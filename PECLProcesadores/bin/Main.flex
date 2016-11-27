@@ -1,4 +1,3 @@
-import java_cup.sym;
 import java_cup.runtime.Symbol;
 %%
 %{
@@ -48,7 +47,7 @@ BOOLEAN="true|false"
 "not" { return new Symbol(sym.NOT); }
 
 
-":=" {return new Symbol (sym.ASIGNACION); }
+ASIGNACION {return new Symbol (sym.ASIGNACION); }
 
 "<=" { return new Symbol(sym.MINOR_EQUAL); }
 "<" { return new Symbol(sym.MINOR); }

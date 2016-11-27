@@ -2,5 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry kind="lib" path="/home/junquera/Programas/java-cup-bin-11b-20160615/java-cup-11b-runtime.jar"/>
+	<classpathentry kind="lib" path="/home/junquera/Programas/java-cup-bin-11b-20160615/java-cup-11b.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
