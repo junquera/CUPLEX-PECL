@@ -1,0 +1,24 @@
+import java_cup.runtime.*;
+import java.io.*;
+
+parser code {:
+	public static void main (String argv[]) throws Exception {
+		parser analizador;
+		analizador = new parser(new Yylex(new InputStreamReader(System.in)));
+		analizador.parse();
+	}
+:};
+
+terminal PROGRAM, IS, BEGIN, END, VAR, IS_INTEGER, IS_BOOLEAN, READ, WRITE, SKIP, WHILE, DO, IF, THEN, ELSE, AND, OR, TRUE, FALSE, NOT;
+
+terminal ASIGNACION;
+
+terminal MINOR_EQUAL, MINOR, EQUAL, MAJOR, MAJOR_EQUAL, MINOR_MAJOR;
+
+terminal SUMA, RESTA, MULTIPLICACION, DIVISION;
+
+terminal LPARENT, RPARENT, COMA, SEMI_COLON, COLON;
+
+terminal String IDENTIFIER;
+terminal Integer INTEGER;
+terminal Boolean BOOLEAN;

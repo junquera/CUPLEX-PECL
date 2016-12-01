@@ -31,8 +31,8 @@ BOOLEAN="true|false"
 "begin" { return new Symbol(sym.BEGIN); }
 "end" { return new Symbol(sym.END); }
 "var" { return new Symbol(sym.VAR); }
-"integer" { return new Symbol(sym.INTEGER); }
-"boolean" { return new Symbol(sym.BOOLEAN); }
+"integer" { return new Symbol(sym.IS_INTEGER); }
+"boolean" { return new Symbol(sym.IS_BOOLEAN); }
 "read" { return new Symbol(sym.READ); }
 "write" { return new Symbol(sym.WRITE); }
 "skip" { return new Symbol(sym.SKIP); }
@@ -69,12 +69,16 @@ BOOLEAN="true|false"
 ";" {return new Symbol (sym.SEMI_COLON); }
 ":" {return new Symbol (sym.COLON); }
 
-// DUDA... En la misma linea identificador + contenido?
 IDENTIFIER { return new Symbol (sym.IDENTIFIER, yytext());  }
 INTEGER { return new Symbol(sym.INTEGER, new Integer(yytext());) }
 BOOLEAN { return new Symbol(sym.BOOLEAN, new Boolean(yytext()); }
 
-[\s\t] {}
+[\s\t\r\n] {}
 
-
-
+. { 
+	System.err.printf("Hay un error en la columna %d de la fila %d: %s\n", yycolumn, yyline, yytext()); 
+	for(int i=0; i < yylength(); i++){
+		System.err.print(" ");
+	} 
+	System.err.println("^"); 
+}
