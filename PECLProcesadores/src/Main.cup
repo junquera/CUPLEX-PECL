@@ -24,6 +24,38 @@ terminal Integer INTEGER;
 terminal Boolean BOOLEAN;
 
 non terminal program;
-non terminal if_statement;
-non terminal while_statement;
- 
+non terminal vars;
+non terminal var;
+non terminal var_identifier;
+non terminal type;
+non terminal statements;
+non terminal statement;
+
+// Es obligatorio que la definición del programa se haga al principio
+start with program;
+
+program ::= PROGRAM IDENTIFIER IS 
+				vars
+			BEGIN 
+				statements 
+			END
+;
+
+
+vars ::= var | var vars
+;
+
+var ::= VAR var_identifier COLON type SEMI_COLON
+;
+
+var_identifier ::= IDENTIFIER | IDENTIFIER COMA var_identifier
+;
+
+type ::= IS_INTEGER | IS_BOOLEAN
+;
+
+statements ::= statement | statement statements
+;
+
+// TODO Definir las sentencias
+statement ::= LPARENT;
