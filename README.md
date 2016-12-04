@@ -6,7 +6,7 @@
 
 Práctica final de laboratorio de la asignatura Procesadores de lenguaje en la Universidad de Alcalá
 
-Agradecimientos: 
+## Agradecimientos 
 
 > https://openfecks.wordpress.com/jlex-y-cup/ 
 

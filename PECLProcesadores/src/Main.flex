@@ -1,4 +1,3 @@
-import java_cup.sym;
 import java_cup.runtime.Symbol;
 %%
 %{
@@ -70,15 +69,12 @@ BOOLEAN="true|false"
 ":" {return new Symbol (sym.COLON); }
 
 IDENTIFIER { return new Symbol (sym.IDENTIFIER, yytext());  }
-INTEGER { return new Symbol(sym.INTEGER, new Integer(yytext());) }
-BOOLEAN { return new Symbol(sym.BOOLEAN, new Boolean(yytext()); }
+INTEGER { return new Symbol(sym.INTEGER, new Integer(yytext())); }
+BOOLEAN { return new Symbol(sym.BOOLEAN, new Boolean(yytext())); }
 
 [\s\t\r\n] {}
 
-. { 
+.+ { 
 	System.err.printf("Hay un error en la columna %d de la fila %d: %s\n", yycolumn, yyline, yytext()); 
-	for(int i=0; i < yylength(); i++){
-		System.err.print(" ");
-	} 
-	System.err.println("^"); 
+	// TODO Entrar en estado de recuperación
 }
