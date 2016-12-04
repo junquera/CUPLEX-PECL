@@ -22,3 +22,8 @@ terminal LPARENT, RPARENT, COMA, SEMI_COLON, COLON;
 terminal String IDENTIFIER;
 terminal Integer INTEGER;
 terminal Boolean BOOLEAN;
+
+non terminal program;
+non terminal if_statement;
+non terminal while_statement;
+ 
