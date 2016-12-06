@@ -34,7 +34,7 @@ BOOLEAN="true|false"
 "program" { return new Symbol(sym.PROGRAM); }
 "is" { return new Symbol(sym.IS); }
 "begin" { return new Symbol(sym.BEGIN); }
-"end" { return new Symbol(sym.END); }
+"end" { return new Symbol(sym.END); } // TODO Set EOF
 "var" { return new Symbol(sym.VAR); }
 "integer" { return new Symbol(sym.IS_INTEGER); }
 "boolean" { return new Symbol(sym.IS_BOOLEAN); }

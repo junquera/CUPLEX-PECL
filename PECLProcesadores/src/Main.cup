@@ -34,10 +34,10 @@ non terminal statement;
 // Es obligatorio que la definición del programa se haga al principio
 start with program;
 
-program ::= PROGRAM IDENTIFIER IS 
-				vars
+program ::= PROGRAM:p IDENTIFIER:i IS 
+				vars:var_list
 			BEGIN 
-				statements 
+				statements:statements_list
 			END
 ;
 
