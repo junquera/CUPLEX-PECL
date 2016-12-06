@@ -4,6 +4,11 @@ import java_cup.runtime.Symbol;
 	// Java code
 %}
 
+// Extraídos del manual http://jflex.de/manual.html
+LineTerminator = \r|\n|\r\n
+WhiteSpace     = {LineTerminator} | [ \t\f]
+
+
 RESERVADAS="program|is|begin|end|var|integer|boolean|read|write|skip|while|do|if|then|else|and|or|true|false|not"
 
 ASIGNACION=":="
@@ -23,6 +28,7 @@ BOOLEAN="true|false"
 %line
 %column
 %full
+%notunix
 %%
 
 "program" { return new Symbol(sym.PROGRAM); }
@@ -46,7 +52,6 @@ BOOLEAN="true|false"
 "false" { return new Symbol(sym.FALSE); }
 "not" { return new Symbol(sym.NOT); }
 
-
 ":=" {return new Symbol (sym.ASIGNACION); }
 
 "<=" { return new Symbol(sym.MINOR_EQUAL); }
@@ -68,13 +73,12 @@ BOOLEAN="true|false"
 ";" {return new Symbol (sym.SEMI_COLON); }
 ":" {return new Symbol (sym.COLON); }
 
-IDENTIFIER { return new Symbol (sym.IDENTIFIER, yytext());  }
-INTEGER { return new Symbol(sym.INTEGER, new Integer(yytext())); }
-BOOLEAN { return new Symbol(sym.BOOLEAN, new Boolean(yytext())); }
+{IDENTIFIER} { return new Symbol (sym.IDENTIFIER, yytext().toUpperCase());  }
+{INTEGER} { return new Symbol(sym.INTEGER, new Integer(yytext())); }
+{BOOLEAN} { return new Symbol(sym.BOOLEAN, new Boolean(yytext())); }
 
-[\s\t\r\n] {}
+{WhiteSpace} { }
 
-.+ { 
-	System.err.printf("Hay un error en la columna %d de la fila %d: %s\n", yycolumn, yyline, yytext()); 
-	// TODO Entrar en estado de recuperación
+. { 
+	System.err.printf("Hay un error léxico en la columna %d de la fila %d:\n %s\n", yycolumn, yyline, yytext());
 }
