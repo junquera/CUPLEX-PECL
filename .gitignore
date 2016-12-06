@@ -3,3 +3,8 @@ bin
 .classpath
 .project
 *~
+
+# Auto generado por cup y lex
+Yylex.java
+parser.java
+sym.java

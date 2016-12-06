@@ -20,38 +20,49 @@ terminal SUMA, RESTA, MULTIPLICACION, DIVISION;
 terminal LPARENT, RPARENT, COMA, SEMI_COLON, COLON;
 
 terminal String IDENTIFIER;
-terminal Integer INTEGER;
-terminal Boolean BOOLEAN;
+terminal int INTEGER;
+terminal boolean BOOLEAN;
 
-non terminal program;
+non terminal Programa program;
 non terminal vars;
 non terminal var;
 non terminal var_identifier;
-non terminal type;
+non terminal char type;
 non terminal statements;
 non terminal statement;
 
 // Es obligatorio que la definición del programa se haga al principio
 start with program;
 
-program ::= PROGRAM:p IDENTIFIER:i IS 
-				vars:var_list
+program ::= PROGRAM IDENTIFIER:i 
+			{:
+				Programa p = new Programa(i);
+			:}
+			IS 
+				vars:v
 			BEGIN 
-				statements:statements_list
-			END
+				statements
+			END			
 ;
-
 
 vars ::= var | var vars
 ;
 
-var ::= VAR var_identifier COLON type SEMI_COLON
+var ::= VAR var_identifier:v COLON type:t SEMI_COLON
+	{:
+		if(t == 'b'){
+		// TODO Aquí sólo deberíamos guardar lista de variables, generada en var_identifier
+			p.addVar(new Bool(v, true););
+		} else if(t == 'i') {
+			p.addVar(new Int(v, true););
+		}
+	:}
 ;
 
 var_identifier ::= IDENTIFIER | IDENTIFIER COMA var_identifier
 ;
 
-type ::= IS_INTEGER | IS_BOOLEAN
+type ::= IS_INTEGER {: RESULT = 'i'; :} | IS_BOOLEAN {: RESULT = 'b'; :} 
 ;
 
 statements ::= statement | statement statements

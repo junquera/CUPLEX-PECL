@@ -31,6 +31,8 @@ BOOLEAN="true|false"
 %notunix
 %%
 
+{WhiteSpace} { }
+
 "program" { return new Symbol(sym.PROGRAM); }
 "is" { return new Symbol(sym.IS); }
 "begin" { return new Symbol(sym.BEGIN); }
@@ -76,8 +78,6 @@ BOOLEAN="true|false"
 {IDENTIFIER} { return new Symbol (sym.IDENTIFIER, yytext().toUpperCase());  }
 {INTEGER} { return new Symbol(sym.INTEGER, new Integer(yytext())); }
 {BOOLEAN} { return new Symbol(sym.BOOLEAN, new Boolean(yytext())); }
-
-{WhiteSpace} { }
 
 . { 
 	System.err.printf("Hay un error léxico en la columna %d de la fila %d:\n %s\n", yycolumn, yyline, yytext());
