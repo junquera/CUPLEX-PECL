@@ -1,4 +1,5 @@
 import java_cup.runtime.*;
+import java.util.*;
 import java.io.*;
 
 parser code {:
@@ -25,9 +26,9 @@ terminal boolean BOOLEAN;
 
 non terminal Programa program;
 non terminal vars;
-non terminal var;
-non terminal var_identifier;
-non terminal char type;
+non terminal HashMap<String, Variable> var;
+non terminal HashMap<String, Variable> var_identifier;
+non terminal Character type;
 non terminal statements;
 non terminal statement;
 
@@ -45,24 +46,35 @@ program ::= PROGRAM IDENTIFIER:i
 			END			
 ;
 
-vars ::= var | var vars
+vars ::= var | vars var 
 ;
 
 var ::= VAR var_identifier:v COLON type:t SEMI_COLON
-	{:
-		if(t == 'b'){
-		// TODO Aquí sólo deberíamos guardar lista de variables, generada en var_identifier
-			p.addVar(new Bool(v, true););
-		} else if(t == 'i') {
-			p.addVar(new Int(v, true););
-		}
-	:}
+{:
+	// Al principio utilizaba ArrayList, pero habría tenido que comprobar que no se repitiesen los nombres
+	// ArrayList<Variable> result = new ArrayList<Variable>();
+	HashMap<String, Variable> hm = new HashMap<String, Variable>(); 
+	for(Variable variable: v){
+		if(t == 'i')
+			hm.put(variable.getName(), new Int(variable.getName(), 0));
+		else if(t=='b')
+			hm.put(variable.getName(), new Bool(variable.getName(), true));
+	}
+	RESULT = hm;
+:}
 ;
 
-var_identifier ::= IDENTIFIER | IDENTIFIER COMA var_identifier
+var_identifier ::= IDENTIFIER:i {: 
+		HashMap<String, Variable> hm = new HashMap<String, Variable>(); 	
+		hm.put(i, new Variable(i)); 
+		RESULT= hm; 
+	:} | var_identifier:lista COMA IDENTIFIER:i {: 
+		hm.put(i, new Variable(i)); 
+	:} 
+//var_identifier ::= VAR IDENTIFIER:i {: ArrayList<Variable> lista = new ArrayList<Variable>(); lista.add(new Variable(i)); RESULT= lista; :} | var_identifier:lista COMA IDENTIFIER:i {: lista.add(new Variable(i)); RESULT=lista; :} 
 ;
 
-type ::= IS_INTEGER {: RESULT = 'i'; :} | IS_BOOLEAN {: RESULT = 'b'; :} 
+type ::= IS_INTEGER {: RESULT='i'; :} | IS_BOOLEAN {: RESULT='b'; :} 
 ;
 
 statements ::= statement | statement statements
