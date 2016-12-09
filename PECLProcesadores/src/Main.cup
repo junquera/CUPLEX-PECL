@@ -6,7 +6,11 @@ parser code {:
 	public static void main (String argv[]) throws Exception {
 		parser analizador;
 		analizador = new parser(new Yylex(new InputStreamReader(System.in)));
-		analizador.parse();
+		try{
+			analizador.parse();
+		} catch(SemanticException se){
+			System.err.println("Hay un error semántico: " + se.getMessage());
+		}
 	}
 :};
 
@@ -25,12 +29,24 @@ terminal int INTEGER;
 terminal boolean BOOLEAN;
 
 non terminal Programa program;
-non terminal vars;
+non terminal HashMap<String, Variable> vars;
 non terminal HashMap<String, Variable> var;
 non terminal HashMap<String, Variable> var_identifier;
 non terminal Character type;
+
 non terminal statements;
 non terminal statement;
+
+non terminal asign_statement;
+non terminal if_statement;
+non terminal read_statement;
+non terminal write_statement;
+non terminal while_statement;
+non terminal expr_booleana;
+non terminal bool_comparation;
+
+non terminal value;
+non terminal booleano;
 
 // Es obligatorio que la definición del programa se haga al principio
 start with program;
@@ -41,12 +57,34 @@ program ::= PROGRAM IDENTIFIER:i
 			:}
 			IS 
 				vars:v
+				{:
+				for(String s: v.keySet())
+					System.out.println(s);
+				:}
 			BEGIN 
 				statements
 			END			
 ;
 
-vars ::= var | vars var 
+vars ::= var:v
+		{:
+			HashMap<String, Variable> hm = new HashMap<String, Variable>();
+			for(String s: v.keySet()) {
+				if(hm.containsKey(s))
+					throw new SemanticException("Variable repetida " + s);
+				hm.put(s, v.get(s));
+			}
+			RESULT = hm;
+		:}
+		| vars:hm var:v 
+		{:
+			for(String s: v.keySet()){
+				if(hm.containsKey(s))
+					throw new SemanticException("Variable repetida " + s);
+				hm.put(s, v.get(s));
+			}
+			RESULT = hm;
+		:}
 ;
 
 var ::= VAR var_identifier:v COLON type:t SEMI_COLON
@@ -54,11 +92,15 @@ var ::= VAR var_identifier:v COLON type:t SEMI_COLON
 	// Al principio utilizaba ArrayList, pero habría tenido que comprobar que no se repitiesen los nombres
 	// ArrayList<Variable> result = new ArrayList<Variable>();
 	HashMap<String, Variable> hm = new HashMap<String, Variable>(); 
-	for(Variable variable: v){
+	for(String variable: v.keySet()){
+	
+		if(hm.containsKey(variable))
+			throw new SemanticException("Variable repetida " + variable);
+			
 		if(t == 'i')
-			hm.put(variable.getName(), new Int(variable.getName(), 0));
+			hm.put(variable, new Int(v.get(variable).getName(), 0));
 		else if(t=='b')
-			hm.put(variable.getName(), new Bool(variable.getName(), true));
+			hm.put(variable, new Bool(v.get(variable).getName(), true));
 	}
 	RESULT = hm;
 :}
@@ -68,17 +110,34 @@ var_identifier ::= IDENTIFIER:i {:
 		HashMap<String, Variable> hm = new HashMap<String, Variable>(); 	
 		hm.put(i, new Variable(i)); 
 		RESULT= hm; 
-	:} | var_identifier:lista COMA IDENTIFIER:i {: 
+	:} | var_identifier:hm COMA IDENTIFIER:i {: 
+		if(hm.containsKey(i))
+			throw new SemanticException("Variable repetida " + i);
 		hm.put(i, new Variable(i)); 
+		RESULT = hm;
 	:} 
-//var_identifier ::= VAR IDENTIFIER:i {: ArrayList<Variable> lista = new ArrayList<Variable>(); lista.add(new Variable(i)); RESULT= lista; :} | var_identifier:lista COMA IDENTIFIER:i {: lista.add(new Variable(i)); RESULT=lista; :} 
 ;
 
 type ::= IS_INTEGER {: RESULT='i'; :} | IS_BOOLEAN {: RESULT='b'; :} 
 ;
 
-statements ::= statement | statement statements
+statements ::= statement | statements statement
 ;
 
 // TODO Definir las sentencias
-statement ::= LPARENT;
+statement ::= if_statement | read_statement | write_statement | while_statement | asign_statement;
+
+asign_statement ::= IDENTIFIER ASIGNACION value SEMI_COLON;
+value ::= expr_booleana | INTEGER | IDENTIFIER;
+
+if_statement ::= IF expr_booleana THEN statements END IF SEMI_COLON | IF expr_booleana THEN statements ELSE statements END IF SEMI_COLON;
+read_statement ::= READ IDENTIFIER  SEMI_COLON;
+write_statement ::= WRITE IDENTIFIER SEMI_COLON;
+while_statement ::= WHILE expr_booleana DO statements END WHILE SEMI_COLON;
+
+expr_booleana ::= 	booleano
+				;
+
+comparation ::=  MINOR_EQUAL | MINOR | EQUAL | MAJOR | MAJOR_EQUAL | MINOR_MAJOR;
+
+booleano ::= TRUE | FALSE;

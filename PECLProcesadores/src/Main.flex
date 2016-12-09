@@ -48,6 +48,7 @@ BOOLEAN="true|false"
 "if" { return new Symbol(sym.IF); }
 "then" { return new Symbol(sym.THEN); }
 "else" { return new Symbol(sym.ELSE); }
+
 "and" { return new Symbol(sym.AND); }
 "or" { return new Symbol(sym.OR); }
 "true" { return new Symbol(sym.TRUE); }
