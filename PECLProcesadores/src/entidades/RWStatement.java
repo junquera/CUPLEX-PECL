@@ -12,4 +12,12 @@ public class RWStatement extends Statement {
 	public Variable getVariable() {
 		return this.v;
 	}
+	
+	@Override
+	public String toString(){
+		if(this.getTipo() == Statement.READ)
+			return "Leyendo " + this.v;
+		else
+			return "Escribiendo " + this.v;
+	}
 }

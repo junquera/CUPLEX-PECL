@@ -15,4 +15,9 @@ public class Int extends Variable {
 	public void setValue(int value) {
 		this.value = value;
 	}
+	
+	@Override
+	public String toString(){
+		return "Int: " + this.getName() + " = " + this.value;
+	}
 }

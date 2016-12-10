@@ -10,16 +10,16 @@ parser code {:
 		try{
 			analizador.parse();
 		} catch(SemanticException se){
-			System.err.println("Hay un error semántico: " + se.getMessage());
+			System.err.println("Hay un error semántico:\n" + se.getMessage());
 		}
 	}
 :};
 
-terminal PROGRAM, IS, BEGIN, END, VAR, IS_INTEGER, IS_BOOLEAN, READ, WRITE, SKIP, WHILE, DO, IF, THEN, ELSE, AND, OR, NOT;
+terminal PROGRAM, IS, BEGIN, END, VAR, IS_INTEGER, IS_BOOLEAN, READ, WRITE, WHILE, DO, IF, THEN, ELSE, AND, OR, NOT;
 
 terminal ASIGNACION;
 
-terminal MINOR_EQUAL, MINOR, EQUAL, MAJOR, MAJOR_EQUAL, MINOR_MAJOR;
+terminal MINOR_EQUAL, MINOR, EQUAL, MAJOR, MAJOR_EQUAL;
 
 terminal SUMA, RESTA, MULTIPLICACION, DIVISION;
 
@@ -44,7 +44,7 @@ non terminal RWStatement read_statement;
 non terminal RWStatement write_statement;
 non terminal WhileStatement while_statement;
 
-non terminal value;
+non terminal Object value;
 
 non terminal Boolean expr_booleana;
 non terminal Boolean termino_booleano;
@@ -66,6 +66,38 @@ program ::= PROGRAM IDENTIFIER:i
 			{:
 				Programa p = new Programa(i);				
 				p.setVariables(v);
+				
+				// Planificación final del programa
+				ArrayList<Statement> tmpSt = new ArrayList<Statement>();
+				for(Statement s: ss){
+					switch(s.getTipo()){
+						case Statement.IF:
+							if( ((IfStatement) s).getCondition() )
+								tmpSt.addAll(s.getSubStatements());
+							else
+								tmpSt.addAll(((IfStatement) s).getElseStatements());
+							break;
+						case Statement.READ:
+						case Statement.WRITE:
+						case Statement.WHILE:
+							// Como no he conseguido hacer que en los terminos booleanos se puedan introducir
+							// identificadores de variables, no me queda más remedio que introducir los while sin analizar...
+						default:
+							tmpSt.add(s);							
+							break;				
+					}
+				}
+				
+				// Aquí analizo que la asignaciones se hagan bien
+				for(Statement s: tmpSt){
+					if(s.getTipo() == Statement.ASSIGN) {
+						p.setVarValue(((AssignStatement) s).getV());
+						p.addStatement(s);
+					} else {
+						p.addStatement(s);
+					}
+				}
+				
 				System.out.println(p);
 			:}
 
@@ -128,29 +160,39 @@ var_identifier ::= IDENTIFIER:i
 					:} 
 ;
 
-type ::= IS_INTEGER {: RESULT='i'; :} | IS_BOOLEAN {: RESULT='b'; :} 
-;
+type ::=	IS_INTEGER {: RESULT='i'; :} 
+			| IS_BOOLEAN {: RESULT='b'; :} 
+		;
 
-statements ::= statement:s
-		{:
-			ArrayList<Statement> statements = new ArrayList<Statement>();
-			statements.add(s);
-			RESULT = statements;
-		:}
- | statements:ss statement:s
+statements ::=	statement:s
+				{:
+					ArrayList<Statement> statements = new ArrayList<Statement>();
+					statements.add(s);
+					RESULT = statements;
+				:}
+ 				| statements:ss statement:s
  
- 		{:
- 			ss.add(s);
- 			RESULT = ss;
- 		:}
-;
+		 		{:
+		 			ss.add(s);
+		 			RESULT = ss;
+		 		:}
+			;
 
 
 statement ::= if_statement:s {: RESULT = s; :} | read_statement:s {: RESULT = s; :}  | write_statement:s {: RESULT = s; :}  | while_statement:s {: RESULT = s; :}  | asign_statement:s {: RESULT = s; :} ;
 
-asign_statement ::= IDENTIFIER:i ASIGNACION value:v SEMI_COLON {: RESULT = new AssignStatement(new Variable(i)); :};
-// TODO Hacer esto...
-value ::= expr_booleana:e | termino_entero:t | IDENTIFIER:i ;
+asign_statement ::= IDENTIFIER:i ASIGNACION value:v SEMI_COLON 
+					{: 
+						if(v instanceof Boolean)
+							RESULT = new AssignStatement(new Bool(i, ((Boolean) v).booleanValue()));
+						else if (v instanceof Integer)
+							RESULT = new AssignStatement(new Int(i, ((Integer) v).intValue()));
+						else
+							throw new SemanticException("Variable de tipo desconocido"); 
+					:}
+				;
+
+value ::= expr_booleana:e {: RESULT = new Boolean(e); :} | termino_entero:t {: RESULT= new Integer(t); :} ;
 
 if_statement ::= 	IF expr_booleana:e THEN statements:ss END IF SEMI_COLON
 					{:
@@ -212,7 +254,7 @@ termino_booleano ::= 	BOOLEAN:b {: RESULT = b; :}
 						| LPARENT termino_booleano:t RPARENT {: RESULT = t; :}
 						| termino_entero:t1 comparation:c termino_entero:t2
 						{:
-							switch(o){
+							switch(c){
 								case 0:
 									RESULT = t1 <= t2;
 									break;
@@ -228,32 +270,29 @@ termino_booleano ::= 	BOOLEAN:b {: RESULT = b; :}
 								case 4:
 									RESULT = t1 >= t2;
 									break;
-								case 5:
-									RESULT = t1 <> t2;
-									break;
 							}					
 						:}
 					;
 						
-termino_entero ::= INTEGER:i {: RESULT = i; :}
-				| LPARENT termino_entero RPARENT {: RESULT = i; :}
-				| termino_entero:t operacion:o INTEGER:i 
-				{:
-					switch(o){
-						case 0:
-							RESULT = t + i;
-							break;
-						case 1:
-							RESULT = t - i;
-							break;
-						case 2:
-							RESULT = t * i;
-							break;
-						case 3:
-							RESULT = t / i;
-							break;
-					}
-				:}
+termino_entero ::= 	INTEGER:i {: RESULT = i; :}
+					| LPARENT termino_entero:i RPARENT {: RESULT = i; :}
+					| termino_entero:t operacion:o INTEGER:i 
+					{:
+						switch(o){
+							case 0:
+								RESULT = t + i;
+								break;
+							case 1:
+								RESULT = t - i;
+								break;
+							case 2:
+								RESULT = t * i;
+								break;
+							case 3:
+								RESULT = t / i;
+								break;
+						}
+					:}
 			;
 				
 
@@ -261,8 +300,7 @@ comparation ::= MINOR_EQUAL  {: RESULT = 0; :}
 				| MINOR {: RESULT = 1; :} 
 				| EQUAL {: RESULT = 2; :} 
 				| MAJOR {: RESULT = 3; :} 
-				| MAJOR_EQUAL {: RESULT = 4; :} 
-				| MINOR_MAJOR {: RESULT = 5; :} ;
+				| MAJOR_EQUAL {: RESULT = 4; :} ;
 
 operacion ::= 	SUMA {: RESULT = 0; :} 
 				| RESTA {: RESULT = 1; :} 

@@ -32,7 +32,6 @@ BOOLEAN=true|false
 "boolean" { return new Symbol(sym.IS_BOOLEAN); }
 "read" { return new Symbol(sym.READ); }
 "write" { return new Symbol(sym.WRITE); }
-"skip" { return new Symbol(sym.SKIP); }
 "while" { return new Symbol(sym.WHILE); }
 "do" { return new Symbol(sym.DO); }
 "if" { return new Symbol(sym.IF); }
@@ -50,7 +49,6 @@ BOOLEAN=true|false
 "=" { return new Symbol(sym.EQUAL); }
 ">" { return new Symbol(sym.MAJOR); }
 ">=" { return new Symbol(sym.MAJOR_EQUAL); }
-"<>" { return new Symbol(sym.MINOR_MAJOR); }
 
 "+" {return new Symbol (sym.SUMA); }
 "-" {return new Symbol (sym.RESTA); }

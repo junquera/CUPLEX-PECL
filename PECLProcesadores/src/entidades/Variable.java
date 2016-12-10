@@ -4,6 +4,7 @@ public class Variable {
 
 	public static final int INTEGER = 0;
 	public static final int BOOLEAN = 1;
+	public static final int PSEUDO = Integer.MAX_VALUE;
 
 	private String name;
 	private int type;
@@ -32,6 +33,23 @@ public class Variable {
 
 	public void setType(int type) {
 		this.type = type;
+	}
+
+	public String getTypeString() {
+		switch (this.type) {
+		case INTEGER:
+			return "integer";
+		case BOOLEAN:
+			return "boolean";
+		case PSEUDO:
+			return "pseudo";
+		default:
+			return "none";
+		}
+	}
+
+	public String toString() {
+		return "Variable: " + this.name + ":" + getTypeString();
 	}
 
 }

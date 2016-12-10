@@ -16,4 +16,9 @@ public class Bool extends Variable {
 	public void setValue(boolean value) {
 		this.value = value;
 	}
+	
+	@Override
+	public String toString(){
+		return "Bool: " + this.getName() + " = " + this.value;
+	}
 }
