@@ -1,11 +1,12 @@
 import java_cup.runtime.*;
 import java.util.*;
 import java.io.*;
+import entidades.*;
 
 parser code {:
 	public static void main (String argv[]) throws Exception {
 		parser analizador;
-		analizador = new parser(new Yylex(new InputStreamReader(System.in)));
+		analizador = new parser(new Yylex(new FileReader(new File("test.txt"))));
 		try{
 			analizador.parse();
 		} catch(SemanticException se){
@@ -14,7 +15,7 @@ parser code {:
 	}
 :};
 
-terminal PROGRAM, IS, BEGIN, END, VAR, IS_INTEGER, IS_BOOLEAN, READ, WRITE, SKIP, WHILE, DO, IF, THEN, ELSE, AND, OR, TRUE, FALSE, NOT;
+terminal PROGRAM, IS, BEGIN, END, VAR, IS_INTEGER, IS_BOOLEAN, READ, WRITE, SKIP, WHILE, DO, IF, THEN, ELSE, AND, OR, NOT;
 
 terminal ASIGNACION;
 
@@ -25,8 +26,8 @@ terminal SUMA, RESTA, MULTIPLICACION, DIVISION;
 terminal LPARENT, RPARENT, COMA, SEMI_COLON, COLON;
 
 terminal String IDENTIFIER;
-terminal int INTEGER;
-terminal boolean BOOLEAN;
+terminal Integer INTEGER;
+terminal Boolean BOOLEAN;
 
 non terminal Programa program;
 non terminal HashMap<String, Variable> vars;
@@ -34,36 +35,40 @@ non terminal HashMap<String, Variable> var;
 non terminal HashMap<String, Variable> var_identifier;
 non terminal Character type;
 
-non terminal statements;
-non terminal statement;
+non terminal ArrayList<Statement> statements;
+non terminal Statement statement;
 
-non terminal asign_statement;
-non terminal if_statement;
-non terminal read_statement;
-non terminal write_statement;
-non terminal while_statement;
-non terminal expr_booleana;
-non terminal bool_comparation;
+non terminal AssignStatement asign_statement;
+non terminal IfStatement if_statement;
+non terminal RWStatement read_statement;
+non terminal RWStatement write_statement;
+non terminal WhileStatement while_statement;
 
 non terminal value;
-non terminal booleano;
+
+non terminal Boolean expr_booleana;
+non terminal Boolean termino_booleano;
+
+non terminal Integer termino_entero;
+
+non terminal Integer comparation;
+non terminal Integer operacion;
+
 
 // Es obligatorio que la definición del programa se haga al principio
 start with program;
 
 program ::= PROGRAM IDENTIFIER:i 
-			{:
-				Programa p = new Programa(i);
-			:}
-			IS 
-				vars:v
-				{:
-				for(String s: v.keySet())
-					System.out.println(s);
-				:}
+			IS vars:v
 			BEGIN 
-				statements
-			END			
+				statements:ss	
+			END		
+			{:
+				Programa p = new Programa(i);				
+				p.setVariables(v);
+				System.out.println(p);
+			:}
+
 ;
 
 vars ::= var:v
@@ -97,47 +102,186 @@ var ::= VAR var_identifier:v COLON type:t SEMI_COLON
 		if(hm.containsKey(variable))
 			throw new SemanticException("Variable repetida " + variable);
 			
-		if(t == 'i')
+		if(t == 'i'){
 			hm.put(variable, new Int(v.get(variable).getName(), 0));
-		else if(t=='b')
+		} else if(t=='b'){
 			hm.put(variable, new Bool(v.get(variable).getName(), true));
+		}
 	}
 	RESULT = hm;
 :}
 ;
 
-var_identifier ::= IDENTIFIER:i {: 
-		HashMap<String, Variable> hm = new HashMap<String, Variable>(); 	
-		hm.put(i, new Variable(i)); 
-		RESULT= hm; 
-	:} | var_identifier:hm COMA IDENTIFIER:i {: 
-		if(hm.containsKey(i))
-			throw new SemanticException("Variable repetida " + i);
-		hm.put(i, new Variable(i)); 
-		RESULT = hm;
-	:} 
+var_identifier ::= IDENTIFIER:i 
+					{: 
+						HashMap<String, Variable> hm = new HashMap<String, Variable>(); 	
+						hm.put(i, new Variable(i)); 
+						RESULT= hm; 
+					:} 
+					| var_identifier:hm COMA IDENTIFIER:i 
+					{: 
+						if(hm.containsKey(i)){
+							throw new SemanticException("Variable repetida " + i);
+						}
+						hm.put(i, new Variable(i)); 
+						RESULT = hm;
+					:} 
 ;
 
 type ::= IS_INTEGER {: RESULT='i'; :} | IS_BOOLEAN {: RESULT='b'; :} 
 ;
 
-statements ::= statement | statements statement
+statements ::= statement:s
+		{:
+			ArrayList<Statement> statements = new ArrayList<Statement>();
+			statements.add(s);
+			RESULT = statements;
+		:}
+ | statements:ss statement:s
+ 
+ 		{:
+ 			ss.add(s);
+ 			RESULT = ss;
+ 		:}
 ;
 
-// TODO Definir las sentencias
-statement ::= if_statement | read_statement | write_statement | while_statement | asign_statement;
 
-asign_statement ::= IDENTIFIER ASIGNACION value SEMI_COLON;
-value ::= expr_booleana | INTEGER | IDENTIFIER;
+statement ::= if_statement:s {: RESULT = s; :} | read_statement:s {: RESULT = s; :}  | write_statement:s {: RESULT = s; :}  | while_statement:s {: RESULT = s; :}  | asign_statement:s {: RESULT = s; :} ;
 
-if_statement ::= IF expr_booleana THEN statements END IF SEMI_COLON | IF expr_booleana THEN statements ELSE statements END IF SEMI_COLON;
-read_statement ::= READ IDENTIFIER  SEMI_COLON;
-write_statement ::= WRITE IDENTIFIER SEMI_COLON;
-while_statement ::= WHILE expr_booleana DO statements END WHILE SEMI_COLON;
+asign_statement ::= IDENTIFIER:i ASIGNACION value:v SEMI_COLON {: RESULT = new AssignStatement(new Variable(i)); :};
+// TODO Hacer esto...
+value ::= expr_booleana:e | termino_entero:t | IDENTIFIER:i ;
 
-expr_booleana ::= 	booleano
+if_statement ::= 	IF expr_booleana:e THEN statements:ss END IF SEMI_COLON
+					{:
+						IfStatement s = new IfStatement(e);
+						for(Statement aux: ss){
+							s.addSubStatement(aux);
+						}
+						RESULT = s;
+					:}
+					 | IF expr_booleana:e THEN statements:tss ELSE statements:fss END IF SEMI_COLON
+					{:
+						IfStatement s = new IfStatement(e);
+						for(Statement aux: tss){
+							s.addSubStatement(aux);
+						}
+						for(Statement aux: fss){
+							s.addElseStatements(aux);
+						}
+						RESULT = s;
+					:}
+			 ;
+
+read_statement ::= READ IDENTIFIER:i SEMI_COLON
+				{:
+					RESULT = new RWStatement(true, i);
+				:}
+;
+write_statement ::= WRITE IDENTIFIER:i SEMI_COLON
+				{:
+					RESULT = new RWStatement(false, i);
+				:}
+;
+
+while_statement ::= WHILE expr_booleana:e DO statements:ss END WHILE SEMI_COLON
+					{:
+						WhileStatement s = new WhileStatement(e);
+						for(Statement aux: ss){
+							s.addSubStatement(aux);
+						}
+						RESULT = s;
+					:}
 				;
 
-comparation ::=  MINOR_EQUAL | MINOR | EQUAL | MAJOR | MAJOR_EQUAL | MINOR_MAJOR;
+// Como no encuentro la forma de que además de valores  
+// explícitos puedan leer valores de variables, (no consigo
+// resolver un problema de reducción/desplazamiento para
+// poder conservar value) voy a hacer que devuelvan 
+// únicamente el valor de las expresiones resueltas
 
-booleano ::= TRUE | FALSE;
+expr_booleana ::= 	termino_booleano:t {: RESULT = t; :}
+					| expr_booleana:e AND termino_booleano:t {: RESULT = e && t; :}
+					| expr_booleana:e OR termino_booleano:t {: RESULT = e || t; :}
+					| expr_booleana:e EQUAL termino_booleano:t {: RESULT = e == t; :}
+				;
+
+// 1a versión omitiendo paréntesis
+termino_booleano ::= 	BOOLEAN:b {: RESULT = b; :}
+						| NOT LPARENT termino_booleano:t RPARENT {: RESULT = !t; :}
+						| LPARENT termino_booleano:t RPARENT {: RESULT = t; :}
+						| termino_entero:t1 comparation:c termino_entero:t2
+						{:
+							switch(o){
+								case 0:
+									RESULT = t1 <= t2;
+									break;
+								case 1:
+									RESULT = t1 < t2;
+									break;
+								case 2:
+									RESULT = t1 == t2;
+									break;
+								case 3:
+									RESULT = t1 > t2;
+									break;
+								case 4:
+									RESULT = t1 >= t2;
+									break;
+								case 5:
+									RESULT = t1 <> t2;
+									break;
+							}					
+						:}
+					;
+						
+termino_entero ::= INTEGER:i {: RESULT = i; :}
+				| LPARENT termino_entero RPARENT {: RESULT = i; :}
+				| termino_entero:t operacion:o INTEGER:i 
+				{:
+					switch(o){
+						case 0:
+							RESULT = t + i;
+							break;
+						case 1:
+							RESULT = t - i;
+							break;
+						case 2:
+							RESULT = t * i;
+							break;
+						case 3:
+							RESULT = t / i;
+							break;
+					}
+				:}
+			;
+				
+
+comparation ::= MINOR_EQUAL  {: RESULT = 0; :} 
+				| MINOR {: RESULT = 1; :} 
+				| EQUAL {: RESULT = 2; :} 
+				| MAJOR {: RESULT = 3; :} 
+				| MAJOR_EQUAL {: RESULT = 4; :} 
+				| MINOR_MAJOR {: RESULT = 5; :} ;
+
+operacion ::= 	SUMA {: RESULT = 0; :} 
+				| RESTA {: RESULT = 1; :} 
+				| MULTIPLICACION {: RESULT = 2; :} 
+				| DIVISION {: RESULT = 3; :};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

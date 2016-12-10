@@ -9,21 +9,11 @@ LineTerminator = \r|\n|\r\n
 WhiteSpace     = {LineTerminator} | [ \t\f]
 
 
-RESERVADAS="program|is|begin|end|var|integer|boolean|read|write|skip|while|do|if|then|else|and|or|true|false|not"
-
-ASIGNACION=":="
-
-RELACION="<=|<|=|>|>=|<>"
-
-MATH="+|-|*|/"
-
-PUNCT="(|)|,|;|:"
-
 IDENTIFIER=[A-Za-z][A-Za-z0-9]*
 
-INTEGER="[+-]?[1-9][0-9]*"
+INTEGER=[+-]?[1-9][0-9]*
 
-BOOLEAN="true|false"
+BOOLEAN=true|false
 %cup
 %line
 %column
@@ -51,8 +41,6 @@ BOOLEAN="true|false"
 
 "and" { return new Symbol(sym.AND); }
 "or" { return new Symbol(sym.OR); }
-"true" { return new Symbol(sym.TRUE); }
-"false" { return new Symbol(sym.FALSE); }
 "not" { return new Symbol(sym.NOT); }
 
 ":=" {return new Symbol (sym.ASIGNACION); }
