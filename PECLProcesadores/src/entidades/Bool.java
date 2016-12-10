@@ -1,16 +1,15 @@
+package entidades;
 
-class Bool extends Variable {
+public class Bool extends Variable {
 
 	private boolean value;
 
 	public Bool(String name, boolean value) {
-		super(name);
-		System.out.println(name + ":" + value);
-
+		super(name, Variable.BOOLEAN);
 		this.value = value;
 	}
 
-	public boolean isValue() {
+	public boolean getValue() {
 		return value;
 	}
 

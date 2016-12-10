@@ -1,0 +1,6 @@
+program programa is
+	var x: integer;
+	var y,z: boolean;
+begin
+	x:=5;
+end

@@ -1,11 +1,10 @@
+package entidades;
 
-class Int extends Variable {
+public class Int extends Variable {
 	private int value;
 
 	public Int(String name, int value) {
-		super(name);
-		System.out.println(name + ":" + value);
-
+		super(name, Variable.INTEGER);
 		this.value = value;
 	}
 
