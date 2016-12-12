@@ -54,6 +54,8 @@ non terminal Integer termino_entero;
 non terminal Integer comparation;
 non terminal Integer operacion;
 
+precedence left LPARENT, MULTIPLICACION, DIVISION, SUMA, RESTA;
+
 
 // Es obligatorio que la definición del programa se haga al principio
 start with program;
@@ -248,7 +250,8 @@ expr_booleana ::= 	termino_booleano:t {: RESULT = t; :}
 					| expr_booleana:e EQUAL termino_booleano:t {: RESULT = e == t; :}
 				;
 
-// 1a versión omitiendo paréntesis
+// Si consigo arreglar mi problema con los identificadores, tendría que introducir esto aquí:
+//| IDENTIFIER:i {: RESULT = i; :}
 termino_booleano ::= 	BOOLEAN:b {: RESULT = b; :}
 						| NOT LPARENT termino_booleano:t RPARENT {: RESULT = !t; :}
 						| LPARENT termino_booleano:t RPARENT {: RESULT = t; :}

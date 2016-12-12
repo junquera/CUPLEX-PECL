@@ -35,7 +35,7 @@ public class Programa {
 	}
 	
 	public String toString() {
-		String programa = "Programa: " + this.name + "\n";
+		String programa = "Análisis Sintáctico completado\nPrograma: " + this.name + "\n";
 		programa += "Variables:\n";
 		for(String s : variables.keySet()){
 			Variable v = variables.get(s);
