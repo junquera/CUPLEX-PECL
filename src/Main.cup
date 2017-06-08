@@ -15,6 +15,7 @@ parser code {:
 
 :};
 
+// TODO Averiguar qué significan "skip" y "<>"
 terminal PROGRAM, IS, BEGIN, END;
 terminal VAR, IS_INTEGER, IS_BOOLEAN;
 terminal READ, WRITE;
@@ -39,7 +40,7 @@ non terminal Statement statement;
 non terminal Condition cond;
 non terminal Expression expr;
 
-// TODO Intentar evaluar precedencia gramaticalmente
+// TODO ¿Intentar evaluar precedencia gramaticalmente?
 precedence left MULTIPLICACION, DIVISION, SUMA, RESTA;
 precedence left AND, OR;
 
@@ -90,28 +91,41 @@ statement_list ::= statement_list:stmt_list statement:stmt {:
                     StatementList stmtList = StatementList();
                     stmtList.add(stmt);
                  :};
-
-statement ::= IDENTIFIER ASIGNACION expr SEMI_COLON
-            | IDENTIFIER ASIGNACION cond SEMI_COLON
-            | IF cond THEN statement_list END IF SEMI_COLON
-            | IF cond THEN statement_list ELSE statement_list END IF SEMI_COLON // TODO Ver else ambiguo
-            | REPEAT statement_list UNTIL cond SEMI_COLON
-            | WRITE expr
-            | READ IDENTIFIER
+statement ::= IDENTIFIER:i ASIGNACION expr:e SEMI_COLON
+            {:
+              RESULT = new IdentifierStatement(id, e);
+            :}
+            | IDENTIFIER:i ASIGNACION cond:c SEMI_COLON
+            {:
+              RESULT = new IdentifierStatement(id, c);
+            :}
+            | IF cond:c THEN statement_list:stmnt END IF SEMI_COLON
+            {:
+              RESULT = new IfStatement(c, stmnt);
+            :}
+            | IF cond:c THEN statement_list:ifStmnt ELSE statement_list:elseStmnt END IF SEMI_COLON // TODO Ver else ambiguo
+            {:
+              RESULT = new IfStatement(c, ifStmnt, elseStmnt);
+            :}
+            | REPEAT statement_list:stmnt UNTIL cond:c SEMI_COLON
+            {:
+              RESULT = new RepeatStatement(c, stmnt);
+            :}
+            | WRITE expr:e {: RESULT = new WriteStatement(e); :}
+            | READ IDENTIFIER:i {: RESULT = new ReadStatement(i); :}
             ;
 
-cond ::= NOT cond
-       | LPARENT cond RPARENT
-       | cond AND cond
-       | cond OR cond
-       | cond EQUAL cond        // TODO ¡Arreglar esto! (Ambigüedad)
-       | expr EQUAL expr
-       | expr MINOR_EQUAL expr
-       | expr MINOR expr
-       | expr MAJOR expr
-       | expr MAJOR_EQUAL expr
-       | expr MINOR_MAJOR expr
-       | BOOLEAN
+cond ::= NOT cond:c {: RESULT = new NotCondition(c); :}
+       | LPARENT cond:c RPARENT {: RESULT = c; :}
+       | cond:c1 AND cond:c2 {: RESULT = new AndCondition(c1, c2); :}
+       | cond:c1 OR cond:c2 {: RESULT = new OrCondition(c1, c2); :}
+       | expr:e1 EQUAL expr:e2 {: RESULT = new EqualCondition(e1, e2); :}        // ¿También 'cond EQUAL cond'?
+       | expr:e1 MINOR_EQUAL expr:e2 {: RESULT = new MinorEqualCondition(e1, e2); :}
+       | expr:e1 MINOR expr:e2 {: RESULT = new MinorCondition(e1, e2); :}
+       | expr:e1 MAJOR expr:e2 {: RESULT = new MajorCondition(e1, e2); :}
+       | expr:e1 MAJOR_EQUAL expr:e2 {: RESULT = new MajorEqualCondition(e1, e2); :}
+       | expr:e1 MINOR_MAJOR expr:e2 {: RESULT = new MinorMajorCondition(e1, e2); :}
+       | BOOLEAN:b {: RESULT = new BooleanCondition(b); :}
        ;
 
 expr ::= LPARENT expr RPARENT
