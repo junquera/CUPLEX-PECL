@@ -15,7 +15,7 @@ parser code {:
 
 :};
 
-// TODO Averiguar qué significan "skip" y "<>"
+// TODO Averiguar qué significan "skip"
 terminal PROGRAM, IS, BEGIN, END;
 terminal VAR, IS_INTEGER, IS_BOOLEAN;
 terminal READ, WRITE;
@@ -24,7 +24,7 @@ terminal REPEAT, UNTIL;
 terminal IF, THEN, ELSE;
 terminal AND, OR, NOT;
 terminal ASIGNACION;
-terminal MINOR_EQUAL, MINOR, EQUAL, MAJOR, MAJOR_EQUAL, MINOR_MAJOR;
+terminal MINOR_EQUAL, MINOR, EQUAL, MAJOR, MAJOR_EQUAL;
 terminal SUMA, RESTA, MULTIPLICACION, DIVISION;
 terminal LPARENT, RPARENT, COMA, SEMI_COLON, COLON;
 terminal INTEGER, BOOLEAN, IDENTIFIER;
@@ -44,6 +44,7 @@ non terminal Expression expr;
 precedence left MULTIPLICACION, DIVISION, SUMA, RESTA;
 precedence left AND, OR;
 
+// TODO Implementar generics (<>)
 
 programa ::= PROGRAM IDENTIFIER:id IS
                 var_init_list:var_list
@@ -124,15 +125,14 @@ cond ::= NOT cond:c {: RESULT = new NotCondition(c); :}
        | expr:e1 MINOR expr:e2 {: RESULT = new MinorCondition(e1, e2); :}
        | expr:e1 MAJOR expr:e2 {: RESULT = new MajorCondition(e1, e2); :}
        | expr:e1 MAJOR_EQUAL expr:e2 {: RESULT = new MajorEqualCondition(e1, e2); :}
-       | expr:e1 MINOR_MAJOR expr:e2 {: RESULT = new MinorMajorCondition(e1, e2); :}
        | BOOLEAN:b {: RESULT = new BooleanCondition(b); :}
        ;
 
-expr ::= LPARENT expr RPARENT
-       | expr SUMA expr
-       | expr RESTA expr
-       | expr MULTIPLICACION expr
-       | expr DIVISION expr
-       | INTEGER
-       | IDENTIFIER
+expr ::= LPARENT expr:e RPARENT {: RESULT = e; :}
+       | expr:e1 SUMA expr:e2 {: RESULT = new SumaExpression(e1, e2); :}
+       | expr:e1 RESTA expr:e2 {: RESULT = new RestaExpression(e1, e2); :}
+       | expr:e1 MULTIPLICACION expr:e2 {: RESULT = new MultiplicacionExpression(e1, e2); :}
+       | expr:e1 DIVISION expr:e2 {: RESULT = new DivisionExpression(e1, e2); :}
+       | INTEGER:i {: RESULT = new IntegerExpression(i); :}
+       | IDENTIFIER:i {: RESULT = new IdentifierExpression(i); :}
        ;

@@ -42,6 +42,7 @@ BOOLEAN=true|false
 
 "integer" { tokens.add("integer"); return new Symbol(sym.IS_INTEGER); }
 "boolean" { tokens.add("boolean"); return new Symbol(sym.IS_BOOLEAN); }
+"<>" { tokens.add("generic"); return new Symbol(sym.IS_GENERIC); }
 
 "read" { tokens.add("read"); return new Symbol(sym.READ); }
 "write" { tokens.add("write"); return new Symbol(sym.WRITE); }
@@ -66,7 +67,7 @@ BOOLEAN=true|false
 "=" { tokens.add("equal"); return new Symbol(sym.EQUAL); }
 ">" { tokens.add("major"); return new Symbol(sym.MAJOR); }
 ">=" { tokens.add("major_equal"); return new Symbol(sym.MAJOR_EQUAL); }
-"<>" { tokens.add("minor_major"); return new Symbol(sym.MINOR_MAJOR); }
+
 
 "+" { tokens.add("suma"); return new Symbol (sym.SUMA); }
 "-" { tokens.add("resta"); return new Symbol (sym.RESTA); }
