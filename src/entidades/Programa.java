@@ -63,6 +63,9 @@ class ReadStatement implements Statement {
 
 
 interface Condition {
+
+    public boolean getValue();
+
 }
 
 class NotCondition implements Condition {
@@ -71,6 +74,10 @@ class NotCondition implements Condition {
 
     }
 
+    @Override
+    public boolean getValue() {
+        return false;
+    }
 }
 
 class AndCondition implements Condition {
@@ -79,6 +86,10 @@ class AndCondition implements Condition {
 
     }
 
+    @Override
+    public boolean getValue() {
+        return false;
+    }
 }
 
 class OrCondition implements Condition {
@@ -87,6 +98,10 @@ class OrCondition implements Condition {
 
     }
 
+    @Override
+    public boolean getValue() {
+        return false;
+    }
 }
 
 class EqualCondition implements Condition {
@@ -95,6 +110,10 @@ class EqualCondition implements Condition {
 
     }
 
+    @Override
+    public boolean getValue() {
+        return false;
+    }
 }
 
 class MinorEqualCondition implements Condition {
@@ -103,6 +122,10 @@ class MinorEqualCondition implements Condition {
 
     }
 
+    @Override
+    public boolean getValue() {
+        return false;
+    }
 }
 
 class MinorCondition implements Condition {
@@ -111,6 +134,10 @@ class MinorCondition implements Condition {
 
     }
 
+    @Override
+    public boolean getValue() {
+        return false;
+    }
 }
 
 class MajorCondition implements Condition {
@@ -119,6 +146,10 @@ class MajorCondition implements Condition {
 
     }
 
+    @Override
+    public boolean getValue() {
+        return false;
+    }
 }
 
 class MajorEqualCondition implements Condition {
@@ -127,25 +158,26 @@ class MajorEqualCondition implements Condition {
 
     }
 
-}
-
-class MinorMajorCondition implements Condition {
-
-    public MinorMajorCondition(Expression e1, Expression e2){
-
+    @Override
+    public boolean getValue() {
+        return false;
     }
-
 }
 
 class BooleanCondition implements Condition {
 
-    public BooleanCondition(Boolean b){
+    public BooleanCondition(boolean b){
 
     }
 
+    @Override
+    public boolean getValue() {
+        return false;
+    }
 }
 
 interface Expression {
+    public int getValue();
 }
 
 class SumaExpression implements Expression {
@@ -153,6 +185,10 @@ class SumaExpression implements Expression {
     public SumaExpression(Expression e1, Expression e2){
     }
 
+    @Override
+    public int getValue() {
+        return 0;
+    }
 }
 
 class RestaExpression implements Expression {
@@ -160,6 +196,10 @@ class RestaExpression implements Expression {
     public RestaExpression(Expression e1, Expression e2){
     }
 
+    @Override
+    public int getValue() {
+        return 0;
+    }
 }
 
 class MultiplicacionExpression implements Expression {
@@ -167,6 +207,10 @@ class MultiplicacionExpression implements Expression {
     public MultiplicacionExpression(Expression e1, Expression e2){
     }
 
+    @Override
+    public int getValue() {
+        return 0;
+    }
 }
 
 class DivisionExpression implements Expression {
@@ -174,6 +218,10 @@ class DivisionExpression implements Expression {
     public DivisionExpression(Expression e1, Expression e2){
     }
 
+    @Override
+    public int getValue() {
+        return 0;
+    }
 }
 
 class IntegerExpression implements Expression {
@@ -181,6 +229,10 @@ class IntegerExpression implements Expression {
     public IntegerExpression(int i){
     }
 
+    @Override
+    public int getValue() {
+        return 0;
+    }
 }
 
 class IdentifierExpression implements Expression {
@@ -188,6 +240,10 @@ class IdentifierExpression implements Expression {
     public IdentifierExpression(String id){
     }
 
+    @Override
+    public int getValue() {
+        return 0;
+    }
 }
 
 
