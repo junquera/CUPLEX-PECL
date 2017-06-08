@@ -27,13 +27,15 @@ terminal ASIGNACION;
 terminal MINOR_EQUAL, MINOR, EQUAL, MAJOR, MAJOR_EQUAL;
 terminal SUMA, RESTA, MULTIPLICACION, DIVISION;
 terminal LPARENT, RPARENT, COMA, SEMI_COLON, COLON;
-terminal INTEGER, BOOLEAN, IDENTIFIER;
+terminal Integer INTEGER;
+terminal Boolean BOOLEAN;
+terminal String IDENTIFIER;
 
-non terminal var_init_identifiers;
-non terminal var_type;
+non terminal ArrayList<String> var_init_identifiers;
+non terminal Integer var_type;
 
 non terminal Programa programa;
-non terminal VarList var_init_list;
+non terminal SymbolTable var_init_list;
 non terminal StatementList statement_list;
 
 non terminal Statement statement;
@@ -51,25 +53,25 @@ programa ::= PROGRAM IDENTIFIER:id IS
              BEGIN
                 statement_list:stmt_list
              END {:
-                var_init_list.put(id, new PseudoIdentifier(id));
-                Programa p = new Programa(var_init_list, statement_list);
+                var_list.put(id, new PseudoIdentifier(id));
+                Programa p = new Programa(var_list, stmt_list);
              :};
 
 var_init_list ::= var_init_list:identifiers VAR var_init_identifiers:id_list COLON var_type:type SEMI_COLON {:
                     if(type == 0){
                         for(String identifier: id_list){
-                            identifiers.put(identifier, new IntegerIdentifier(identifier, value));
+                            identifiers.put(identifier, new IntegerIdentifier(identifier, 0));
                         }
                     } else if (type == 1){
                         for(String identifier: id_list){
-                            identifiers.put(identifier, new BooleanIdentifier(identifier, value));
+                            identifiers.put(identifier, new BooleanIdentifier(identifier, false));
                         }
                     } else {
                         throw new Exception(String.format("Var type %d is not allowed.", type));
                     }
                     RESULT = identifiers;
                 :}
-                | {: RESULT = new VarList(); :} // Void => Init var list
+                | {: RESULT = new SymbolTable(); :} // Void => Init var list
                 ;
 
 var_type ::= IS_INTEGER {: RESULT = 0; :} | IS_BOOLEAN {: RESULT = 1; :};
@@ -89,14 +91,14 @@ statement_list ::= statement_list:stmt_list statement:stmt {:
                     RESULT = stmt_list;
                  :}
                  | statement:stmt {:
-                    StatementList stmtList = StatementList();
+                    StatementList stmtList = new StatementList();
                     stmtList.add(stmt);
                  :};
-statement ::= IDENTIFIER:i ASIGNACION expr:e SEMI_COLON
+statement ::= IDENTIFIER:id ASIGNACION expr:e SEMI_COLON
             {:
               RESULT = new IdentifierStatement(id, e);
             :}
-            | IDENTIFIER:i ASIGNACION cond:c SEMI_COLON
+            | IDENTIFIER:id ASIGNACION cond:c SEMI_COLON
             {:
               RESULT = new IdentifierStatement(id, c);
             :}
