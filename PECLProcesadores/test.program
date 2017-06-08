@@ -1,9 +1,0 @@
-program programa is
-	var x: integer;
-	var y,z: boolean;
-begin
-	x := 1 + 2;
-	if ( 3 > 2 ) then
-		y := 3 > 2;
-	end if ;
-end

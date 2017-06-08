@@ -1,0 +1,124 @@
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.*;
+
+parser code {:
+	public static void main (String argv[]) throws Exception {
+		parser analizador;
+		analizador = new parser(new Yylex(new FileReader(new File("test.txt"))));
+		try{
+			analizador.parse();
+		} catch(Exception se){
+			System.err.println("Hay un error semántico:\n" + se.getMessage());
+		}
+	}
+
+:};
+
+terminal PROGRAM, IS, BEGIN, END;
+terminal VAR, IS_INTEGER, IS_BOOLEAN;
+terminal READ, WRITE;
+terminal SKIP;
+terminal REPEAT, UNTIL;
+terminal IF, THEN, ELSE;
+terminal AND, OR, NOT;
+terminal ASIGNACION;
+terminal MINOR_EQUAL, MINOR, EQUAL, MAJOR, MAJOR_EQUAL, MINOR_MAJOR;
+terminal SUMA, RESTA, MULTIPLICACION, DIVISION;
+terminal LPARENT, RPARENT, COMA, SEMI_COLON, COLON;
+terminal INTEGER, BOOLEAN, IDENTIFIER;
+
+non terminal var_init_identifiers;
+non terminal var_type;
+
+non terminal Programa programa;
+non terminal VarList var_init_list;
+non terminal StatementList statement_list;
+
+non terminal Statement statement;
+non terminal Condition cond;
+non terminal Expression expr;
+
+// TODO Intentar evaluar precedencia gramaticalmente
+precedence left MULTIPLICACION, DIVISION, SUMA, RESTA;
+precedence left AND, OR;
+
+
+programa ::= PROGRAM IDENTIFIER:id IS
+                var_init_list:var_list
+             BEGIN
+                statement_list:stmt_list
+             END {:
+                var_init_list.put(id, new PseudoIdentifier(id));
+                Programa p = new Programa(var_init_list, statement_list);
+             :};
+
+var_init_list ::= var_init_list:identifiers VAR var_init_identifiers:id_list COLON var_type:type SEMI_COLON {:
+                    if(type == 0){
+                        for(String identifier: id_list){
+                            identifiers.put(identifier, new IntegerIdentifier(identifier, value));
+                        }
+                    } else if (type == 1){
+                        for(String identifier: id_list){
+                            identifiers.put(identifier, new BooleanIdentifier(identifier, value));
+                        }
+                    } else {
+                        throw new Exception(String.format("Var type %d is not allowed.", type));
+                    }
+                    RESULT = identifiers;
+                :}
+                | {: RESULT = new VarList(); :} // Void => Init var list
+                ;
+
+var_type ::= IS_INTEGER {: RESULT = 0; :} | IS_BOOLEAN {: RESULT = 1; :};
+
+var_init_identifiers ::= var_init_identifiers:id_list COMA IDENTIFIER:id {:
+                            id_list.add(id);
+                            RESULT = id_list;
+                        :}
+                       | VAR IDENTIFIER:id {:
+                            ArrayList<String> identifiers = new ArrayList<>();
+                            identifiers.add(id);
+                            RESULT = identifiers;
+                       :};
+
+statement_list ::= statement_list:stmt_list statement:stmt {:
+                    stmt_list.add(stmt);
+                    RESULT = stmt_list;
+                 :}
+                 | statement:stmt {:
+                    StatementList stmtList = StatementList();
+                    stmtList.add(stmt);
+                 :};
+
+statement ::= IDENTIFIER ASIGNACION expr SEMI_COLON
+            | IDENTIFIER ASIGNACION cond SEMI_COLON
+            | IF cond THEN statement_list END IF SEMI_COLON
+            | IF cond THEN statement_list ELSE statement_list END IF SEMI_COLON // TODO Ver else ambiguo
+            | REPEAT statement_list UNTIL cond SEMI_COLON
+            | WRITE expr
+            | READ IDENTIFIER
+            ;
+
+cond ::= NOT cond
+       | LPARENT cond RPARENT
+       | cond AND cond
+       | cond OR cond
+       | cond EQUAL cond        // TODO ¡Arreglar esto! (Ambigüedad)
+       | expr EQUAL expr
+       | expr MINOR_EQUAL expr
+       | expr MINOR expr
+       | expr MAJOR expr
+       | expr MAJOR_EQUAL expr
+       | expr MINOR_MAJOR expr
+       | BOOLEAN
+       ;
+
+expr ::= LPARENT expr RPARENT
+       | expr SUMA expr
+       | expr RESTA expr
+       | expr MULTIPLICACION expr
+       | expr DIVISION expr
+       | INTEGER
+       | IDENTIFIER
+       ;
