@@ -63,6 +63,8 @@ non terminal Expression expr;
 precedence left MULTIPLICACION, DIVISION, SUMA, RESTA;
 precedence left AND, OR;
 
+start with programa;
+
 // TODO Implementar generics (<>)
 programa ::= PROGRAM IDENTIFIER:id IS
                 var_init_list:var_list
