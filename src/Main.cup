@@ -95,7 +95,9 @@ statement_list ::= statement_list:stmt_list statement:stmt {:
                  | statement:stmt {:
                     StatementList stmtList = new StatementList();
                     stmtList.add(stmt);
+                    RESULT = stmtList;
                  :};
+
 statement ::= IDENTIFIER:id ASIGNACION expr:e SEMI_COLON
             {:
               RESULT = new IdentifierStatement(id, e);
