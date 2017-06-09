@@ -57,7 +57,7 @@ programa ::= PROGRAM IDENTIFIER:id IS
                 Programa p = new Programa(var_list, stmt_list);
              :};
 
-var_init_list ::= var_init_list:identifiers var_init_identifiers:id_list COLON var_type:type SEMI_COLON {:
+var_init_list ::= var_init_list:identifiers VAR var_init_identifiers:id_list COLON var_type:type SEMI_COLON {:
                     if(type == 0){
                         for(String identifier: id_list){
                             identifiers.put(identifier, new IntegerIdentifier(identifier, 0));
@@ -71,7 +71,9 @@ var_init_list ::= var_init_list:identifiers var_init_identifiers:id_list COLON v
                     }
                     RESULT = identifiers;
                 :}
-                | {: RESULT = new SymbolTable(); :} // Void => Init var list
+                | {:
+                    RESULT = new SymbolTable();
+                :}
                 ;
 
 var_type ::= IS_INTEGER {: RESULT = 0; :} | IS_BOOLEAN {: RESULT = 1; :};
@@ -80,7 +82,7 @@ var_init_identifiers ::= var_init_identifiers:id_list COMA IDENTIFIER:id {:
                             id_list.add(id);
                             RESULT = id_list;
                         :}
-                       | VAR IDENTIFIER:id {:
+                       | IDENTIFIER:id {:
                             ArrayList<String> identifiers = new ArrayList<>();
                             identifiers.add(id);
                             RESULT = identifiers;

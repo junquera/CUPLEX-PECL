@@ -13,7 +13,7 @@ WhiteSpace     = {LineTerminator} | [ \t\f]
 
 IDENTIFIER=[A-Za-z][A-Za-z0-9]*
 
-INTEGER=[+-]?[1-9]*[0-9]+
+INTEGER=[+-]?[0-9]+
 
 BOOLEAN=true|false
 
