@@ -139,6 +139,7 @@ class NotCondition implements Condition {
 
     private Condition c;
 
+
     public NotCondition(Condition c) {
         this.c = c;
     }
@@ -386,12 +387,33 @@ class Programa {
     }
 
     public void test() throws Exception {
+        HashMap<String, Identifier> symbols = symbolTable.getVarMap();
+        System.out.println("[TABLA DE SÍMBOLOS]");
+        for(String key: symbols.keySet()){
+            Identifier i = symbols.get(key);
+            String tipo = "UNDEFINED";
+            String valor = "";
+            switch (i.getType()){
+                case IntegerIdentifier.TYPE:
+                    tipo = "INTEGER";
+                    valor = ""+((IntegerIdentifier) i).getValue();
+                    break;
+                case BooleanIdentifier.TYPE:
+                    tipo = "BOOLEAN";
+                    valor = ""+((BooleanIdentifier) i).getValue();
+                    break;
+                case PseudoIdentifier.TYPE:
+                    tipo = "PSEUDO";
+                    break;
+            }
+            System.out.println(String.format("\t{\n\t\ttipo:\t%s,\n\t\tnombre:\t%s,\n\t\tvalor:\t%s\n\t},", tipo, i.getId(), valor));
+        }
         List<Statement> rawStmntList = stmtList.getList();
 
         for (Statement s : rawStmntList) {
             s.execute(this.symbolTable);
         }
-        }
+    }
 }
 
 class SymbolTable {
@@ -408,6 +430,9 @@ class SymbolTable {
         this.varList.put(id, identifier);
     }
 
+    public HashMap<String, Identifier> getVarMap(){
+        return this.varList;
+    }
     public Identifier get(String id) {
         return this.varList.get(id);
     }

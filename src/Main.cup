@@ -4,18 +4,31 @@ import java.io.*;
 
 parser code {:
 	public static void main (String argv[]) throws Exception {
+
 	    if(argv.length != 1)
 	        throw new Exception("No hay argumentos para analizar programa");
 
 	    String nombre = argv[0];
+        String[] partes = nombre.split(".");
+        if(partes.length <= 0){
+            throw new Exception("La extensión del archivo tiene que ser .program");
+        } else if(!partes[partes.length - 1].equals("program")){
+            throw new Exception("La extensión del archivo tiene que ser .program");
+        }
 
 		parser analizador;
 		analizador = new parser(new Yylex(new FileReader(new File(nombre))));
+		ArrayList<String> errores = new ArrayList<>();
 		try{
 			analizador.parse();
 		} catch(Exception se){
-			System.err.println("[ERROR]\n" + se.getMessage());
+			errores.add(se.getMessage());
 		}
+        if(errores.size() > 0){
+            System.out.println("[ERRORES ENCONTRADOS]");
+            for(String error: errores)
+                System.out.println(error);
+        }
 	}
 
 :};
