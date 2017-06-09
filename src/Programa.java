@@ -117,11 +117,14 @@ class ReadStatement implements Statement {
 
         if (i == null)
             throw new Exception(String.format("Variable %s doesn't exist", this.id));
-
-        if (i instanceof IntegerIdentifier)
-            st.set(this.id, new IntegerIdentifier(this.id, Integer.parseInt(input)));
-        else if (i instanceof BooleanIdentifier)
-            st.set(this.id, new BooleanIdentifier(this.id, Boolean.parseBoolean(input)));
+        try{
+            if (i instanceof IntegerIdentifier)
+                st.set(this.id, new IntegerIdentifier(this.id, Integer.parseInt(input)));
+            else if (i instanceof BooleanIdentifier)
+                st.set(this.id, new BooleanIdentifier(this.id, Boolean.parseBoolean(input)));
+        } catch(Exception e){
+            throw new Exception(String.format("%s no concuerda con el tipo de la variable %s", input, this.id));
+        }
     }
 }
 
@@ -388,7 +391,7 @@ class Programa {
         for (Statement s : rawStmntList) {
             s.execute(this.symbolTable);
         }
-    }
+        }
 }
 
 class SymbolTable {
