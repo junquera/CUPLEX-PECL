@@ -15,19 +15,29 @@ interface Statement {
 
 class IdentifierStatement implements Statement {
 
-    private Identifier i;
+    private String id;
+    private Expression e;
+    private Condition c;
 
     public IdentifierStatement(String id, Expression e) {
-        this.i = i;
+        this.id = id;
+        this.e = e;
     }
 
     public IdentifierStatement(String id, Condition c) {
-        this.i = i;
+        this.id = id;
+        this.c = c;
     }
 
     @Override
     public void execute(SymbolTable st) throws Exception {
-        st.set(i.getId(), i);
+        if(e != null){
+            IntegerIdentifier i = new IntegerIdentifier(this.id, this.e.getValue(st));
+            st.set(this.id, i);
+        } else {
+            BooleanIdentifier i = new BooleanIdentifier(this.id, this.c.getValue(st));
+            st.set(this.id, i);
+        }
     }
 }
 
@@ -72,7 +82,7 @@ class RepeatStatement implements Statement {
 
     @Override
     public void execute(SymbolTable st) throws Exception {
-        while (c.getValue(st))
+        while (! c.getValue(st))
             for (Statement s : this.stmtList.getList())
                 s.execute(st);
     }

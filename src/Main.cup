@@ -47,7 +47,6 @@ precedence left MULTIPLICACION, DIVISION, SUMA, RESTA;
 precedence left AND, OR;
 
 // TODO Implementar generics (<>)
-
 programa ::= PROGRAM IDENTIFIER:id IS
                 var_init_list:var_list
              BEGIN
@@ -55,6 +54,7 @@ programa ::= PROGRAM IDENTIFIER:id IS
              END {:
                 var_list.put(id, new PseudoIdentifier(id));
                 Programa p = new Programa(var_list, stmt_list);
+                p.test();
              :};
 
 var_init_list ::= var_init_list:identifiers VAR var_init_identifiers:id_list COLON var_type:type SEMI_COLON {:
@@ -118,8 +118,8 @@ statement ::= IDENTIFIER:id ASIGNACION expr:e SEMI_COLON
             {:
               RESULT = new RepeatStatement(c, stmnt);
             :}
-            | WRITE expr:e {: RESULT = new WriteStatement(e); :}
-            | READ IDENTIFIER:i {: RESULT = new ReadStatement(i); :}
+            | WRITE expr:e SEMI_COLON {: RESULT = new WriteStatement(e); :}
+            | READ IDENTIFIER:i SEMI_COLON {: RESULT = new ReadStatement(i); :}
             ;
 
 cond ::= NOT cond:c {: RESULT = new NotCondition(c); :}
