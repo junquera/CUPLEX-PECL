@@ -14,7 +14,7 @@ parser code {:
 		try{
 			analizador.parse();
 		} catch(Exception se){
-			System.err.println("Hay un error semántico:\n" + se.getMessage());
+			System.err.println("[ERROR]\n" + se.getMessage());
 		}
 	}
 
@@ -47,7 +47,6 @@ non terminal Statement statement;
 non terminal Condition cond;
 non terminal Expression expr;
 
-// TODO ¿Intentar evaluar precedencia gramaticalmente?
 precedence left MULTIPLICACION, DIVISION, SUMA, RESTA;
 precedence left AND, OR;
 
@@ -127,11 +126,13 @@ statement ::= IDENTIFIER:id ASIGNACION expr:e SEMI_COLON
             | READ IDENTIFIER:i SEMI_COLON {: RESULT = new ReadStatement(i); :}
             ;
 
+
+// TODO Intentar obtener cond de IDENTIFIER
 cond ::= NOT cond:c {: RESULT = new NotCondition(c); :}
        | LPARENT cond:c RPARENT {: RESULT = c; :}
        | cond:c1 AND cond:c2 {: RESULT = new AndCondition(c1, c2); :}
        | cond:c1 OR cond:c2 {: RESULT = new OrCondition(c1, c2); :}
-       | expr:e1 EQUAL expr:e2 {: RESULT = new EqualCondition(e1, e2); :}        // ¿También 'cond EQUAL cond'?
+       | expr:e1 EQUAL expr:e2 {: RESULT = new EqualCondition(e1, e2); :}
        | expr:e1 MINOR_EQUAL expr:e2 {: RESULT = new MinorEqualCondition(e1, e2); :}
        | expr:e1 MINOR expr:e2 {: RESULT = new MinorCondition(e1, e2); :}
        | expr:e1 MAJOR expr:e2 {: RESULT = new MajorCondition(e1, e2); :}
