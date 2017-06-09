@@ -1,14 +1,11 @@
-program switch is
-    var sum,k : integer;
-    var switch : boolean;
+program niega is
+    var i : integer;
 begin
-    switch := true; sum := 0; k := 1;
-    repeat
-        switch := not(switch);
-        if switch then
-            sum := sum+k
-        end if;
-        k := k+1
-    until k<10;
-    write sum
+    read i;
+    if i > 0 then
+        i := 0;
+    else
+        i := 1;
+    end if;
+    write i;
 end

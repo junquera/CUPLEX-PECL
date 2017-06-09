@@ -4,8 +4,13 @@ import java.io.*;
 
 parser code {:
 	public static void main (String argv[]) throws Exception {
+	    if(argv.length != 1)
+	        throw new Exception("No hay argumentos para analizar programa");
+
+	    String nombre = argv[0];
+
 		parser analizador;
-		analizador = new parser(new Yylex(new FileReader(new File("test.txt"))));
+		analizador = new parser(new Yylex(new FileReader(new File(nombre))));
 		try{
 			analizador.parse();
 		} catch(Exception se){
