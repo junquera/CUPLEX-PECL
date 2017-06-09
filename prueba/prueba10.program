@@ -1,0 +1,11 @@
+program error10 is
+    var i, j, k : integer;
+begin
+    read i;
+    j := i;
+    k := j;
+    if true then
+      write i;
+    end if;
+    write (i
+end

@@ -1,4 +1,4 @@
-program erroneo is
+program switch is
     var sum,k : integer;
     var switch : boolean;
 begin

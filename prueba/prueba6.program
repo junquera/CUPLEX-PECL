@@ -1,0 +1,15 @@
+program erroneo is
+    var sum,k : integer;
+    var switch : boolean;
+    var switch : integer;
+begin
+    switch := true; sum := 0; k := 1;
+    repeat
+        switch := not(switch);
+        if switch then
+            sum := sum+k
+        end if;
+        k := k+1
+    until k<10;
+    write sum
+end

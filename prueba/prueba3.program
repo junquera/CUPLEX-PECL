@@ -1,9 +1,9 @@
-program aumenta is
+program cuenta10 is
     var i : integer;
 begin
-    read i;
+    i := 0;
     repeat
         write i;
-        i := i + 2;
+        i := i + 1;
     until i > 10;
 end
