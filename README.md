@@ -32,11 +32,11 @@ Sólo he tenido que escribir dos expresiones regulares para el análisis léxico
 
 - Identificador     `[A-Za-z][A-Za-z0-9]*`
 
-![AFD ID](identifier_afd.png)
+![AFD ID](documentation/identifier_afd.png)
 
 - Integer con signo `[+-]?[0-9]+`
 
-![AFD INT](integer_afd.png)
+![AFD INT](documentation/integer_afd.png)
 
 
 No he empleado estados léxicos porque sólo utilizo el análisis léxico para generar los token, y no dependen de su contexto, así que todo el trabajo de analizar la estructura del programa es del análisis sintáctico.
