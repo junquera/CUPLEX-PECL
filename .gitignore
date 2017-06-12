@@ -8,3 +8,5 @@ bin
 Yylex.java
 parser.java
 sym.java
+
+.idea/**
