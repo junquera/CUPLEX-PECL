@@ -1,0 +1,73 @@
+import java_cup.runtime.*;
+
+parser code {:
+    public void repor_error(String message, Object info) {
+        StringBuffer m = new StringBuffer("Error");
+        System.out.println("Mensaje: " + message);
+        System.out.println("info: " + info.toString());
+        if(info instanceof java_cup.runtime.Symbol){
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+
+            if(s.left >= 0){
+                m.append(" en la linea " + (s.left + 1));
+                if (s.right >= 0)
+                    m.append(", y columna " + (s.right + 1));
+            }
+        }
+        m.append(" : " + message);
+        System.err.println(m);
+    }
+
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+
+    public void conversion(String a, String b, int n){
+
+        int c = 0, d = 0;
+        System.out.println(n + " ");
+
+
+        if (a=="Km"){ c=6; System.out.print("Km"); }
+        else if (a=="Hm"){ c=5; System.out.print("Hm"); }
+        else if (a=="Dm"){ c=4; System.out.print("Dm"); }
+        else if (a=="m"){ c=3; System.out.print("m"); }
+        else if (a=="dm"){ c=2; System.out.print("dm"); }
+        else if (a=="cm"){ c=1; System.out.print("cm"); }
+        else if (a=="mm"){ c=0; System.out.print("mm"); }
+
+        if (b=="Km") d=6;
+        else if (b=="Hm") d=5;
+        else if (b=="Dm") d=4;
+        else if (b=="m") d=3;
+        else if (b=="dm") d=2;
+        else if (b=="cm") d=1;
+        else if (b=="mm") d=0;
+
+        System.out.print(" son "+n*Math.pow(10,c-d)+" ");
+    }
+:};
+
+terminal COMA, PUNTOCOMA, MM, CM, DCM, M, DCAM, HM, KM;
+terminal Integer NUMBER;
+non terminal Object programa, linea, expresiones, medida;
+
+programa ::= programa linea | linea;
+
+linea ::=   error NUMBER medida PUNTOCOMA {: parser.report_error("revise la sintaxis", null); :} |
+            medida:m1 NUMBER:n medida:m2 PUNTOCOMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :} |
+            expresiones medida:m1 NUMBER:n medida:m2 PUNTOCOMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :};
+
+
+expresiones ::= expresiones medida:m1 NUMBER:n medida:m2 COMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :} |
+                medida:m1 NUMBER:n medida:m2 COMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :} |
+                error NUMBER medida COMA {: parser.report_error("revise las medidas en mayusculas", null); :};
+
+medida ::=  KM {: RESULT="Km"; :} |
+            HM {: RESULT="Hm"; :} |
+            DCAM {: RESULT="Dm"; :} |
+            M {: RESULT="m"; :} |
+            DCM {: RESULT="dm"; :} |
+            CM {: RESULT="cm"; :} |
+            MM {: RESULT="mm"; :};
