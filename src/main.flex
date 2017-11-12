@@ -26,24 +26,24 @@ import java_cup.runtime.*;
 /* EL 1. */
 Letra = [A-Z]
 Digito = [0-9]
+
 Car_Cadena = [?] | {Car_Cad_Delimitado}
-Car_Cad_Delimitado = [!#$%&'()*,/:;<=>?^_] | {Car_No_Delimitado}
+Car_Cad_Delimitado = [!#$%&'()*,/:;<=>?\^_] | {Car_No_Delimitado}
 Car_No_Delimitado = [ ] | {Car_Cadena_Simple}
 Car_Cadena_Simple = [+-.] | {Digito} | {Letra}
 Cad_REM = {Car_Cadena}*
 Cad_Delimitada = ["]{Car_Cad_Delimitado}*["]
 Cad_No_Delimitada = {Car_Cadena_Simple} | {Car_Cadena_Simple}{Cad_NoDelimitada}*{Car_Cadena_Simple}
 
-/* TODO No estoy seguro de que esto sea del todo correcto */
-LF = lf
-CR = cr
-EOF = eof
+LF = \n
+CR = \r
+EOF = \x00 | \x03
 
-LineTerminator = \r|\n|\r\n
+LineTerminator = {LF}|{CR}|{LF}{CR}
 WhiteSpace = {LineTerminator} | [ \t\f]
 
 Num_Entero= [+-]?{Digito}+
-Num_Real = {Entero}[.]{Digito}+
+Num_Real = {Num_Entero}[.]{Digito}+
 Num_Escalar = {Num_Real}[E]{Num_Entero}
 Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
 
@@ -90,10 +90,12 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     "TAN" { return symbol(sym.TAN); }
 
     /* EL 4. Identificadores */
+    {Letra} { return symbol(sym.VAR_NUM, new String(yytext())); }
+    {Letra}$ { return symbol(sym.VAR_TXT, new String(yytext())); }
 
     /* EL 5. Constantes */
-    {Cad_Delimitada} {return symbol(sym.CONST_CADENA, new String(yytext()); }
-
+    {Cad_Delimitada} { return symbol(sym.CONST_CADENA, new String(yytext()); }
+    {Constante_Num} { return symbol(sym.CONST_NUM, new Number(yytext()); }
 
     /* EL 6. */
     {WhiteSpace} {}
