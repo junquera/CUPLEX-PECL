@@ -1,3 +1,5 @@
+*.java
+*.java~
 .idea
 doc/big_files
 src/.project

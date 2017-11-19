@@ -22,52 +22,153 @@ parser code {:
         report_error(message, info);
         System.exit(1);
     }
-
-    public void conversion(String a, String b, int n){
-
-        int c = 0, d = 0;
-        System.out.println(n + " ");
-
-
-        if (a=="Km"){ c=6; System.out.print("Km"); }
-        else if (a=="Hm"){ c=5; System.out.print("Hm"); }
-        else if (a=="Dm"){ c=4; System.out.print("Dm"); }
-        else if (a=="m"){ c=3; System.out.print("m"); }
-        else if (a=="dm"){ c=2; System.out.print("dm"); }
-        else if (a=="cm"){ c=1; System.out.print("cm"); }
-        else if (a=="mm"){ c=0; System.out.print("mm"); }
-
-        if (b=="Km") d=6;
-        else if (b=="Hm") d=5;
-        else if (b=="Dm") d=4;
-        else if (b=="m") d=3;
-        else if (b=="dm") d=2;
-        else if (b=="cm") d=1;
-        else if (b=="mm") d=0;
-
-        System.out.print(" son "+n*Math.pow(10,c-d)+" ");
-    }
 :};
 
-terminal COMA, PUNTOCOMA, MM, CM, DCM, M, DCAM, HM, KM;
-terminal Integer NUMBER;
-non terminal Object programa, linea, expresiones, medida;
+terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
+         LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
+         GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RANDOMIZE,
+         READ, REM, RESTORE, RETURN, STEP, STOP, THEN, TO, ABS, ATN,
+         COS, EXP, LOG, RND, SGN, SIN, SQR, TAN, FN, VAR_NUM, VAR_TXT,
+         L_PAR, R_PAR, FINAL, CHECK;
 
-programa ::= programa linea | linea;
+terminal Integer INT;
+terminal Float FLOAT;
+terminal String STRING;
 
+non terminal lineas, linea, variable, variable_numerica, subindice, expresion_num, num,
+             funcion_suministrada, funcion, asignacion,
+             expresion_condicional, sentencia_control, for, print, item,
+             input, data, read, dim, rem, randomize;
+
+
+lineas ::= lineas linea | linea;
+/**
 linea ::=   error NUMBER medida PUNTOCOMA {: parser.report_error("revise la sintaxis", null); :} |
             medida:m1 NUMBER:n medida:m2 PUNTOCOMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :} |
             expresiones medida:m1 NUMBER:n medida:m2 PUNTOCOMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :};
+*/
+
+linea ::= funcion_suministrada |
+          funcion |
+          asignacion |
+          sentencia_control |
+          for | print | input |
+          data | read | dim | rem |
+          randomize ;
+
+/** ES 1. **/
+variable ::=    VAR_TXT
+               ;
+
+variable_numerica ::= VAR_NUM |
+                      VAR_NUM L_PAR subindice R_PAR
+                      ;
+
+subindice ::= expresion_num |
+              expresion_num COMA expresion_num
+              ;
 
 
-expresiones ::= expresiones medida:m1 NUMBER:n medida:m2 COMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :} |
-                medida:m1 NUMBER:n medida:m2 COMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :} |
-                error NUMBER medida COMA {: parser.report_error("revise las medidas en mayusculas", null); :};
+/** ES 2. **/
+expresion_num ::=   expresion_num SUM num |
+                    expresion_num SUB num |
+                    expresion_num MUL num |
+                    expresion_num DIV num |
+                    expresion_num POW num |
+                    INT |
+                    FLOAT |
+                    variable_numerica
+                ;
 
-medida ::=  KM {: RESULT="Km"; :} |
-            HM {: RESULT="Hm"; :} |
-            DCAM {: RESULT="Dm"; :} |
-            M {: RESULT="m"; :} |
-            DCM {: RESULT="dm"; :} |
-            CM {: RESULT="cm"; :} |
-            MM {: RESULT="mm"; :};
+
+/** TODO Ver como priorizar con Libro 2.2.4 Ambigüedad **/
+/** ES 3. **/
+funcion_suministrada ::=
+                ABS L_PAR expresion_num R_PAR |
+                ATN L_PAR expresion_num R_PAR |
+                COS L_PAR expresion_num R_PAR |
+                EXP L_PAR expresion_num R_PAR |
+                INT L_PAR expresion_num R_PAR |
+                LOG L_PAR expresion_num R_PAR |
+                RND L_PAR expresion_num R_PAR |
+                SGN L_PAR expresion_num R_PAR |
+                SIN L_PAR expresion_num R_PAR |
+                SQR L_PAR expresion_num R_PAR |
+                TAN L_PAR expresion_num R_PAR
+            ;
+
+/** ES 4. **/
+funcion ::= DEF FN VAR_NUM EQU expresion_num |
+            DEF FN VAR_NUM L_PAR VAR_NUM R_PAR EQU expresion_num
+            ;
+
+/** ES 5. **/
+asignacion ::= LET variable EQU STRING |
+               LET variable_numerica EQU expresion_num
+               ;
+
+
+/** ES 6. **/
+expresion_condicional ::= expresion_condicional LT expresion_num |
+                          expresion_condicional LE expresion_num |
+                          expresion_condicional EQU expresion_num |
+                          expresion_condicional GE expresion_num |
+                          expresion_condicional GT expresion_num |
+                          expresion_condicional NEQ expresion_num |
+                          expresion_num;
+
+/** ES 7. **/
+sentencia_control ::= GOTO INT |
+                      IF expresion_condicional THEN INT |
+                      GOSUB INT lineas RETURN /** TODO Hacer esta **/ |
+                      ON expresion_condicional GOTO subindice |
+                      STOP |
+                      END
+                      ;
+
+/** ES 8. **/
+for ::=  FOR VAR_NUM EQU expresion_num TO expresion_num STEP expresion_num
+            lineas
+         NEXT VAR_NUM |
+         FOR VAR_NUM EQU expresion_num TO expresion_num
+            lineas
+         NEXT VAR_NUM
+         ;
+
+/** ES 9. **/
+print ::= PRINT item |
+          print COMA item |
+          print PCOMA item
+          ;
+
+item ::= variable | expresion_num | STRING;
+
+/** ES 10. **/
+input ::= INPUT variable |
+          input COMA variable
+          ;
+
+
+/** ES 11. **/
+data ::= data COMA item|
+         DATA item
+         ;
+
+/** ES 12. **/
+read ::=    read COMA variable |
+            READ variable
+           ;
+
+
+/** ES 13. **/
+dim ::= DIM VAR_NUM L_PAR subindice R_PAR |
+        dim COMA VAR_NUM L_PAR subindice R_PAR
+        ;
+
+
+/** ES 14. **/
+rem ::= REM FINAL CHECK;
+
+
+/** ES 15. **/
+randomize ::= RANDOMIZE;

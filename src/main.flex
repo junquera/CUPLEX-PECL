@@ -51,6 +51,26 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
 
 <YYINITIAL> {
 
+    "^" { return symbol(sym.POW); }
+    "*" { return symbol(sym.MUL); }
+    "/" { return symbol(sym.DIV); }
+    "+" { return symbol(sym.SUM); }
+    "-" { return symbol(sym.SUB); }
+
+    "=" { return symbol(sym.EQU); }
+    "(" { return symbol(sym.L_PAR); }
+    ")" { return symbol(sym.R_PAR); }
+
+    "," { return symbol(sym.COMA); }
+    ";" { return symbol(sym.PCOMA); }
+
+    "<" { return symbol(sym.LT); }
+    "<=" { return symbol(sym.LE); }
+    ">=" { return symbol(sym.GE); }
+    ">" { return symbol(sym.GT); }
+    "<>" { return symbol(sym.NEQ); }
+
+
     /* EL 2. Palabras reservadas */
     "DATA" { return symbol(sym.DATA); }
     "DEF" { return symbol(sym.DEF); }
@@ -91,14 +111,22 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
 
     /* EL 4. Identificadores */
     {Letra} { return symbol(sym.VAR_NUM, new String(yytext())); }
-    {Letra}$ { return symbol(sym.VAR_TXT, new String(yytext())); }
+    {Letra}"$" { return symbol(sym.VAR_TXT, new String(yytext())); }
+
+    "FN" { return symbol(sym.FN, new String(yytext())); }
 
     /* EL 5. Constantes */
-    {Cad_Delimitada} { return symbol(sym.CONST_CADENA, new String(yytext()); }
-    {Constante_Num} { return symbol(sym.CONST_NUM, new Number(yytext()); }
+    {Cad_Delimitada} { return symbol(sym.STRING, new String(yytext())); }
+    {Num_Entero} { return symbol(sym.INT, new Integer(yytext())); }
+    {Num_Real}|{Num_Escalar} { return symbol(sym.FLOAT, new Float(yytext())); }
 
     /* EL 6. */
     {WhiteSpace} {}
 
-    . {System.out.println("Error <" + yytext() + "> linea: " + (yyline + 1) + " columna: " + (yycolumn + 1)); }
+    {EOF} { return symbol(sym.EOF); }
+
+    . {
+        System.out.println("Error <" + yytext() + "> linea: " + (yyline + 1) + " columna: " + (yycolumn + 1));
+        return symbol(sym.ERROR, {yyline, yycolumn});
+      }
 }
