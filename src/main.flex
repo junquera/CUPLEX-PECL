@@ -43,11 +43,11 @@ LineTerminator = {LF}|{CR}|{LF}{CR}
 WhiteSpace = {LineTerminator} | [ \t\f]
 
 Num_Entero= [+-]?{Digito}+
-Num_Real = {Num_Entero}[.]{Digito}+
+Num_Real = {Num_Entero}\.{Digito}+
 Num_Escalar = {Num_Real}[E]{Num_Entero}
 Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
 
-%state STRING
+%state STRANG
 
 %%
 
@@ -118,7 +118,7 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     "FN" { return symbol(sym.FN, new String(yytext())); }
 
     /* EL 5. Constantes */
-    \" { string.setLength(0); yybegin(STRING); }
+    \" { string.setLength(0); yybegin(STRANG); }
 
     {Num_Entero} { return symbol(sym.INT, new Integer(yytext())); }
     {Num_Real}|{Num_Escalar} { return symbol(sym.FLOAT, new Float(yytext())); }
@@ -134,7 +134,7 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     }
 }
 
-<STRING> {
+<STRANG> {
     \"                    { yybegin(YYINITIAL); return symbol(sym.STRING, string.toString());  }
     {Car_Cadena}+          { string.append( yytext() ); }
 }

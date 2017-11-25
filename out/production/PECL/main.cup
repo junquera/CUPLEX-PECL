@@ -105,11 +105,13 @@ funcion ::= DEF FN VAR_NUM EQU expresion_num |
             ;
 
 /** ES 5. **/
-asignacion ::= LET variable EQU STRING |
+asignacion ::= LET variable EQU expresion_txt |
                LET variable_numerica EQU expresion_num
                ;
 
-
+expresion_txt ::= STRING |
+                  variable |
+                  expresion_txt SUM expresion_txt;
 /** ES 6. **/
 expresion_condicional ::= expresion_condicional LT expresion_num |
                           expresion_condicional LE expresion_num |
@@ -146,11 +148,8 @@ print ::= PRINT item |
 item ::= variable | expresion_num | STRING;
 
 /** ES 10. **/
-input ::= INPUT variable |
-          INPUT STRING:s variable {:
-            System.out.println(s);
-          :}|
-          input COMA variable
+input ::= INPUT expresion_txt |
+          input COMA expresion_tx
           ;
 
 
