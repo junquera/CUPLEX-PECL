@@ -52,7 +52,8 @@ linea ::= INT expresion;
 
 expresion ::= funcion_suministrada |
           funcion |
-          asignacion |
+          asignacion_num |
+          asignacion_txt |
           sentencia_control |
           for | print | input |
           data | read | dim | rem |
@@ -79,7 +80,8 @@ expresion_num ::=   expresion_num SUM num |
                     expresion_num POW num |
                     INT |
                     FLOAT |
-                    variable_numerica
+                    variable_numerica |
+                    L_PAR expresion_num R_PAR
                 ;
 
 
@@ -105,9 +107,10 @@ funcion ::= DEF FN VAR_NUM EQU expresion_num |
             ;
 
 /** ES 5. **/
-asignacion ::= LET variable EQU expresion_txt |
-               LET variable_numerica EQU expresion_num
+asignacion_num ::= LET variable_numerica EQU expresion_num
                ;
+
+asignacion_txt ::= LET variable EQU expresion_txt;
 
 expresion_txt ::= STRING |
                   variable |

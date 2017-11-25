@@ -124,7 +124,7 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     {Num_Real}|{Num_Escalar} { return symbol(sym.FLOAT, new Float(yytext())); }
 
     /* EL 6. */
-    {WhiteSpace} {}
+    {WhiteSpace}+ { System.out.println("White space"); }
 
     {EOF} { return symbol(sym.EOF); }
 
