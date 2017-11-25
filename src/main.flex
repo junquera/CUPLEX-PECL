@@ -126,7 +126,7 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     {EOF} { return symbol(sym.EOF); }
 
     . {
-        System.out.println("Error <" + yytext() + "> linea: " + (yyline + 1) + " columna: " + (yycolumn + 1));
-        return symbol(sym.ERROR, new Error(yytext(), yyline, yycolumn));
+        System.out.println("LexError <" + yytext() + "> linea: " + (yyline + 1) + " columna: " + (yycolumn + 1));
+        return symbol(sym.ERROR, new LexError(yytext(), yyline, yycolumn));
       }
 }

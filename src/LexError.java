@@ -1,10 +1,10 @@
-public class Error {
+public class LexError {
 
   private String text;
   private int column;
   private int line;
 
-  public Error(String text, int column, int line){
+  public LexError(String text, int column, int line){
     this.text = text;
     this.column = column;
     this.line = line;
