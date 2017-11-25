@@ -7,7 +7,7 @@ import java_cup.runtime.Symbol;
 import java.io.InputStreamReader;
 
 public class Main {
-    static boolean do_debug_parse = false;
+    static boolean do_debug_parse = true;
 
     public static void main(String[] args) throws java.io.IOException {
 
