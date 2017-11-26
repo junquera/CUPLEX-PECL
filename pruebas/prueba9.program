@@ -1,9 +1,0 @@
-program aumenta is
-    var i : integer;
-begin
-    read i;
-    repeat
-        write i;
-        i := i + 2;
-    until i < -10;
-end
