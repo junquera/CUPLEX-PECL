@@ -1,12 +1,8 @@
-bin
-*.class
-.classpath
-.project
-*~
-
-# Auto generado por cup y lex
-Yylex.java
-parser.java
-sym.java
-
-.idea/**
+doc/big_files
+.idea
+out/
+PECL.iml
+src/BASICLexer.java* 
+src/parser.java 
+src/.project
+src/sym.java 

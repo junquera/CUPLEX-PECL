@@ -1,6 +1,0 @@
-// La conjunción o disyunción de expresiones lógicas utiliza los operadores and y or respectivamente.
-// Una expresión lógica negada, utiliza el operador not antes de la expresión lógica entre paréntesis.
-// La igualdad entre dos expresiones utiliza el operador "=". Las dos expresiones comparadas deberán de ser del mismo tipo.
-// La comparación entre dos expresiones de tipo entero utiliza los operadores de relación.
-// Las palabras reservadas no se pueden utilizar como nombre para un identificador.
-// https://github.com/gmh33/Java-CUP-jLex-Example/blob/master/example.cup
