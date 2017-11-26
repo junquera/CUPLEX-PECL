@@ -35,22 +35,21 @@ terminal Integer INT;
 terminal Float FLOAT;
 terminal String STRING;
 
-non terminal lineas, linea, expresion, variable, variable_numerica, subindice, expresion_num, num,
+non terminal lineas, linea, sentencia, variable, variable_numerica, subindice, expresion_num, num,
              funcion_suministrada, funcion, asignacion,
              expresion_condicional, sentencia_control, for, print, item,
              input, data, read, dim, rem, randomize;
 
 
-lineas ::= lineas linea | linea;
+lineas ::= INT sentencia | INT sentencia lineas;
 /**
 linea ::=   error NUMBER medida PUNTOCOMA {: parser.report_error("revise la sintaxis", null); :} |
             medida:m1 NUMBER:n medida:m2 PUNTOCOMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :} |
             expresiones medida:m1 NUMBER:n medida:m2 PUNTOCOMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :};
 */
 
-linea ::= INT expresion;
 
-expresion ::= funcion_suministrada |
+sentencia ::= funcion_suministrada |
           funcion |
           asignacion |
           sentencia_control |
