@@ -47,7 +47,7 @@ Num_Real = {Num_Entero}\.{Digito}+
 Num_Escalar = {Num_Real}[E]{Num_Entero}
 Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
 
-%state STRANG
+%state STRING
 
 %%
 
@@ -118,7 +118,7 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     "FN" { return symbol(sym.FN, new String(yytext())); }
 
     /* EL 5. Constantes */
-    \" { string.setLength(0); yybegin(STRANG); }
+    \" { string.setLength(0); yybegin(STRING); }
 
     {Num_Entero} { return symbol(sym.INT, new Integer(yytext())); }
     {Num_Real}|{Num_Escalar} { return symbol(sym.FLOAT, new Float(yytext())); }
@@ -134,7 +134,7 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     }
 }
 
-<STRANG> {
+<STRING> {
     \"                    { yybegin(YYINITIAL); return symbol(sym.STRING, string.toString());  }
     {Car_Cadena}+          { string.append( yytext() ); }
 }
