@@ -4,6 +4,7 @@
 
 import java_cup.runtime.Symbol;
 
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
 public class Main {
@@ -11,7 +12,8 @@ public class Main {
 
     public static void main(String[] args) throws java.io.IOException {
 
-        parser parser_obj = new parser(new BASICLexer(new InputStreamReader(System.in)));
+        // parser parser_obj = new parser(new BASICLexer(new InputStreamReader(System.in)));
+        parser parser_obj = new parser(new BASICLexer(new InputStreamReader(new FileInputStream("src/programa1.bas"))));
         Symbol parse_tree = null;
         try {
 

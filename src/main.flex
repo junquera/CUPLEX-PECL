@@ -31,7 +31,7 @@ Digito = [0-9]
 Car_Cadena = [?] | {Car_Cad_Delimitado}
 Car_Cad_Delimitado = [!#$%&'()*,/:;<=>?\^_] | {Car_No_Delimitado}
 Car_No_Delimitado = [ ] | {Car_Cadena_Simple}
-Car_Cadena_Simple = [+-.] | {Digito} | {Letra}
+Car_Cadena_Simple = [+-.] | {Digito} | {Letra} | [a-z]
 Cad_REM = {Car_Cadena}*
 Cad_No_Delimitada = {Car_Cadena_Simple} | {Car_Cadena_Simple}{Cad_NoDelimitada}*{Car_Cadena_Simple}
 
@@ -124,7 +124,7 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     {Num_Real}|{Num_Escalar} { return symbol(sym.FLOAT, new Float(yytext())); }
 
     /* EL 6. */
-    {WhiteSpace}+ { System.out.println("White space"); }
+    {WhiteSpace}+ {}
 
     {EOF} { return symbol(sym.EOF); }
 

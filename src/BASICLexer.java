@@ -39,8 +39,8 @@ class BASICLexer implements java_cup.runtime.Scanner {
     "\1\6\1\11\1\5\1\15\12\2\1\3\1\22\1\23\1\17\1\24"+
     "\1\3\1\0\1\26\1\41\1\47\1\25\1\12\1\30\1\36\1\46"+
     "\1\31\2\1\1\43\1\32\1\33\1\34\1\42\1\50\1\35\1\37"+
-    "\1\27\1\40\2\1\1\44\1\1\1\45\3\0\1\13\1\3\45\0"+
-    "\1\53\u1fa2\0\1\53\1\53\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\udfe6\0";
+    "\1\27\1\40\2\1\1\44\1\1\1\45\3\0\1\13\1\3\1\0"+
+    "\32\3\12\0\1\53\u1fa2\0\1\53\1\53\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\udfe6\0";
 
   /** 
    * Translates characters to character classes
@@ -325,7 +325,7 @@ class BASICLexer implements java_cup.runtime.Scanner {
     char [] map = new char[0x110000];
     int i = 0;  /* index in packed string  */
     int j = 0;  /* index in unpacked array */
-    while (i < 162) {
+    while (i < 166) {
       int  count = packed.charAt(i++);
       char value = packed.charAt(i++);
       do map[j++] = value; while (--count > 0);
@@ -702,7 +702,7 @@ class BASICLexer implements java_cup.runtime.Scanner {
             }
           case 63: break;
           case 4: 
-            { System.out.println("White space");
+            { 
             }
           case 64: break;
           case 5: 

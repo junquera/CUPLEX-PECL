@@ -3,3 +3,4 @@ doc/big_files
 src/.project
 PECL.iml
 bin
+out
