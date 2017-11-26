@@ -71,11 +71,11 @@ subindice ::= expresion_num |
 
 
 /** ES 2. **/
-expresion_num ::=   expresion_num SUM num |
-                    expresion_num SUB num |
-                    expresion_num MUL num |
-                    expresion_num DIV num |
-                    expresion_num POW num |
+expresion_num ::=   num SUM expresion_num |
+                    num SUB expresion_num |
+                    num MUL expresion_num |
+                    num DIV expresion_num |
+                    num POW expresion_num |
                     INT |
                     FLOAT |
                     variable_numerica
