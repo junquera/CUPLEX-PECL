@@ -21,3 +21,9 @@ Las especificaciones léxicas se encuentran comentadas en el código en el códi
 - RL 4.
 
 - RL 1.
+
+## Analizador sintáctico
+
+### Errores
+
+- [ ] Hay un error en los bucles `for`. No sé cómo indicar la línea del `NEXT` sin incluir el entero del principio.

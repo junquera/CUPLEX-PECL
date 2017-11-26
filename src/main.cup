@@ -35,7 +35,7 @@ terminal Integer INT;
 terminal Float FLOAT;
 terminal String STRING;
 
-non terminal lineas, linea, sentencia, variable, variable_numerica, subindice, expresion_num, num,
+non terminal lineas, sentencia, variable, variable_numerica, subindice, expresion_num,  expresion_txt, num,
              funcion_suministrada, funcion, asignacion,
              expresion_condicional, sentencia_control, for, print, item,
              input, data, read, dim, rem, randomize;
@@ -81,6 +81,11 @@ expresion_num ::=   num SUM expresion_num |
                     variable_numerica
                 ;
 
+expresion_txt ::= variable |
+                  STRING |
+                  expresion_txt SUM variable |
+                  expresion_txt SUM STRING
+                  ;
 
 /** TODO Ver como priorizar con Libro 2.2.4 Ambigüedad **/
 /** ES 3. **/
@@ -104,7 +109,7 @@ funcion ::= DEF FN VAR_NUM EQU expresion_num |
             ;
 
 /** ES 5. **/
-asignacion ::= LET variable EQU STRING |
+asignacion ::= LET variable EQU expresion_txt |
                LET variable_numerica EQU expresion_num
                ;
 
@@ -145,8 +150,8 @@ print ::= PRINT item |
 item ::= variable | expresion_num | STRING;
 
 /** ES 10. **/
-input ::= INPUT variable |
-          input COMA variable
+input ::= INPUT item |
+          input COMA item
           ;
 
 

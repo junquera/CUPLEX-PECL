@@ -1,12 +1,15 @@
-10 INPUT "Cual es tu nombre?: "; U$
-20 PRINT "Hola "; U$
-30 INPUT "Cuantas estrellas quieres?: "; N
-40 LET S$ = ""
-50 FOR I = 1 TO N
-60 LET S$ = S$ + "*"
-70 NEXT I
-80 PRINT S$
-90 INPUT "Quieres mas estrellas? "; A$
-120 IF A$ = "S" THEN GOTO 30
-130 PRINT "Adios !! "; U$
-140 END
+10 PRINT "Cual es tu nombre?: "
+20 INPUT U$
+30 PRINT "Hola "; U$
+40 PRINT "Cuantas estrellas quieres?: "
+50 INPUT N
+60 LET S$ = ""
+70 FOR I = 1 TO N
+80 LET S$ = S$ + "*"
+90 NEXT I
+100 PRINT S$
+110 PRINT "Quieres mas estrellas? "
+120 INPUT A$
+130 IF A$ = "S" THEN GOTO 30
+140 PRINT "Adios !! "; U$
+150 END
