@@ -1,6 +1,8 @@
-.idea
 doc/big_files
-src/.project
+.idea
+out/
 PECL.iml
-bin
-out
+src/BASICLexer.java* 
+src/parser.java 
+src/.project
+src/sym.java 
