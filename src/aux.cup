@@ -1,0 +1,142 @@
+/** ES1.- Variables **/
+var ::= var_num_simple |
+        var_num_suscrita |
+        var_cadena
+        ;
+
+var_num_simple ::= VAR_NUM;
+var_num_suscrita ::= VAR_NUM LPAR literal_num RPAR | VAR_NUM LPAR literal_num COMA literal_num RPAR;
+var_cadena ::= VAR_TXT;
+
+/** ES2.- Expresiones numéricas **/
+
+literal ::= literal_num
+            | STRING
+            ;
+
+literal_num ::= INT
+                | FLOAT;
+
+postfix_expression ::= literal
+                       | var
+                       | LPAR postfix_expression RPAR
+                       ;
+
+pow_expression ::= postfix_expression
+                   | pow_expression POW postfix_expression
+                   ;
+
+multiplicative_expression ::=
+		pow_expression
+	|	multiplicative_expression MULT postfix_expression
+	|	multiplicative_expression DIV postfix_expression
+	;
+
+additive_expression ::=
+		multiplicative_expression
+	|	additive_expression PLUS multiplicative_expression
+	|	additive_expression MINUS multiplicative_expression
+	;
+
+/** ES3.- Funciones suministradas**/
+
+funcion_suministrada ::= ABS LPAR additive_expression RPAR
+                         | ATN LPAR additive_expression RPAR
+                         | COS LPAR additive_expression RPAR
+                         | EXP LPAR additive_expression RPAR
+                         | INT LPAR additive_expression RPAR
+                         | LOG LPAR additive_expression RPAR
+                         | SGN LPAR additive_expression RPAR
+                         | SIN LPAR additive_expression RPAR
+                         | SQR LPAR additive_expression RPAR
+                         | TAN LPAR additive_expression RPAR
+                         | RND
+                         ;
+
+
+/** ES4.- Nuevas funciones **/
+
+funcion_nueva ::= DEF FN VAR_NUM EQU additive_expression |
+                  DEF FN VAR_NUM LPAR VAR_NUM RPAR EQU additive_expression
+                  ;
+
+
+/** ES5.- Asignacion **/
+asignacion ::= LET variable EQU additive_expression ;
+
+/** ES6.- Comparacion **/
+conditional_expression ::=  conditional_expression LT additive_expression |
+                            conditional_expression LE additive_expression |
+                            conditional_expression EQU additive_expression |
+                            conditional_expression GE additive_expression |
+                            conditional_expression GT additive_expression |
+                            conditional_expression NEQ additive_expression |
+                            additive_expression;
+
+/** ES7.- Sentencias de control**/
+
+goto ::= GOTO INT;
+
+// TODO conditional_expression == exp1 comparación exp2
+if_then ::= IF conditional_expression THEN INT;
+
+gosub ::= GOSUB INT ... RETURN;
+
+on_goto ::= ON conditional_expression GOTO |
+            on_goto COMA INT;
+
+stop ::= STOP; // TRATAR COMO GOTO END
+
+/** ES8.- For-To **/
+
+for_to ::= FOR variable = additive_expression TO  additive_expression ... NEXT variable |
+           FOR variable = additive_expression TO  additive_expression STEP additive_expression ... NEXT variable
+           ;
+
+
+/** ES9.- Print **/
+
+print ::= PRINT additive_expression |
+          print COMA additive_expression |
+          print PCOMA additive_expression
+          ;
+
+
+/** ES10.- Input **/
+
+input ::= INPUT variable |
+          input COMA variable
+          ;
+
+/** ES11.- Data**/
+
+data ::= DATA postfix_expression |
+         data COMA postfix_expression;
+
+
+/** ES12.- Read **/
+
+read ::= READ variable |
+         read COMA variable
+         ;
+
+restore ::= RESTORE;
+
+
+/** ES13.- Dim **/
+declaracion_dim ::= LETRA LPAR INT RPAR | LETRA LPAR INT COMA INT RPAR;
+
+dim ::= DIM declaracion_dim
+        | dim COMA declaracion_dim
+        ;
+
+
+/** ES14.- Rem **/
+
+
+
+/** ES15.- Randomize **/
+
+
+
+

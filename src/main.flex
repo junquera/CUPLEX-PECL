@@ -60,8 +60,8 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     "-" { return symbol(sym.SUB); }
 
     "=" { return symbol(sym.EQU); }
-    "(" { return symbol(sym.L_PAR); }
-    ")" { return symbol(sym.R_PAR); }
+    "(" { return symbol(sym.LPAR); }
+    ")" { return symbol(sym.RPAR); }
 
     "," { return symbol(sym.COMA); }
     ";" { return symbol(sym.PCOMA); }
