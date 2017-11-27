@@ -140,9 +140,8 @@ on_goto ::= ON conditional_expression GOTO |
 stop ::= STOP; // TRATAR COMO GOTO END
 
 /** ES8.- For-To **/
-
-for_to ::= FOR var EQU additive_expression TO  additive_expression lineas NEXT var|
-           FOR var EQU additive_expression TO  additive_expression STEP additive_expression lineas NEXT var
+for_to ::= FOR var EQU additive_expression TO  additive_expression lineas INTEGER NEXT var|
+           FOR var EQU additive_expression TO  additive_expression STEP additive_expression lineas INTEGER NEXT var
            ;
 
 
