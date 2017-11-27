@@ -48,6 +48,7 @@ Num_Escalar = {Num_Real}[E]{Num_Entero}
 Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
 
 %state STRING
+%state REM
 
 %%
 
@@ -90,7 +91,7 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     "PRINT" { return symbol(sym.PRINT); }
     "RANDOMIZE" { return symbol(sym.RANDOMIZE); }
     "READ" { return symbol(sym.READ); }
-    "REM" { return symbol(sym.REM); } //   <REM> {Cad_REM} { return symbol(sym.CAD_REM); }
+    "REM" { yybegin(REM); }
     "RESTORE" { return symbol(sym.RESTORE); }
     "RETURN" { return symbol(sym.RETURN); }
     "STEP" { return symbol(sym.STEP); }
@@ -137,4 +138,9 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
 <STRING> {
     \"                    { yybegin(YYINITIAL); return symbol(sym.STRING, string.toString());  }
     {Car_Cadena}+          { string.append( yytext() ); }
+}
+
+<REM> {
+    "\n" { yybegin(YYINITIAL); }
+    {Cad_REM}* {  }
 }

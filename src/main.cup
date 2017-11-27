@@ -107,6 +107,7 @@ funcion_suministrada ::= ABS LPAR additive_expression RPAR
 
 
 /** ES4.- Nuevas funciones **/
+// TODO funcion_nueva - def_funcion_nueva
 
 funcion_nueva ::= DEF FN VAR_NUM EQU additive_expression |
                   DEF FN VAR_NUM LPAR VAR_NUM RPAR EQU additive_expression
