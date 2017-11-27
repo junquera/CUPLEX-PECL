@@ -45,7 +45,6 @@ WhiteSpace = {LineTerminator} | [ \t\f]
 Num_Entero= [+-]?{Digito}+
 Num_Real = {Num_Entero}\.{Digito}+
 Num_Escalar = {Num_Real}[E]{Num_Entero}
-Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
 
 %state STRING
 %state REM
@@ -121,7 +120,7 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     /* EL 5. Constantes */
     \" { string.setLength(0); yybegin(STRING); }
 
-    {Num_Entero} { return symbol(sym.INT, new Integer(yytext())); }
+    {Num_Entero} { return symbol(sym.INTEGER, new Integer(yytext())); }
     {Num_Real}|{Num_Escalar} { return symbol(sym.FLOAT, new Float(yytext())); }
 
     /* EL 6. */

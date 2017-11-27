@@ -30,11 +30,11 @@ non terminal lineas, sentencia;
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
          GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RANDOMIZE,
-         READ, REM, RESTORE, RETURN, STEP, STOP, THEN, TO, ABS, ATN,
+         READ, REM, RESTORE, RETURN, STEP, STOP, THEN, TO, ABS, ATN, INT,
          COS, EXP, LOG, RND, SGN, SIN, SQR, TAN, FN, VAR_NUM, VAR_TXT,
-         LPAR, RPAR, FINAL, CHECK, ERROR, CAD_REM;
+         LPAR, RPAR, ERROR, CAD_REM;
 
-terminal Integer INT;
+terminal Integer INTEGER;
 terminal Float FLOAT;
 terminal String STRING;
 
@@ -66,7 +66,7 @@ literal ::= literal_num
             | STRING
             ;
 
-literal_num ::= INT
+literal_num ::= INTEGER
                 | FLOAT;
 
 postfix_expression ::= literal
