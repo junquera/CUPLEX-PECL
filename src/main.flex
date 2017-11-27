@@ -90,7 +90,7 @@ Constante_Num = {Num_Entero}|{Num_Real}|{Num_Escalar}
     "PRINT" { return symbol(sym.PRINT); }
     "RANDOMIZE" { return symbol(sym.RANDOMIZE); }
     "READ" { return symbol(sym.READ); }
-    "REM" { return symbol(sym.REM); }
+    "REM" { return symbol(sym.REM); } //   <REM> {Cad_REM} { return symbol(sym.CAD_REM); }
     "RESTORE" { return symbol(sym.RESTORE); }
     "RETURN" { return symbol(sym.RETURN); }
     "STEP" { return symbol(sym.STEP); }

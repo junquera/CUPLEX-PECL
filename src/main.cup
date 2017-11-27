@@ -24,6 +24,8 @@ parser code {:
     }
 :};
 
+non terminal var, var_num_simple, var_num_suscrita, var_cadena, literal, literal_num, postfix_expression, pow_expression, multiplicative_expression, additive_expression, funcion_suministrada, funcion_nueva, asignacion, conditional_expression, goto, if_then, gosub, on_goto, stop, for_to, print, input, data, read, restore, declaracion_dim, dim, rem, randomize;
+
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
          GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RANDOMIZE,
@@ -35,146 +37,145 @@ terminal Integer INT;
 terminal Float FLOAT;
 terminal String STRING;
 
-non terminal lineas, sentencia, variable, variable_numerica, subindice, expresion_num,  expresion_txt, num,
-             funcion_suministrada, funcion, asignacion,
-             expresion_condicional, sentencia_control, for, print, item,
-             input, data, read, dim, rem, randomize;
+/** ES1.- Variables **/
+var ::= var_num_simple |
+        var_num_suscrita |
+        var_cadena
+        ;
+
+var_num_simple ::= VAR_NUM;
+var_num_suscrita ::= VAR_NUM LPAR literal_num RPAR | VAR_NUM LPAR literal_num COMA literal_num RPAR;
+var_cadena ::= VAR_TXT;
+
+/** ES2.- Expresiones numéricas **/
+
+literal ::= literal_num
+            | STRING
+            ;
+
+literal_num ::= INT
+                | FLOAT;
+
+postfix_expression ::= literal
+                       | var
+                       | LPAR postfix_expression RPAR
+                       ;
+
+pow_expression ::= postfix_expression
+                   | pow_expression POW postfix_expression
+                   ;
+
+multiplicative_expression ::=
+		pow_expression
+	|	multiplicative_expression MUL postfix_expression
+	|	multiplicative_expression DIV postfix_expression
+	;
+
+additive_expression ::=
+		multiplicative_expression
+	|	additive_expression SUM multiplicative_expression
+	|	additive_expression SUB multiplicative_expression
+	;
+
+/** ES3.- Funciones suministradas**/
+
+funcion_suministrada ::= ABS LPAR additive_expression RPAR
+                         | ATN LPAR additive_expression RPAR
+                         | COS LPAR additive_expression RPAR
+                         | EXP LPAR additive_expression RPAR
+                         | INT LPAR additive_expression RPAR
+                         | LOG LPAR additive_expression RPAR
+                         | SGN LPAR additive_expression RPAR
+                         | SIN LPAR additive_expression RPAR
+                         | SQR LPAR additive_expression RPAR
+                         | TAN LPAR additive_expression RPAR
+                         | RND
+                         ;
 
 
-lineas ::= INT sentencia | INT sentencia lineas;
-/**
-linea ::=   error NUMBER medida PUNTOCOMA {: parser.report_error("revise la sintaxis", null); :} |
-            medida:m1 NUMBER:n medida:m2 PUNTOCOMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :} |
-            expresiones medida:m1 NUMBER:n medida:m2 PUNTOCOMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :};
-*/
+/** ES4.- Nuevas funciones **/
 
-
-sentencia ::= funcion_suministrada |
-          funcion |
-          asignacion |
-          sentencia_control |
-          for | print | input |
-          data | read | dim | rem |
-          randomize ;
-
-/** ES 1. **/
-variable ::=    VAR_TXT
-               ;
-
-variable_numerica ::= VAR_NUM |
-                      VAR_NUM LPAR subindice RPAR
-                      ;
-
-subindice ::= expresion_num |
-              expresion_num COMA expresion_num
-              ;
-
-
-/** ES 2. **/
-expresion_num ::=   num SUM expresion_num |
-                    num SUB expresion_num |
-                    num MUL expresion_num |
-                    num DIV expresion_num |
-                    num POW expresion_num |
-                    INT |
-                    FLOAT |
-                    variable_numerica
-                ;
-
-expresion_txt ::= variable |
-                  STRING |
-                  expresion_txt SUM variable |
-                  expresion_txt SUM STRING
+funcion_nueva ::= DEF FN VAR_NUM EQU additive_expression |
+                  DEF FN VAR_NUM LPAR VAR_NUM RPAR EQU additive_expression
                   ;
 
-/** TODO Ver como priorizar con Libro 2.2.4 Ambigüedad **/
-/** ES 3. **/
-funcion_suministrada ::=
-                ABS LPAR expresion_num RPAR |
-                ATN LPAR expresion_num RPAR |
-                COS LPAR expresion_num RPAR |
-                EXP LPAR expresion_num RPAR |
-                INT LPAR expresion_num RPAR |
-                LOG LPAR expresion_num RPAR |
-                RND LPAR expresion_num RPAR |
-                SGN LPAR expresion_num RPAR |
-                SIN LPAR expresion_num RPAR |
-                SQR LPAR expresion_num RPAR |
-                TAN LPAR expresion_num RPAR
-            ;
 
-/** ES 4. **/
-funcion ::= DEF FN VAR_NUM EQU expresion_num |
-            DEF FN VAR_NUM LPAR VAR_NUM RPAR EQU expresion_num
-            ;
+/** ES5.- Asignacion **/
+asignacion ::= LET var EQU additive_expression ;
 
-/** ES 5. **/
-asignacion ::= LET variable EQU expresion_txt |
-               LET variable_numerica EQU expresion_num
-               ;
+/** ES6.- Comparacion **/
+conditional_expression ::=  conditional_expression LT additive_expression |
+                            conditional_expression LE additive_expression |
+                            conditional_expression EQU additive_expression |
+                            conditional_expression GE additive_expression |
+                            conditional_expression GT additive_expression |
+                            conditional_expression NEQ additive_expression |
+                            additive_expression;
 
+/** ES7.- Sentencias de control**/
 
-/** ES 6. **/
-expresion_condicional ::= expresion_condicional LT expresion_num |
-                          expresion_condicional LE expresion_num |
-                          expresion_condicional EQU expresion_num |
-                          expresion_condicional GE expresion_num |
-                          expresion_condicional GT expresion_num |
-                          expresion_condicional NEQ expresion_num |
-                          expresion_num;
+goto ::= GOTO INT;
 
-/** ES 7. **/
-sentencia_control ::= GOTO INT |
-                      IF expresion_condicional THEN INT |
-                      GOSUB INT lineas RETURN /** TODO Hacer esta **/ |
-                      ON expresion_condicional GOTO subindice |
-                      STOP |
-                      END
-                      ;
+// TODO conditional_expression == exp1 comparación exp2
+if_then ::= IF conditional_expression THEN INT;
 
-/** ES 8. **/
-for ::=  FOR VAR_NUM EQU expresion_num TO expresion_num STEP expresion_num
-            lineas
-         NEXT VAR_NUM |
-         FOR VAR_NUM EQU expresion_num TO expresion_num
-            lineas
-         NEXT VAR_NUM
-         ;
+gosub ::= GOSUB INT ... RETURN;
 
-/** ES 9. **/
-print ::= PRINT item |
-          print COMA item |
-          print PCOMA item
-          ;
+on_goto ::= ON conditional_expression GOTO |
+            on_goto COMA INT;
 
-item ::= variable | expresion_num | STRING;
+stop ::= STOP; // TRATAR COMO GOTO END
 
-/** ES 10. **/
-input ::= INPUT item |
-          input COMA item
-          ;
+/** ES8.- For-To **/
 
-
-/** ES 11. **/
-data ::= data COMA item|
-         DATA item
-         ;
-
-/** ES 12. **/
-read ::=    read COMA variable |
-            READ variable
+for_to ::= FOR variable EQU additive_expression TO  additive_expression ... NEXT variable |
+           FOR variable EQU additive_expression TO  additive_expression STEP additive_expression ... NEXT variable
            ;
 
 
-/** ES 13. **/
-dim ::= DIM VAR_NUM LPAR subindice RPAR |
-        dim COMA VAR_NUM LPAR subindice RPAR
+/** ES9.- Print **/
+
+print ::= PRINT additive_expression |
+          print COMA additive_expression |
+          print PCOMA additive_expression
+          ;
+
+
+/** ES10.- Input **/
+
+input ::= INPUT variable |
+          input COMA variable
+          ;
+
+/** ES11.- Data**/
+
+data ::= DATA postfix_expression |
+         data COMA postfix_expression;
+
+
+/** ES12.- Read **/
+
+read ::= READ variable |
+         read COMA variable
+         ;
+
+restore ::= RESTORE;
+
+
+/** ES13.- Dim **/
+declaracion_dim ::= LETRA LPAR INT RPAR | LETRA LPAR INT COMA INT RPAR;
+
+dim ::= DIM declaracion_dim
+        | dim COMA declaracion_dim
         ;
 
 
-/** ES 14. **/
-rem ::= REM FINAL CHECK;
+/** ES14.- Rem **/
 
+rem ::= REM CAD_REM;
 
-/** ES 15. **/
+/** ES15.- Randomize **/
+
 randomize ::= RANDOMIZE;
+
+
