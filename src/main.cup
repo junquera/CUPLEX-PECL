@@ -25,40 +25,37 @@ parser code {:
 :};
 
 non terminal var, var_num_simple, var_num_suscrita, var_cadena, literal, literal_num, postfix_expression, pow_expression, multiplicative_expression, additive_expression, funcion_suministrada, funcion_nueva, asignacion, conditional_expression, goto, if_then, gosub, on_goto, stop, for_to, print, input, data, read, restore, declaracion_dim, dim, rem, randomize;
-non terminal lineas, sentencia;
+non terminal programa, lineas, sentencia;
 
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
          GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RANDOMIZE,
          READ, REM, RESTORE, RETURN, STEP, STOP, THEN, TO, ABS, ATN, INT,
          COS, EXP, LOG, RND, SGN, SIN, SQR, TAN, FN, VAR_NUM, VAR_TXT,
-         LPAR, RPAR, ERROR, CAD_REM;
+         LPAR, RPAR, ERROR;
 
 terminal Integer INTEGER;
 terminal Float FLOAT;
 terminal String STRING;
 
+programa ::= lineas INTEGER END;
 // TODO \n
-lineas ::= sentencia | sentencia lineas;
-sentencia ::=  asignacion |goto
-                      if_then|
-                      gosub|
-                      on_goto|
-                      stop|
-          for_to | print | input |
-          data | read | dim | rem |
-          randomize ;
+lineas ::= INTEGER sentencia | lineas INTEGER sentencia;
+
+sentencia ::=  asignacion | goto | if_then | gosub |
+               on_goto| stop| for_to | print | input |
+               data | read | dim | rem | randomize ;
 
 
 /** ES1.- Variables **/
 var ::= var_num_simple |
-        var_num_suscrita |
-        var_cadena
+        var_cadena |
+        var_num_suscrita
         ;
 
 var_num_simple ::= VAR_NUM;
 var_num_suscrita ::= VAR_NUM LPAR literal_num RPAR | VAR_NUM LPAR literal_num COMA literal_num RPAR;
-var_cadena ::= VAR_TXT;
+var_cadena ::= VAR_TXT:v ;
 
 /** ES2.- Expresiones numéricas **/
 
@@ -66,8 +63,7 @@ literal ::= literal_num
             | STRING
             ;
 
-literal_num ::= INTEGER
-                | FLOAT;
+literal_num ::= INTEGER | FLOAT;
 
 postfix_expression ::= literal
                        | var
@@ -115,44 +111,46 @@ funcion_nueva ::= DEF FN VAR_NUM EQU additive_expression |
 
 
 /** ES5.- Asignacion **/
+
 asignacion ::= LET var EQU additive_expression ;
 
 /** ES6.- Comparacion **/
+
 conditional_expression ::=  conditional_expression LT additive_expression |
                             conditional_expression LE additive_expression |
-                            conditional_expression EQU additive_expression |
                             conditional_expression GE additive_expression |
                             conditional_expression GT additive_expression |
+                            conditional_expression EQU additive_expression |
                             conditional_expression NEQ additive_expression |
-                            additive_expression;
+                            additive_expression
+                            ;
 
 /** ES7.- Sentencias de control**/
 
 goto ::= GOTO INT;
 
 // TODO conditional_expression == exp1 comparación exp2
-if_then ::= IF conditional_expression THEN INT;
+if_then ::= IF conditional_expression THEN INTEGER ;
 
-gosub ::= GOSUB INT lineas RETURN;
+gosub ::= GOSUB INTEGER lineas RETURN;
 
 on_goto ::= ON conditional_expression GOTO |
-            on_goto COMA INT;
+            on_goto COMA INTEGER;
 
 stop ::= STOP; // TRATAR COMO GOTO END
 
 /** ES8.- For-To **/
 
-for_to ::= FOR var EQU additive_expression TO  additive_expression lineas |
-           FOR var EQU additive_expression TO  additive_expression STEP additive_expression lineas |
-           for_to NEXT var
+for_to ::= FOR var EQU additive_expression TO  additive_expression lineas NEXT var|
+           FOR var EQU additive_expression TO  additive_expression STEP additive_expression lineas NEXT var
            ;
 
 
-/** ES9.- Print **/
+/** ES9.- PrINTEGER */
 
 print ::= PRINT additive_expression |
-          print COMA additive_expression |
-          print PCOMA additive_expression
+          print PCOMA additive_expression |
+          print COMA additive_expression
           ;
 
 
@@ -178,7 +176,7 @@ restore ::= RESTORE;
 
 
 /** ES13.- Dim **/
-declaracion_dim ::= INT LPAR INT RPAR | INT LPAR INT COMA INT RPAR;
+declaracion_dim ::= INTEGER LPAR INTEGER RPAR | INTEGER LPAR INTEGER COMA INTEGER RPAR;
 
 dim ::= DIM declaracion_dim
         | dim COMA declaracion_dim
@@ -187,7 +185,7 @@ dim ::= DIM declaracion_dim
 
 /** ES14.- Rem **/
 
-rem ::= REM CAD_REM;
+rem ::= REM;
 
 /** ES15.- Randomize **/
 

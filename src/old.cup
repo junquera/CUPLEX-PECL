@@ -41,7 +41,7 @@ non terminal lineas, sentencia, variable, variable_numerica, subindice, expresio
              input, data, read, dim, rem, randomize;
 
 
-lineas ::= INT sentencia | INT sentencia lineas;
+lineas ::= INTEGER sentencia | INTEGER sentencia lineas;
 /**
 linea ::=   error NUMBER medida PUNTOCOMA {: parser.report_error("revise la sintaxis", null); :} |
             medida:m1 NUMBER:n medida:m2 PUNTOCOMA {: parser.conversion(m1.toString(), m2.toString(), n.intValue()); System.out.println(m2); :} |
@@ -53,7 +53,7 @@ sentencia ::= funcion_suministrada |
           funcion |
           asignacion |
           sentencia_control |
-          for | print | input |
+          for | prINTEGER | input |
           data | read | dim | rem |
           randomize ;
 
@@ -76,7 +76,7 @@ expresion_num ::=   num SUM expresion_num |
                     num MUL expresion_num |
                     num DIV expresion_num |
                     num POW expresion_num |
-                    INT |
+                    INTEGER |
                     FLOAT |
                     variable_numerica
                 ;
@@ -124,9 +124,9 @@ expresion_condicional ::= expresion_condicional LT expresion_num |
                           expresion_num;
 
 /** ES 7. **/
-sentencia_control ::= GOTO INT |
-                      IF expresion_condicional THEN INT |
-                      GOSUB INT lineas RETURN /** TODO Hacer esta **/ |
+sentencia_control ::= GOTO INTEGER |
+                      IF expresion_condicional THEN INTEGER |
+                      GOSUB INTEGER lineas RETURN /** TODO Hacer esta **/ |
                       ON expresion_condicional GOTO subindice |
                       STOP |
                       END
@@ -142,9 +142,9 @@ for ::=  FOR VAR_NUM EQU expresion_num TO expresion_num STEP expresion_num
          ;
 
 /** ES 9. **/
-print ::= PRINT item |
-          print COMA item |
-          print PCOMA item
+prINTEGER ::= PRINTEGER item |
+          prINTEGER COMA item |
+          prINTEGER PCOMA item
           ;
 
 item ::= variable | expresion_num | STRING;

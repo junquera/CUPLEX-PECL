@@ -113,7 +113,7 @@ Num_Escalar = {Num_Real}[E]{Num_Entero}
 
     /* EL 4. Identificadores */
     {Letra} { return symbol(sym.VAR_NUM, new String(yytext())); }
-    {Letra}"$" { return symbol(sym.VAR_TXT, new String(yytext())); }
+    {Letra}"\$" { return symbol(sym.VAR_TXT, new String(yytext())); }
 
     "FN" { return symbol(sym.FN, new String(yytext())); }
 
@@ -124,7 +124,7 @@ Num_Escalar = {Num_Real}[E]{Num_Entero}
     {Num_Real}|{Num_Escalar} { return symbol(sym.FLOAT, new Float(yytext())); }
 
     /* EL 6. */
-    {WhiteSpace}+ {}
+    {WhiteSpace} {}
 
     {EOF} { return symbol(sym.EOF); }
 
@@ -140,6 +140,5 @@ Num_Escalar = {Num_Real}[E]{Num_Entero}
 }
 
 <REM> {
-    "\n" { yybegin(YYINITIAL); }
-    {Cad_REM}* {  }
+    {Cad_REM} { yybegin(YYINITIAL); return symbol(sym.REM); }
 }
