@@ -21,6 +21,7 @@ public class Main {
                 parse_tree = parser_obj.debug_parse();
             else
                 parse_tree = parser_obj.parse();
+            System.out.println(parse_tree);
             System.out.println("Entrada correcta");
         } catch (Exception e){
             System.out.println("Horror");
