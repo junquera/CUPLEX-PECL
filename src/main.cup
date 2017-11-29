@@ -39,7 +39,7 @@ terminal Float FLOAT;
 terminal String STRING;
 
 programa ::= lineas INTEGER END;
-// TODO \n
+// TODO \n?
 lineas ::= INTEGER sentencia | lineas INTEGER sentencia;
 
 sentencia ::=  asignacion | goto | if_then | gosub |
@@ -130,7 +130,9 @@ conditional_expression ::=  conditional_expression LT additive_expression |
 goto ::= GOTO INT;
 
 // TODO conditional_expression == exp1 comparación exp2
-if_then ::= IF conditional_expression THEN INTEGER ;
+if_then ::= IF conditional_expression THEN INTEGER | IF error:e {:
+    parser.report_error(""+eleft, e);
+:};
 
 gosub ::= GOSUB INTEGER lineas RETURN;
 

@@ -11,5 +11,6 @@
 110 PRINT "Quieres mas estrellas? "
 120 INPUT A$
 130 IF A$ = "S" THEN 30
+140 IF asdf THEN OK
 140 PRINT "Adios !! "; U$
 150 END

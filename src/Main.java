@@ -8,7 +8,7 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 
 public class Main {
-    static boolean do_debug_parse = true;
+    static boolean do_debug_parse = false;
 
     public static void main(String[] args) throws java.io.IOException {
 

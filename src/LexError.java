@@ -33,4 +33,18 @@ public class LexError {
   public void setLine(int line){
     this.line = line;
   }
+
+  public String toString(){
+    StringBuffer sb = new StringBuffer();
+
+    sb.append(this.text);
+
+    for(int i = 0; i < column; i++){
+      sb.append(" ");
+    }
+
+    sb.append("^");
+
+    return sb.toString();
+  }
 }
