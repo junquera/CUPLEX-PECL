@@ -104,13 +104,14 @@ funcion_suministrada ::= ABS LPAR funcion_suministrada RPAR
 
 
 /** ES4.- Nuevas funciones **/
-// TODO funcion_nueva - def_funcion_nueva
 
 def_funcion_nueva ::= DEF FN VAR_NUM EQU additive_expression |
                   DEF FN VAR_NUM LPAR VAR_NUM RPAR EQU additive_expression
                   ;
 
 funcion ::= FN VAR_NUM | FN VAR_NUM LPAR funcion RPAR | funcion_suministrada;
+
+// TODO Cómo hacer funcion + X ?
 
 /** ES5.- Asignacion **/
 

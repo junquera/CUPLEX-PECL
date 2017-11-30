@@ -6,14 +6,25 @@ import java_cup.runtime.Symbol;
 
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 
 public class Main {
     static boolean do_debug_parse = false;
 
-    public static void main(String[] args) throws java.io.IOException {
+    public static void main(String[] args) throws Exception {
+
+        String program ="src/programa1.bas";
+        if(args.length > 1)
+            program = args[1];
+
+        // RS 1.- El analizador solamente ha de aceptar ficheros con extensión “.bas”.
+        if(!program.matches("^.+\\.bas"))
+            throw new Exception("La extensión del archivo tiene que ser .bas");
 
         // parser parser_obj = new parser(new BASICLexer(new InputStreamReader(System.in)));
-        parser parser_obj = new parser(new BASICLexer(new InputStreamReader(new FileInputStream("src/programa1.bas"))));
+        parser parser_obj = new parser(new BASICLexer(new InputStreamReader(new FileInputStream(program))));
         Symbol parse_tree = null;
         try {
 
