@@ -24,7 +24,7 @@ parser code {:
     }
 :};
 
-non terminal var, var_num_simple, var_num_suscrita, var_cadena, literal, literal_num, postfix_expression, pow_expression, multiplicative_expression, additive_expression, funcion_suministrada, funcion_nueva, asignacion, conditional_expression, goto, if_then, gosub, on_goto, stop, for_to, print, input, data, read, restore, declaracion_dim, dim, rem, randomize;
+non terminal var, var_num_simple, var_num_suscrita, var_cadena, literal, literal_num, basic_expression, pow_expression, multiplicative_expression, additive_expression, funcion_suministrada, funcion_nueva, asignacion, conditional_expression, goto, if_then, gosub, on_goto, stop, for_to, print, input, data, read, restore, declaracion_dim, dim, rem, randomize;
 non terminal programa, lineas, sentencia;
 
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
@@ -65,19 +65,19 @@ literal ::= literal_num
 
 literal_num ::= INTEGER | FLOAT;
 
-postfix_expression ::= literal
+basic_expression ::= literal
                        | var
-                       | LPAR postfix_expression RPAR
+                       | LPAR basic_expression RPAR
                        ;
 
-pow_expression ::= postfix_expression
-                   | pow_expression POW postfix_expression
+pow_expression ::= basic_expression
+                   | pow_expression POW basic_expression
                    ;
 
 multiplicative_expression ::=
 		pow_expression
-	|	multiplicative_expression MUL postfix_expression
-	|	multiplicative_expression DIV postfix_expression
+	|	multiplicative_expression MUL basic_expression
+	|	multiplicative_expression DIV basic_expression
 	;
 
 additive_expression ::=
@@ -88,17 +88,18 @@ additive_expression ::=
 
 /** ES3.- Funciones suministradas**/
 
-funcion_suministrada ::= ABS LPAR additive_expression RPAR
-                         | ATN LPAR additive_expression RPAR
-                         | COS LPAR additive_expression RPAR
-                         | EXP LPAR additive_expression RPAR
-                         | INT LPAR additive_expression RPAR
-                         | LOG LPAR additive_expression RPAR
-                         | SGN LPAR additive_expression RPAR
-                         | SIN LPAR additive_expression RPAR
-                         | SQR LPAR additive_expression RPAR
-                         | TAN LPAR additive_expression RPAR
+funcion_suministrada ::= ABS LPAR funcion_suministrada RPAR
+                         | ATN LPAR funcion_suministrada RPAR
+                         | COS LPAR funcion_suministrada RPAR
+                         | EXP LPAR funcion_suministrada RPAR
+                         | INT LPAR funcion_suministrada RPAR
+                         | LOG LPAR funcion_suministrada RPAR
+                         | SGN LPAR funcion_suministrada RPAR
+                         | SIN LPAR funcion_suministrada RPAR
+                         | SQR LPAR funcion_suministrada RPAR
+                         | TAN LPAR funcion_suministrada RPAR
                          | RND
+                         | additive_expression
                          ;
 
 
@@ -131,7 +132,7 @@ goto ::= GOTO INT;
 
 // TODO conditional_expression == exp1 comparación exp2
 if_then ::= IF conditional_expression THEN INTEGER | IF error:e {:
-    parser.report_error(""+eleft, e);
+    parser.report_error("" + eleft, e);
 :};
 
 gosub ::= GOSUB INTEGER lineas RETURN;
@@ -163,8 +164,8 @@ input ::= INPUT var |
 
 /** ES11.- Data**/
 
-data ::= DATA postfix_expression |
-         data COMA postfix_expression;
+data ::= DATA basic_expression |
+         data COMA basic_expression;
 
 
 /** ES12.- Read **/
