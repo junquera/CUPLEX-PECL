@@ -24,7 +24,7 @@ parser code {:
     }
 :};
 
-non terminal var, var_num_simple, var_num_suscrita, var_cadena, literal, literal_num, basic_expression, pow_expression, multiplicative_expression, additive_expression, funcion_suministrada, funcion_nueva, asignacion, conditional_expression, goto, if_then, gosub, on_goto, stop, for_to, print, input, data, read, restore, declaracion_dim, dim, rem, randomize;
+non terminal var, var_num_simple, var_num_suscrita, var_cadena, literal, literal_num, basic_expression, pow_expression, multiplicative_expression, additive_expression, funcion_suministrada, def_funcion_nueva, funcion, asignacion, conditional_expression, goto, if_then, gosub, on_goto, stop, for_to, print, input, data, read, restore, declaracion_dim, dim, rem, randomize;
 non terminal programa, lineas, sentencia;
 
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
@@ -43,7 +43,7 @@ programa ::= lineas INTEGER END;
 lineas ::= INTEGER sentencia | lineas INTEGER sentencia;
 
 sentencia ::=  asignacion | goto | if_then | gosub |
-               on_goto| stop| for_to | print | input |
+               on_goto| stop| for_to | print | input | def_funcion_nueva |
                data | read | dim | rem | randomize ;
 
 
@@ -106,24 +106,25 @@ funcion_suministrada ::= ABS LPAR funcion_suministrada RPAR
 /** ES4.- Nuevas funciones **/
 // TODO funcion_nueva - def_funcion_nueva
 
-funcion_nueva ::= DEF FN VAR_NUM EQU additive_expression |
+def_funcion_nueva ::= DEF FN VAR_NUM EQU additive_expression |
                   DEF FN VAR_NUM LPAR VAR_NUM RPAR EQU additive_expression
                   ;
 
+funcion ::= FN VAR_NUM | FN VAR_NUM LPAR funcion RPAR | funcion_suministrada;
 
 /** ES5.- Asignacion **/
 
-asignacion ::= LET var EQU additive_expression ;
+asignacion ::= LET var EQU funcion ;
 
 /** ES6.- Comparacion **/
 
-conditional_expression ::=  conditional_expression LT additive_expression |
-                            conditional_expression LE additive_expression |
-                            conditional_expression GE additive_expression |
-                            conditional_expression GT additive_expression |
-                            conditional_expression EQU additive_expression |
-                            conditional_expression NEQ additive_expression |
-                            additive_expression
+conditional_expression ::=  conditional_expression LT funcion |
+                            conditional_expression LE funcion |
+                            conditional_expression GE funcion |
+                            conditional_expression GT funcion |
+                            conditional_expression EQU funcion |
+                            conditional_expression NEQ funcion |
+                            funcion
                             ;
 
 /** ES7.- Sentencias de control**/
@@ -143,16 +144,16 @@ on_goto ::= ON conditional_expression GOTO |
 stop ::= STOP; // TRATAR COMO GOTO END
 
 /** ES8.- For-To **/
-for_to ::= FOR var EQU additive_expression TO  additive_expression lineas INTEGER NEXT var|
-           FOR var EQU additive_expression TO  additive_expression STEP additive_expression lineas INTEGER NEXT var
+for_to ::= FOR var EQU funcion TO  funcion lineas INTEGER NEXT var|
+           FOR var EQU funcion TO  funcion STEP funcion lineas INTEGER NEXT var
            ;
 
 
 /** ES9.- PrINTEGER */
 
-print ::= PRINT additive_expression |
-          print PCOMA additive_expression |
-          print COMA additive_expression
+print ::= PRINT funcion |
+          print PCOMA funcion |
+          print COMA funcion
           ;
 
 

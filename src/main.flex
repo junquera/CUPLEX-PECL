@@ -140,5 +140,6 @@ Num_Escalar = {Num_Real}[E]{Num_Entero}
 }
 
 <REM> {
-    {Cad_REM} { yybegin(YYINITIAL); return symbol(sym.REM); }
+    [\n] {yybegin(YYINITIAL); return symbol(sym.REM); }
+    {Cad_REM} { }
 }
