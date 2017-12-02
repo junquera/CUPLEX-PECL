@@ -15,7 +15,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
-        String program ="src/programa1.bas";
+        String program ="src/programa3.bas";
         if(args.length > 1)
             program = args[1];
 

@@ -4,7 +4,7 @@ parser code {:
     public void report_error(String message, Object info) {
         StringBuffer m = new StringBuffer("Error");
         System.out.println("Mensaje: " + message);
-        System.out.println("info: " + info.toString());
+        // System.out.println("info: " + info.toString());
         if(info instanceof java_cup.runtime.Symbol){
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
 
@@ -19,6 +19,7 @@ parser code {:
     }
 
     public void report_fatal_error(String message, Object info) {
+        System.out.println("FATAL ERROR");
         report_error(message, info);
         System.exit(1);
     }
@@ -133,9 +134,13 @@ conditional_expression ::=  conditional_expression LT funcion |
 goto ::= GOTO INT;
 
 // TODO conditional_expression == exp1 comparación exp2
-if_then ::= IF conditional_expression THEN INTEGER | IF error:e {:
-    parser.report_error("" + eleft, e);
-:};
+if_then ::= IF conditional_expression THEN INTEGER |
+            IF conditional_expression THEN error:e {:
+                parser.report_error("Error en if: IF c THEN (numero de linea)", e);
+            :} |
+            IF error:e {:
+                parser.report_error("Error en if: ", e);
+            :};
 
 gosub ::= GOSUB INTEGER lineas RETURN;
 
@@ -167,12 +172,18 @@ input ::= INPUT var |
 /** ES11.- Data**/
 
 data ::= DATA basic_expression |
+         DATA error:e {:
+            parser.report_error("Error en data: ", e);
+         :} |
          data COMA basic_expression;
 
 
 /** ES12.- Read **/
 
 read ::= READ var |
+         READ error:e {:
+             parser.report_error("Error en read: ", e);
+         :} |
          read COMA var
          ;
 
@@ -180,7 +191,12 @@ restore ::= RESTORE;
 
 
 /** ES13.- Dim **/
-declaracion_dim ::= INTEGER LPAR INTEGER RPAR | INTEGER LPAR INTEGER COMA INTEGER RPAR;
+// TODO Revisar esto
+declaracion_dim ::= VAR_NUM LPAR INTEGER RPAR |
+                    VAR_NUM LPAR INTEGER COMA INTEGER RPAR |
+                    VAR_NUM LPAR error:e RPAR {:
+                        parser.report_error("Hay que introducir un entero; o dos separados por comas (','): ", e);
+                    :};
 
 dim ::= DIM declaracion_dim
         | dim COMA declaracion_dim
