@@ -24,6 +24,13 @@ Las especificaciones léxicas se encuentran comentadas en el código en el códi
 
 ## Analizador sintáctico
 
+### Especificaciones sintácticas
+
+
+### Requisitons sintácticos
+
 ### Errores
 
-- [ ] Hay un error en los bucles `for`. No sé cómo indicar la línea del `NEXT` sin incluir el entero del principio.
+- [x] Hay un error en los bucles `for`. No sé cómo indicar la línea del `NEXT` sin incluir el entero del principio.
+
+- [ ] Ver si hay una forma más limpia (por contexto a lo mejor) de arreglar el problema del `NEXT` en el `FOR`.
