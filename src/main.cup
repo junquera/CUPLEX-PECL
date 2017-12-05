@@ -1,6 +1,12 @@
 import java_cup.runtime.*;
+import java.util.HashMap;
+import semantic.*;
 
 parser code {:
+
+    public SymbolTable tabla = new SymbolTable();
+
+
     public void report_error(String message, Object info) {
         StringBuffer m = new StringBuffer("Error");
         System.out.println("Mensaje: " + message);
@@ -8,10 +14,10 @@ parser code {:
         if(info instanceof java_cup.runtime.Symbol){
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
 
-            if(s.left >= 0){
-                m.append(" en la linea " + (s.left + 1));
-                if (s.right >= 0)
-                    m.append(", y columna " + (s.right + 1));
+            if(s.left > 0){
+                m.append(" en la linea " + (s.left));
+                if (s.right > 0)
+                    m.append(", y columna " + (s.right));
             }
         }
         m.append(" : " + message);
@@ -25,8 +31,22 @@ parser code {:
     }
 :};
 
-non terminal var, var_num_simple, var_num_suscrita, var_cadena, literal, literal_num, basic_expression, pow_expression, multiplicative_expression, additive_expression, funcion_suministrada, def_funcion_nueva, funcion, asignacion, conditional_expression, goto, if_then, gosub, on_goto, stop, for_to, print, input, data, read, restore, declaracion_dim, dim, rem, randomize;
-non terminal programa, lineas, sentencia;
+non terminal Variable var;
+non terminal VarNumSimple var_num_simple;
+non terminal VarNumSuscrita var_num_suscrita;
+non terminal VarCadena var_cadena;
+
+non terminal literal, literal_num,
+             basic_expression, pow_expression, multiplicative_expression, additive_expression, conditional_expression,
+             declaracion_dim;
+
+non terminal Funcion funcion_suministrada, funcion,
+
+
+non terminal Programa programa;
+non terminal Linea[] lineas;
+non terminal Linea linea;
+non terminal Sentencia sentencia, asignacion, goto, if_then, gosub, on_goto, stop, for_to, print, input, def_funcion_nueva, data, read, dim, rem, restore, randomize;
 
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
@@ -39,9 +59,14 @@ terminal Integer INTEGER;
 terminal Float FLOAT;
 terminal String STRING;
 
+// TODO Hay que ver si esto se puede poner (segun PECL)
+start with programa;
+
 programa ::= lineas INTEGER END;
 // TODO \n?
-lineas ::= INTEGER sentencia | lineas INTEGER sentencia;
+lineas ::= linea | lineas linea;
+
+linea ::= INTEGER sentencia;
 
 sentencia ::=  asignacion | goto | if_then | gosub |
                on_goto| stop| for_to | print | input | def_funcion_nueva |
@@ -49,58 +74,89 @@ sentencia ::=  asignacion | goto | if_then | gosub |
 
 
 /** ES1.- Variables **/
-var ::= var_num_simple |
-        var_cadena |
-        var_num_suscrita
-        ;
+var ::= var_num_simple:v {:
+            RESULT = v;
+        :} |
+        var_cadena:v {:
+          RESULT = v;
+        :} |
+        var_num_suscrita:v {:
+            RESULT = v;
+        :};
 
-var_num_simple ::= VAR_NUM;
-var_num_suscrita ::= VAR_NUM LPAR literal_num RPAR | VAR_NUM LPAR literal_num COMA literal_num RPAR;
-var_cadena ::= VAR_TXT:v ;
+var_num_simple ::=  VAR_NUM:v {:
+                      RESULT = new VarNumSimple((String) v, null);
+                    :};
+
+var_num_suscrita ::= VAR_NUM LPAR literal_num RPAR:v {:
+                        RESULT = new VarNumSuscrita((String) v, null);
+                     :} |
+                     VAR_NUM LPAR literal_num COMA literal_num RPAR:v {:
+                        RESULT = new VarNumSuscrita2((String) v, null);
+                    :};
+
+var_cadena ::=  VAR_TXT:v {:
+                  RESULT = new VarCadena((String) v, null);
+                :};
 
 /** ES2.- Expresiones numéricas **/
+literal ::= literal_num:l {:
+                RESULT = l;
+            :} |
+            STRING:s {:
+                RESULT = s;
+            :};
 
-literal ::= literal_num
-            | STRING
-            ;
+literal_num ::= INTEGER:i {:
+                    RESULT = new Integer(i);
+                :} |
+                FLOAT:f {:
+                    RESULT = new Float(f);
+                :};
 
-literal_num ::= INTEGER | FLOAT;
+basic_expression ::=   literal:l {:
+                            RESULT = l;
+                        :} |
+                        var:v {:
+                            // TODO Valor de tabla de simbolos
+                            RESULT = parser.tabla.get(v.getName());
+                       :} |
+                       LPAR basic_expression:b RPAR {:
+                            RESULT = b;
+                       :};
 
-basic_expression ::= literal
-                       | var
-                       | LPAR basic_expression RPAR
-                       ;
-
-pow_expression ::= basic_expression
-                   | pow_expression POW basic_expression
+pow_expression ::= basic_expression:b {:
+                        RESULT = b;
+                   :} |
+                   pow_expression:p POW:s basic_expression:b {: RESULT =  Math.pow(p, b); :}
                    ;
 
 multiplicative_expression ::=
-		pow_expression
-	|	multiplicative_expression MUL basic_expression
-	|	multiplicative_expression DIV basic_expression
+		pow_expression:p {: RESULT =  :}
+	|	multiplicative_expression:m MUL basic_expression:b {: RESULT = m*b;  :}
+	|	multiplicative_expression:m DIV basic_expression:b {: RESULT = m/b :}
 	;
 
 additive_expression ::=
-		multiplicative_expression
-	|	additive_expression SUM multiplicative_expression
-	|	additive_expression SUB multiplicative_expression
+		multiplicative_expression:m {: RESULT = m; :}
+	|	additive_expression:a SUM multiplicative_expression:m {: RESULT = a + m; :}
+	|	additive_expression:a SUB multiplicative_expression:m {: RESULT = a - m :}
 	;
 
 /** ES3.- Funciones suministradas**/
 
-funcion_suministrada ::= ABS LPAR funcion_suministrada RPAR
-                         | ATN LPAR funcion_suministrada RPAR
-                         | COS LPAR funcion_suministrada RPAR
-                         | EXP LPAR funcion_suministrada RPAR
-                         | INT LPAR funcion_suministrada RPAR
-                         | LOG LPAR funcion_suministrada RPAR
-                         | SGN LPAR funcion_suministrada RPAR
-                         | SIN LPAR funcion_suministrada RPAR
-                         | SQR LPAR funcion_suministrada RPAR
-                         | TAN LPAR funcion_suministrada RPAR
+funcion_suministrada ::= ABS LPAR funcion_suministrada:f RPAR {: RESULT = f;  :}
+                         | ATN LPAR funcion_suministrada:f RPAR {: RESULT = f; :}
+                         | COS LPAR funcion_suministrada:f RPAR {: RESULT = f; :}
+                         | EXP LPAR funcion_suministrada:f RPAR {: RESULT = f; :}
+                         | INT LPAR funcion_suministrada:f RPAR {: RESULT = f; :}
+                         | LOG LPAR funcion_suministrada:f RPAR {: RESULT = f; :}
+                         | SGN LPAR funcion_suministrada:f RPAR {: RESULT = f; :}
+                         | SIN LPAR funcion_suministrada:f RPAR {: RESULT = f; :}
+                         | SQR LPAR funcion_suministrada:f RPAR {: RESULT = f; :}
+                         | TAN LPAR funcion_suministrada:f RPAR {: RESULT = f; :}
                          | RND
-                         | additive_expression
+                         | additive_expression:a {: RESULT = a; :}
                          ;
 
 
@@ -116,7 +172,29 @@ funcion ::= FN VAR_NUM | FN VAR_NUM LPAR funcion RPAR | funcion_suministrada;
 
 /** ES5.- Asignacion **/
 
-asignacion ::= LET var EQU funcion ;
+asignacion ::= LET var:v EQU funcion:f {:
+
+:};
+//
+//    EXAMPLE OF "ESm 2-3.-"
+//
+//    switch (((Symbol) v).sym){
+//        case sym.VAR_TXT:
+//            if(((Symbol) f).sym != sym.STRING){
+//                System.out.println(((Symbol) f).sym  + " " + ((Symbol) v).sym);
+//                throw new Exception();
+//            }
+//            break;
+//        case sym.VAR_NUM:
+//            int aux = ((Symbol) f).sym;
+//            if(aux != sym.INTEGER && aux != sym.FLOAT){
+//                System.out.println(aux + " " + ((Symbol) v).sym);
+//                throw new Exception();
+//            }
+//            break;
+//        default:
+//            throw new Exception();
+//    }
 
 /** ES6.- Comparacion **/
 
