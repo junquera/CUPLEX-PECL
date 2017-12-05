@@ -1,5 +1,3 @@
-import semantic.Variable;
-
 import java.util.HashMap;
 
 /**
@@ -7,21 +5,21 @@ import java.util.HashMap;
  */
 public class SymbolTable {
 
-    private HashMap<String, Variable> map;
+    private HashMap<String, BASICSymbol> map;
 
     public SymbolTable(){
         this.map = new HashMap<>();
     }
 
-    public void add(String name, Variable v){
+    public void add(String name, BASICSymbol v){
         this.map.put(name, v);
     }
 
-    public Variable get(String name){
+    public BASICSymbol get(String name){
         return this.map.get(name);
     }
 
-    public void update(String name, Variable v){
+    public void update(String name, BASICSymbol v){
         this.map.put(name, v);
     }
 

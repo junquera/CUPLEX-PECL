@@ -1,6 +1,12 @@
 import java_cup.runtime.*;
+import java.util.HashMap;
+import semantic.*;
 
 parser code {:
+
+    public SymbolTable tabla = new SymbolTable();
+
+
     public void report_error(String message, Object info) {
         StringBuffer m = new StringBuffer("Error");
         System.out.println("Mensaje: " + message);
@@ -8,10 +14,10 @@ parser code {:
         if(info instanceof java_cup.runtime.Symbol){
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
 
-            if(s.left >= 0){
-                m.append(" en la linea " + (s.left + 1));
-                if (s.right >= 0)
-                    m.append(", y columna " + (s.right + 1));
+            if(s.left > 0){
+                m.append(" en la linea " + (s.left));
+                if (s.right > 0)
+                    m.append(", y columna " + (s.right));
             }
         }
         m.append(" : " + message);
@@ -25,8 +31,19 @@ parser code {:
     }
 :};
 
-non terminal var, var_num_simple, var_num_suscrita, var_cadena, literal, literal_num, basic_expression, pow_expression, multiplicative_expression, additive_expression, funcion_suministrada, def_funcion_nueva, funcion, asignacion, conditional_expression, goto, if_then, gosub, on_goto, stop, for_to, print, input, data, read, restore, declaracion_dim, dim, rem, randomize;
-non terminal programa, lineas, sentencia;
+non terminal var, var_num_simple, var_num_suscrita, var_cadena;
+
+non terminal literal, literal_num,
+             basic_expression, pow_expression, multiplicative_expression, additive_expression, conditional_expression,
+             declaracion_dim;
+
+non terminal Funcion funcion_suministrada, funcion;
+
+
+non terminal Programa programa;
+non terminal Linea[] lineas;
+non terminal Linea linea;
+non terminal Sentencia sentencia, asignacion, goto, if_then, gosub, on_goto, stop, for_to, print, input, def_funcion_nueva, data, read, dim, rem, restore, randomize;
 
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
@@ -38,6 +55,9 @@ terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
 terminal Integer INTEGER;
 terminal Float FLOAT;
 terminal String STRING;
+
+// TODO Hay que ver si esto se puede poner (segun PECL)
+start with programa;
 
 programa ::= lineas INTEGER END;
 // TODO \n?
@@ -56,7 +76,7 @@ var ::= var_num_simple |
 
 var_num_simple ::= VAR_NUM;
 var_num_suscrita ::= VAR_NUM LPAR literal_num RPAR | VAR_NUM LPAR literal_num COMA literal_num RPAR;
-var_cadena ::= VAR_TXT:v ;
+var_cadena ::= VAR_TXT:v;
 
 /** ES2.- Expresiones numéricas **/
 
