@@ -14,11 +14,11 @@ import java_cup.runtime.*;
 %{
     StringBuffer string = new StringBuffer();
     private Symbol symbol(int type) {
-        return new Symbol(type, yyline, yycolumn);
+        return new BASICSymbol(type, yyline + 1, yycolumn + 1);
     }
 
     private Symbol symbol(int type, Object value){
-        return new Symbol(type, yyline, yycolumn, value);
+        return new BASICSymbol(type, yyline + 1, yycolumn + 1, value);
     }
 
 %}
@@ -37,7 +37,7 @@ Cad_No_Delimitada = {Car_Cadena_Simple} | {Car_Cadena_Simple}{Cad_NoDelimitada}*
 
 LF = \n
 CR = \r
-EOF = \x00 | \x03
+/** EOF = \x00 | \x03 **/
 
 LineTerminator = {LF}|{CR}|{LF}{CR}
 WhiteSpace = {LineTerminator} | [ \t\f]
@@ -126,7 +126,8 @@ Num_Escalar = {Num_Real}[E]{Num_Entero}
     /* EL 6. */
     {WhiteSpace} {}
 
-    {EOF} { return symbol(sym.EOF); }
+    /* {EOF} { return symbol(sym.EOF); } */
+    <<EOF>> { return symbol(sym.EOF); }
 
     . {
         System.out.println("LexError <" + yytext() + "> linea: " + (yyline + 1) + " columna: " + (yycolumn + 1));

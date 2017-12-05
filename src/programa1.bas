@@ -4,6 +4,7 @@
 40 PRINT "Cuantas estrellas quieres?: "
 50 INPUT N
 60 LET S$ = ""
+65 LET A(1) = 55
 70 FOR I = 1 TO N
 80 LET S$ = S$ + "*"
 90 REM YA NO TENGO PROBLEMAS PARA LEER EN INT DEL PRINCIPIO DE NEXT
