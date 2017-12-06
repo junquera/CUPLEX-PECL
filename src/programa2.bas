@@ -1,3 +1,4 @@
+0 REM Error en if (linea 140)
 10 PRINT "Cual es tu nombre?: "
 20 INPUT U$
 30 PRINT "Hola "; U$
@@ -13,6 +14,6 @@
 120 INPUT A$
 130 IF A$ = "S" THEN 30
 135 DEF FNA(X) = X + 2
-140 IF N > FNA(2) THEN 1
+140 IF N > FNA(2) THEN A
 140 PRINT "Adios !! "; U$
 150 END

@@ -40,7 +40,7 @@ CR = \r
 /** EOF = \x00 | \x03 **/
 
 LineTerminator = {LF}|{CR}|{LF}{CR}
-WhiteSpace = {LineTerminator} | [ \t\f]
+WhiteSpace = [ \t\f]
 
 Num_Entero= [+-]?{Digito}+
 Num_Real = {Num_Entero}\.{Digito}+
@@ -123,8 +123,12 @@ Num_Escalar = {Num_Real}[E]{Num_Entero}
     {Num_Entero} { return symbol(sym.INTEGER, new Integer(yytext())); }
     {Num_Real}|{Num_Escalar} { return symbol(sym.FLOAT, new Float(yytext())); }
 
+
+
     /* EL 6. */
     {WhiteSpace} {}
+
+    {LineTerminator} { return symbol(sym.CRLF); }
 
     /* {EOF} { return symbol(sym.EOF); } */
     <<EOF>> { return symbol(sym.EOF); }
@@ -141,6 +145,5 @@ Num_Escalar = {Num_Real}[E]{Num_Entero}
 }
 
 <REM> {
-    [\n] {yybegin(YYINITIAL); return symbol(sym.REM); }
-    {Cad_REM} { }
+    {Cad_REM} {yybegin(YYINITIAL); return symbol(sym.REM);}
 }

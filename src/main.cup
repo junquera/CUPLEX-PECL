@@ -1,31 +1,23 @@
 import java_cup.runtime.*;
 import java.util.HashMap;
 import semantic.*;
+import java.util.ArrayList;
 
 parser code {:
 
     public SymbolTable tabla = new SymbolTable();
-
+    public ArrayList<SyntaxError> errors = new ArrayList<>();
 
     public void report_error(String message, Object info) {
-        StringBuffer m = new StringBuffer("Error");
-        System.out.println("Mensaje: " + message);
-        // System.out.println("info: " + info.toString());
-        if(info instanceof java_cup.runtime.Symbol){
-            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
-
-            if(s.left > 0){
-                m.append(" en la linea " + (s.left));
-                if (s.right > 0)
-                    m.append(", y columna " + (s.right));
-            }
+        if(info instanceof BASICSymbol) {
+            BASICSymbol s = ((BASICSymbol) info);
+            errors.add(new SyntaxError(message, s.getLine(), s.getColumn()));
         }
-        m.append(" : " + message);
-        System.err.println(m);
+
     }
 
     public void report_fatal_error(String message, Object info) {
-        System.out.println("FATAL ERROR");
+        System.err.println("!! FATAL ERROR !!");
         report_error(message, info);
         System.exit(1);
     }
@@ -43,14 +35,14 @@ non terminal Funcion funcion_suministrada, funcion;
 non terminal Programa programa;
 non terminal Linea[] lineas;
 non terminal Linea linea;
-non terminal Sentencia sentencia, asignacion, goto, if_then, gosub, on_goto, stop, for_to, print, input, def_funcion_nueva, data, read, dim, rem, restore, randomize;
+non terminal Sentencia sentencia, asignacion, goto, if_then, gosub, on_goto, stop, for_to, next, print, input, def_funcion_nueva, data, read, dim;
 
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
          GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RANDOMIZE,
          READ, REM, RESTORE, RETURN, STEP, STOP, THEN, TO, ABS, ATN, INT,
          COS, EXP, LOG, RND, SGN, SIN, SQR, TAN, FN, VAR_NUM, VAR_TXT,
-         LPAR, RPAR, ERROR;
+         LPAR, RPAR, ERROR, CRLF;
 
 terminal Integer INTEGER;
 terminal Float FLOAT;
@@ -59,13 +51,17 @@ terminal String STRING;
 // TODO Hay que ver si esto se puede poner (segun PECL)
 start with programa;
 
-programa ::= lineas INTEGER END;
+programa ::= lineas;
 // TODO \n?
-lineas ::= INTEGER sentencia | lineas INTEGER sentencia;
+lineas ::= linea | lineas linea;
+
+linea ::= INTEGER:i sentencia CRLF {:
+              System.out.println(i);
+          :};
 
 sentencia ::=  asignacion | goto | if_then | gosub |
-               on_goto| stop| for_to | print | input | def_funcion_nueva |
-               data | read | dim | rem | randomize ;
+               on_goto| stop| for_to | next | print | input | data |
+               def_funcion_nueva | read | dim | REM | RANDOMIZE | RESTORE | END ;
 
 
 /** ES1.- Variables **/
@@ -156,10 +152,10 @@ goto ::= GOTO INT;
 // TODO conditional_expression == exp1 comparación exp2
 if_then ::= IF conditional_expression THEN INTEGER |
             IF conditional_expression THEN error:e {:
-                parser.report_error("Error en if: IF c THEN (numero de linea)", e);
+                parser.report_error("SyntaxError en if: IF c THEN (numero de linea)", e);
             :} |
             IF error:e {:
-                parser.report_error("Error en if: ", e);
+                parser.report_error("SyntaxError en if: ", e);
             :};
 
 gosub ::= GOSUB INTEGER lineas RETURN;
@@ -170,9 +166,11 @@ on_goto ::= ON conditional_expression GOTO |
 stop ::= STOP; // TRATAR COMO GOTO END
 
 /** ES8.- For-To **/
-for_to ::= FOR var EQU funcion TO  funcion lineas INTEGER NEXT var|
-           FOR var EQU funcion TO  funcion STEP funcion lineas INTEGER NEXT var
+for_to ::= FOR var EQU funcion TO funcion |
+           FOR var EQU funcion TO funcion STEP funcion
            ;
+
+next ::= NEXT var;
 
 
 /** ES9.- PrINTEGER */
@@ -186,28 +184,29 @@ print ::= PRINT funcion |
 /** ES10.- Input **/
 
 input ::= INPUT var |
-          input COMA var
+          input COMA var |
+          INPUT error:e {:
+            parser.report_error("SyntaxError en input: ", e);
+          :}
           ;
 
 /** ES11.- Data**/
-
-data ::= DATA basic_expression |
+data ::= DATA funcion |
+         data COMA funcion |
          DATA error:e {:
-            parser.report_error("Error en data: ", e);
-         :} |
-         data COMA basic_expression;
+            parser.report_error("SyntaxError en data: ", e);
+         :}
+         ;
 
 
 /** ES12.- Read **/
 
 read ::= READ var |
+         read COMA var |
          READ error:e {:
-             parser.report_error("Error en read: ", e);
-         :} |
-         read COMA var
+             parser.report_error("SyntaxError en read: ", e);
+         :}
          ;
-
-restore ::= RESTORE;
 
 
 /** ES13.- Dim **/
@@ -224,11 +223,5 @@ dim ::= DIM declaracion_dim
 
 
 /** ES14.- Rem **/
-
-rem ::= REM;
-
 /** ES15.- Randomize **/
-
-randomize ::= RANDOMIZE;
-
 
