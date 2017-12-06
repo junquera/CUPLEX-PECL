@@ -23,19 +23,22 @@ parser code {:
     }
 :};
 
-non terminal var, var_num_simple, var_num_suscrita, var_cadena;
+non terminal Node.Variable var, var_num_simple, var_num_suscrita, var_cadena;
 
-non terminal literal, literal_num,
-             basic_expression, pow_expression, multiplicative_expression, additive_expression, conditional_expression,
-             declaracion_dim;
+non terminal Node.Literal literal, literal_num;
 
-non terminal Funcion funcion_suministrada, funcion;
+non terminal Node.BinExpression basic_expression, pow_expression, multiplicative_expression,
+                           additive_expression, conditional_expression;
+
+non terminal Node.DeclDim declaracion_dim;
+
+non terminal Node.Funcion funcion_suministrada, funcion;
 
 
-non terminal Programa programa;
-non terminal Linea[] lineas;
-non terminal Linea linea;
-non terminal Sentencia sentencia, asignacion, goto, if_then, gosub, on_goto, stop, for_to, next, print, input, def_funcion_nueva, data, read, dim;
+non terminal Node.Programa programa;
+non terminal Node.Linea[] lineas;
+non terminal Node.Linea linea;
+non terminal Node.Sentencia sentencia, asignacion, goto, if_then, gosub, on_goto, stop, for_to, next, print, input, def_funcion_nueva, data, read, dim;
 
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
@@ -65,70 +68,208 @@ sentencia ::=  asignacion | goto | if_then | gosub |
 
 
 /** ES1.- Variables **/
-var ::= var_num_simple |
-        var_cadena |
-        var_num_suscrita
+var ::= var_num_simple:v {: RESULT = v; :} |
+        var_cadena:v {: RESULT = v; :} |
+        var_num_suscrita:v {: RESULT = v; :}
         ;
 
-var_num_simple ::= VAR_NUM;
-var_num_suscrita ::= VAR_NUM LPAR literal_num RPAR | VAR_NUM LPAR literal_num COMA literal_num RPAR;
-var_cadena ::= VAR_TXT:v;
+var_num_simple ::= VAR_NUM:v {:
+                        Node.Variable va = new Node.Variable(v, Node.Variable.NUMERIC);
+                        RESULT = va;
+                    :};
+
+// TODO VariableDim
+var_num_suscrita ::= VAR_NUM:v LPAR literal_num:v1 RPAR {:
+                            Node.Variable va = new Node.Variable(v, Node.Variable.NUMERIC);
+                            va.addSonNode(v1);
+                            RESULT = va;
+                    :} |
+                    VAR_NUM:v LPAR literal_num:v1 COMA literal_num:v2 RPAR {:
+                              Node.Variable va = new Node.Variable(v, Node.Variable.NUMERIC);
+                              va.addSonNode(v1);
+                              va.addSonNode(v2);
+                              RESULT = va;
+                      :};
+
+var_cadena ::= VAR_TXT:v {:
+                    Node.Variable va = new Node.Variable(v, Node.Variable.STRING);
+                    RESULT = va;
+                :};
 
 /** ES2.- Expresiones numéricas **/
 
-literal ::= literal_num
-            | STRING
+literal ::= literal_num:v {:
+                RESULT = v;
+            :} |
+            STRING:v {:
+                RESULT = new Node.Literal(v, Node.Variable.STRING);
+            :}
             ;
 
-literal_num ::= INTEGER | FLOAT;
+literal_num ::= INTEGER:v {:
+                     RESULT = new Node.Literal(v, Node.Variable.NUMERIC);
+                :}| FLOAT:v {:
+                    RESULT = new Node.Literal(v, Node.Variable.NUMERIC);
+                 :};
 
-basic_expression ::= literal
-                       | var
-                       | LPAR basic_expression RPAR
-                       ;
+basic_expression ::= literal:e {:
+                        Node.BinExpression be = new Node.BinExpression();
+                        be.addSonNode(e);
+                        RESULT = be;
+                   :} |
+                    var:e {:
+                          Node.BinExpression be = new Node.BinExpression();
+                          be.addSonNode(e);
+                          RESULT = be;
+                     :} |
+                   LPAR basic_expression:b RPAR {:
+                        RESULT = b;
+                    :};
 
-pow_expression ::= basic_expression
-                   | pow_expression POW basic_expression
-                   ;
+pow_expression ::= basic_expression:e {:
+                        Node.BinExpression be = new Node.BinExpression();
+                        be.addSonNode(e);
+                        RESULT = be;
+                   :} |
+                   pow_expression:e1 POW basic_expression:e2 {:
+                      Node.BinExpression be = new Node.BinExpression();
+                      be.addSonNode(e1);
+                      be.addSonNode(e2);
+                      RESULT = be;
+                   :};
 
 multiplicative_expression ::=
-		pow_expression
-	|	multiplicative_expression MUL basic_expression
-	|	multiplicative_expression DIV basic_expression
-	;
+		pow_expression:e {:
+              Node.BinExpression be = new Node.BinExpression();
+              be.addSonNode(e);
+              RESULT = be;
+         :} |
+		multiplicative_expression:e1 DIV basic_expression:e2 {:
+              Node.BinExpression be = new Node.BinExpression();
+              be.addSonNode(e1);
+              be.addSonNode(e2);
+              RESULT = be;
+       :} |
+       multiplicative_expression:e1 MUL basic_expression:e2 {:
+              Node.BinExpression be = new Node.BinExpression();
+              be.addSonNode(e1);
+              be.addSonNode(e2);
+              RESULT = be;
+       :};
 
 additive_expression ::=
-		multiplicative_expression
-	|	additive_expression SUM multiplicative_expression
-	|	additive_expression SUB multiplicative_expression
+		multiplicative_expression:e {:
+             Node.BinExpression be = new Node.BinExpression();
+             be.addSonNode(e);
+             RESULT = be;
+        :}
+	|	additive_expression:e1 SUM multiplicative_expression:e2 {:
+              Node.BinExpression be = new Node.BinExpression();
+              be.addSonNode(e1);
+              be.addSonNode(e2);
+              RESULT = be;
+       :}
+	|	additive_expression:e1 SUB multiplicative_expression:e2 {:
+              Node.BinExpression be = new Node.BinExpression();
+              be.addSonNode(e1);
+              be.addSonNode(e2);
+              RESULT = be;
+       :}
 	;
 
 /** ES3.- Funciones suministradas**/
 
-funcion_suministrada ::= ABS LPAR funcion_suministrada RPAR
-                         | ATN LPAR funcion_suministrada RPAR
-                         | COS LPAR funcion_suministrada RPAR
-                         | EXP LPAR funcion_suministrada RPAR
-                         | INT LPAR funcion_suministrada RPAR
-                         | LOG LPAR funcion_suministrada RPAR
-                         | SGN LPAR funcion_suministrada RPAR
-                         | SIN LPAR funcion_suministrada RPAR
-                         | SQR LPAR funcion_suministrada RPAR
-                         | TAN LPAR funcion_suministrada RPAR
-                         | RND
-                         | additive_expression
+funcion_suministrada ::= ABS LPAR funcion_suministrada:f RPAR {:
+                            Node.Funcion nf = new Node.Funcion("ABS");
+                            nf.addSonNode(f);
+                            RESULT = nf;
+                        :} |
+                        ATN LPAR funcion_suministrada:f RPAR {:
+                            Node.Funcion nf = new Node.Funcion("ATN");
+                            nf.addSonNode(f);
+                            RESULT = nf;
+                         :} |
+                         COS LPAR funcion_suministrada:f RPAR {:
+                            Node.Funcion nf = new Node.Funcion("COS");
+                            nf.addSonNode(f);
+                            RESULT = nf;
+                         :} |
+                         EXP LPAR funcion_suministrada:f RPAR {:
+                            Node.Funcion nf = new Node.Funcion("EXP");
+                            nf.addSonNode(f);
+                            RESULT = nf;
+                         :} |
+                         INT LPAR funcion_suministrada:f RPAR {:
+                            Node.Funcion nf = new Node.Funcion("INT");
+                            nf.addSonNode(f);
+                            RESULT = nf;
+                         :} |
+                         LOG LPAR funcion_suministrada:f RPAR {:
+                            Node.Funcion nf = new Node.Funcion("LOG");
+                            nf.addSonNode(f);
+                            RESULT = nf;
+                         :} |
+                         SGN LPAR funcion_suministrada:f RPAR {:
+                            Node.Funcion nf = new Node.Funcion("SGN");
+                            nf.addSonNode(f);
+                            RESULT = nf;
+                         :} |
+                         SIN LPAR funcion_suministrada:f RPAR {:
+                            Node.Funcion nf = new Node.Funcion("SIN");
+                            nf.addSonNode(f);
+                            RESULT = nf;
+                         :} |
+                         SQR LPAR funcion_suministrada:f RPAR {:
+                            Node.Funcion nf = new Node.Funcion("SQR");
+                            nf.addSonNode(f);
+                            RESULT = nf;
+                         :} |
+                         TAN LPAR funcion_suministrada:f RPAR {:
+                            Node.Funcion nf = new Node.Funcion("TAN");
+                            nf.addSonNode(f);
+                            RESULT = nf;
+                         :} |
+                         RND {:
+                            Node.Funcion nf = new Node.Funcion("RND");
+                            RESULT = nf;
+                        :}  |
+                         additive_expression:e {:
+                            Node.Funcion nf = new Node.Funcion("BIN_EXP");
+                            nf.addSonNode(e);
+                            RESULT = nf;
+                         :}
                          ;
 
 
 /** ES4.- Nuevas funciones **/
 
-def_funcion_nueva ::= DEF FN VAR_NUM EQU additive_expression |
-                  DEF FN VAR_NUM LPAR VAR_NUM RPAR EQU additive_expression
-                  ;
-
-funcion ::= FN VAR_NUM | FN VAR_NUM LPAR funcion RPAR | funcion_suministrada;
+def_funcion_nueva ::= DEF FN:f VAR_NUM:v EQU funcion:fn {:
+        Node.DefFuncion ndf = new Node.DefFuncion();
+        Node.Funcion nf = new Node.Funcion((String) f + (String) v, true);
+        ndf.addSonNode(nf);
+        ndf.addSonNode(fn);
+    :} |
+    DEF FN:f VAR_NUM:v LPAR funcion:fn1 RPAR EQU funcion:fn2 {:
+        Node.DefFuncion ndf = new Node.DefFuncion();
+        Node.Funcion nf = new Node.Funcion((String) f + (String) v, true);
+        nf.addSonNode(fn1);
+        ndf.addSonNode(nf);
+        ndf.addSonNode(fn2);
+    :}
+;
 
 // TODO Cómo hacer funcion + X ?
+funcion ::= FN:f VAR_NUM:v {:
+                Node.Funcion nf = new Node.Funcion((String) f + (String) v, true);
+                RESULT = nf;
+            :} | FN:f VAR_NUM:v LPAR funcion:fe RPAR {:
+                Node.Funcion nf = new Node.Funcion((String) f + (String) v, true);
+                nf.addSonNode(fe);
+                RESULT = nf;
+            :}  | funcion_suministrada:fs {:
+                RESULT = fs;
+            :};
+
 
 /** ES5.- Asignacion **/
 
