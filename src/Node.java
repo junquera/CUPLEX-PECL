@@ -11,27 +11,27 @@ public abstract class Node {
         public static final int NUMERIC = 0;
         public static final int STRING = 1;
 
-        private Object content;
+        private String name;
         private int type;
 
         public Variable() {
         }
 
-        public Variable(Object content) {
-            this.content = content;
+        public Variable(String name) {
+            this.name = name;
         }
 
-        public Variable(Object content, int type) {
-            this.content = content;
+        public Variable(String name, int type) {
+            this.name = name;
             this.type = type;
         }
 
-        public Object getContent() {
-            return content;
+        public String getName() {
+            return name;
         }
 
-        public void setContent(Object content) {
-            this.content = content;
+        public void setName(String name) {
+            this.name = name;
         }
 
         public int getType() {
@@ -40,6 +40,22 @@ public abstract class Node {
 
         public void setType(int type) {
             this.type = type;
+        }
+
+        @Override
+        public String toString() {
+            String result = "Variable " + this.name + ", type: ";
+            switch (type){
+                case NUMERIC:
+                    result += "numeric";
+                    break;
+                case STRING:
+                    result += "string";
+                    break;
+                default:
+                    result += "unknown";
+            }
+            return result;
         }
     }
 
@@ -71,6 +87,17 @@ public abstract class Node {
             this.content = content;
         }
 
+        public String toString() {
+            switch (type) {
+                case NUMERIC:
+                    return "Literal numérico: " + content;
+                case STRING:
+                    return "Literal cadena: " + content;
+                default:
+                    return "Literal desconocido...";
+            }
+        }
+
         public int getType() {
             return type;
         }
@@ -89,13 +116,6 @@ public abstract class Node {
         public static final int SUM = 5;
         public static final int SUB = 6;
 
-        public static final int LT = 7;
-        public static final int LE = 8;
-        public static final int GE = 9;
-        public static final int GT = 10;
-        public static final int EQU = 11;
-        public static final int NEQ = 12;
-
         private int op;
 
         public BinExpression() {
@@ -104,12 +124,33 @@ public abstract class Node {
         public BinExpression(int op) {
             this.op = op;
         }
+
         public void addSonNode(Node n) throws Exception {
 
-            if(n.getType() != Literal.NUMERIC)
+            if (n.getType() != Literal.NUMERIC)
                 throw new Exception("Sólo acepto números");
 
             super.addSonNode(n);
+        }
+
+
+        public String toString() {
+            switch (op) {
+                case BASIC:
+                    return getNodeType() + ": BASIC";
+                case POW:
+                    return getNodeType() + ": POW";
+                case MUL:
+                    return getNodeType() + ": MUL";
+                case DIV:
+                    return getNodeType() + ": DIV";
+                case SUM:
+                    return getNodeType() + ": SUM";
+                case SUB:
+                    return getNodeType() + ": SUB";
+                default:
+                    return getNodeType() + ": OP. DESCONOCIDA";
+            }
         }
 
         public int getOp() {
@@ -120,7 +161,7 @@ public abstract class Node {
             this.op = op;
         }
 
-        public int getType(){
+        public int getType() {
             return Literal.NUMERIC;
         }
     }
@@ -152,7 +193,26 @@ public abstract class Node {
             this.op = op;
         }
 
-        public int getType(){
+        public String toString() {
+            switch (op) {
+                case LT:
+                    return getNodeType() + ": LT";
+                case LE:
+                    return getNodeType() + ": LE";
+                case GE:
+                    return getNodeType() + ": GE";
+                case GT:
+                    return getNodeType() + ": GT";
+                case EQU:
+                    return getNodeType() + ": EQU";
+                case NEQ:
+                    return getNodeType() + ": NEQ";
+                default:
+                    return getNodeType() + ": OP. DESCONOCIDA";
+            }
+        }
+
+        public int getType() {
             return Literal.NUMERIC;
         }
     }
@@ -166,12 +226,13 @@ public abstract class Node {
         private boolean created;
 
         private String value;
+
         public Funcion(String value) {
             this.value = value;
             this.created = false;
         }
 
-        public Funcion(String value, boolean created){
+        public Funcion(String value, boolean created) {
             this.value = value;
             this.created = created;
         }
@@ -201,6 +262,7 @@ public abstract class Node {
     public static class Linea extends Node {
 
         private int lineNumber;
+
         public Linea(int ln) {
             this.lineNumber = ln;
         }
@@ -213,7 +275,7 @@ public abstract class Node {
             this.lineNumber = lineNumber;
         }
 
-        public String toString(){
+        public String toString() {
             return this.lineNumber + " " + super.toString();
         }
     }
@@ -234,8 +296,11 @@ public abstract class Node {
     }
 
     public static class IfThen extends Node {
+
         public IfThen() {
         }
+
+
     }
 
     public static class GoSub extends Node {
@@ -315,32 +380,34 @@ public abstract class Node {
         return this.getClass().getName();
     }
 
-    public int getType(){ return -1; }
+    public int getType() {
+        return -1;
+    }
 
-    public String getTree(){
+    public String getTree() {
         return getTree(0);
     }
 
-    public String getTree(int level){
+    public String getTree(int level) {
         StringBuffer result = new StringBuffer();
-        if(level > 0){
-            for(int i=0; i< level; i++)
+        if (level > 0) {
+            for (int i = 0; i <= level; i++)
                 result.append('\t');
             result.append("|-");
         }
-        result.append("[" + toString() + "]");
-        if(sons.size() > 0){
-            result.append("--\n");
-            for(Node n: sons)
-                if(n != null)
+        result.append("[" + toString() + "]\n");
+        if (sons.size() > 0) {
+            for (Node n : sons)
+                if (n != null) {
                     result.append(n.getTree(level + 1));
+                }
         }
         return result.toString();
     }
 
-    public void check() throws Exception{
-        for(Node n: sons)
-            if(n != null)
+    public void check() throws Exception {
+        for (Node n : sons)
+            if (n != null)
                 n.check();
     }
 

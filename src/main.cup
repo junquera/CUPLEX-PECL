@@ -45,8 +45,9 @@ terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
          GOSUB, GOTO, IF, INPUT, LET, NEXT, ON, PRINT, RANDOMIZE,
          READ, REM, RESTORE, RETURN, STEP, STOP, THEN, TO, ABS, ATN, INT,
-         COS, EXP, LOG, RND, SGN, SIN, SQR, TAN, FN, VAR_NUM, VAR_TXT,
-         LPAR, RPAR, ERROR, CRLF;
+         COS, EXP, LOG, RND, SGN, SIN, SQR, TAN, FN, LPAR, RPAR, ERROR, CRLF;
+
+terminal String VAR_NUM, VAR_TXT;
 
 terminal Integer INTEGER;
 terminal Float FLOAT;
@@ -83,9 +84,50 @@ linea ::= INTEGER:i sentencia:s CRLF {:
               RESULT = nl;
           :};
 
-sentencia ::=  asignacion | goto | if_then | gosub |
-               on_goto| stop| for_to | next | print | input | data |
-               def_funcion_nueva | read | dim | REM | RANDOMIZE | RESTORE | END ;
+sentencia ::=  asignacion {:
+ :} |
+goto:s {:
+    RESULT = s;
+:} |
+if_then:s {:
+    RESULT = s;
+:} |
+gosub:s {:
+    RESULT = s;
+:} |
+
+on_goto:s {:
+    RESULT = s;
+:} |
+stop:s {:
+    RESULT = s;
+:} |
+for_to:s {:
+    RESULT = s;
+:} |
+next:s {:
+    RESULT = s;
+:} |
+print:s {:
+    RESULT = s;
+:} |
+input:s {:
+    RESULT = s;
+:} |
+data:s {:
+    RESULT = s;
+:} |
+
+def_funcion_nueva:s {:
+    RESULT = s;
+:} |
+read:s {:
+    RESULT = s;
+:} |
+dim:s {:
+    RESULT = s;
+:} |
+REM | RANDOMIZE | RESTORE | END:s ;
 
 
 /** ES1.- Variables **/
@@ -338,7 +380,12 @@ conditional_expression ::=  conditional_expression:e1 LT funcion:e2 {:
 goto ::= GOTO INT;
 
 // TODO conditional_expression == exp1 comparación exp2
-if_then ::= IF conditional_expression THEN INTEGER |
+if_then ::= IF conditional_expression:ce THEN literal_num:l {:
+                Node.IfThen nit = new Node.IfThen();
+                nit.addSonNode(ce);
+                nit.addSonNode(l);
+                RESULT = nit;
+            :}|
             IF conditional_expression THEN error:e {:
                 parser.report_error("SyntaxError en if: IF c THEN (numero de linea)", e);
             :} |
