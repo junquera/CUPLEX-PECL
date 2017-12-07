@@ -39,7 +39,7 @@ non terminal Node funcion_suministrada, funcion;
 non terminal /*Node.Programa*/ Node.Programa programa;
 non terminal /*Node.Line*/ List<Node.Linea> lineas;
 non terminal /*Node.Linea*/ Node.Linea linea;
-non terminal /*Node.Sentencia*/ Node sentencia, asignacion, goto, if_then, gosub, on_goto, stop, for_to, next, print, input, def_funcion_nueva, data, read, dim;
+non terminal /*Node.Sentencia*/ Node sentencia, asignacion, goto, if_then, gosub, on_goto, for_to, next, print, input, def_funcion_nueva, data, read, dim;
 
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
@@ -58,6 +58,7 @@ start with programa;
 
 programa ::= lineas:ls {:
     Node.Programa p = new Node.Programa();
+    // TODO Controlar aquí gosub-return y for-end
     for(Node.Linea nl: ls)
         p.addSonNode(nl);
     p.check();
@@ -84,50 +85,60 @@ linea ::= INTEGER:i sentencia:s CRLF {:
               RESULT = nl;
           :};
 
-sentencia ::=  asignacion {:
- :} |
-goto:s {:
-    RESULT = s;
-:} |
-if_then:s {:
-    RESULT = s;
-:} |
-gosub:s {:
-    RESULT = s;
-:} |
+sentencia ::=  asignacion:s {:
+                    RESULT = s;
+                :} |
+                goto:s {:
+                    RESULT = s;
+                :} |
+                if_then:s {:
+                    RESULT = s;
+                :} |
+                gosub:s {:
+                    RESULT = s;
+                :} |
 
-on_goto:s {:
-    RESULT = s;
-:} |
-stop:s {:
-    RESULT = s;
-:} |
-for_to:s {:
-    RESULT = s;
-:} |
-next:s {:
-    RESULT = s;
-:} |
-print:s {:
-    RESULT = s;
-:} |
-input:s {:
-    RESULT = s;
-:} |
-data:s {:
-    RESULT = s;
-:} |
+                on_goto:s {:
+                    RESULT = s;
+                :} |
+                for_to:s {:
+                    RESULT = s;
+                :} |
+                next:s {:
+                    RESULT = s;
+                :} |
+                print:s {:
+                    RESULT = s;
+                :} |
+                input:s {:
+                    RESULT = s;
+                :} |
+                data:s {:
+                    RESULT = s;
+                :} |
 
-def_funcion_nueva:s {:
-    RESULT = s;
-:} |
-read:s {:
-    RESULT = s;
-:} |
-dim:s {:
-    RESULT = s;
-:} |
-REM | RANDOMIZE | RESTORE | END:s ;
+                def_funcion_nueva:s {:
+                    RESULT = s;
+                :} |
+                read:s {:
+                    RESULT = s;
+                :} |
+                dim:s {:
+                    RESULT = s;
+                :} |
+                REM {:
+                    RESULT = new Node.Rem();
+                :} | RANDOMIZE {:
+                    RESULT = new Node.Randomize();
+                :} | RETURN {:
+                    RESULT = new Node.Return();
+                :} | RESTORE {:
+                    RESULT = new Node.Restore();
+                :} | END {:
+                    RESULT = new Node.End();
+                :} | STOP {:
+                    RESULT = new Node.Stop();
+                :};
 
 
 /** ES1.- Variables **/
@@ -377,7 +388,11 @@ conditional_expression ::=  conditional_expression:e1 LT funcion:e2 {:
 
 /** ES7.- Sentencias de control**/
 
-goto ::= GOTO INT;
+goto ::= GOTO literal_num:l {:
+    Node.GoTo ngt = new Node.GoTo();
+    ngt.addSonNode(l);
+    RESULT = ngt;
+:};
 
 // TODO conditional_expression == exp1 comparación exp2
 if_then ::= IF conditional_expression:ce THEN literal_num:l {:
@@ -393,26 +408,53 @@ if_then ::= IF conditional_expression:ce THEN literal_num:l {:
                 parser.report_error("SyntaxError en if: ", e);
             :};
 
-gosub ::= GOSUB INTEGER lineas RETURN;
+gosub ::= GOSUB literal_num:l {:
+            Node.GoSub ngs = new Node.GoSub();
+            ngs.addSonNode(l);
+            RESULT = ngs;
+        :};
 
-on_goto ::= ON conditional_expression GOTO |
-            on_goto COMA INTEGER;
-
-stop ::= STOP; // TRATAR COMO GOTO END
+on_goto ::= ON conditional_expression:ce GOTO {:
+                Node.OnGoTo ogt = new Node.OnGoTo();
+                ogt.addSonNode(ce);
+                RESULT = ogt;
+            :} |
+            on_goto:ogt COMA literal_num:l {:
+                ogt.addSonNode(l);
+                RESULT = ogt;
+            :};
 
 /** ES8.- For-To **/
 for_to ::= FOR var EQU funcion TO funcion |
            FOR var EQU funcion TO funcion STEP funcion
            ;
 
-next ::= NEXT var;
+next ::= NEXT var:v {:
+    Node.Next nn = new Node.Next();
+    nn.addSonNode(v);
+    RESULT = nn;
+:};
 
 
 /** ES9.- PrINTEGER */
 
-print ::= PRINT funcion |
-          print PCOMA funcion |
-          print COMA funcion
+print ::= PRINT funcion:f {:
+            Node.Print np = new Node.Print();
+            np.addSonNode(f);
+            RESULT = np;
+          :} |
+          print:p PCOMA funcion:f {:
+            Node.Literal nl = new Node.Literal("SPACE", Node.Literal.STRING);
+            p.addSonNode(nl);
+            p.addSonNode(f);
+            RESULT = p;
+          :} |
+          print:p COMA funcion:f {:
+            Node.Literal nl = new Node.Literal("TAB", Node.Literal.STRING);
+            p.addSonNode(nl);
+            p.addSonNode(f);
+            RESULT = p;
+          :}
           ;
 
 

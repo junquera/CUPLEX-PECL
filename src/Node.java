@@ -63,6 +63,7 @@ public abstract class Node {
 
         public static final int NUMERIC = 0;
         public static final int STRING = 1;
+        public static final int BOOL = 2;
 
         private Object content;
         private int type;
@@ -93,6 +94,8 @@ public abstract class Node {
                     return "Literal numérico: " + content;
                 case STRING:
                     return "Literal cadena: " + content;
+                case BOOL:
+                    return "Literal booleano: " + content;
                 default:
                     return "Literal desconocido...";
             }
@@ -213,7 +216,7 @@ public abstract class Node {
         }
 
         public int getType() {
-            return Literal.NUMERIC;
+            return Literal.BOOL;
         }
     }
 
@@ -278,6 +281,8 @@ public abstract class Node {
         public String toString() {
             return this.lineNumber + " " + super.toString();
         }
+
+        // TODO Nuevo método para saber qué clase tiene la sentencia
     }
 
     public static class Sentencia extends Node {
@@ -358,6 +363,27 @@ public abstract class Node {
         }
     }
 
+    public static class Rem extends Node {
+        public Rem() {
+        }
+    }
+    public static class Randomize extends Node {
+        public Randomize() {
+        }
+    }
+    public static class Return extends Node {
+        public Return() {
+        }
+    }
+    public static class Restore extends Node {
+        public Restore() {
+        }
+    }
+    public static class End extends Node {
+        public End() {
+        }
+    }
+
     private ArrayList<Node> sons;
 
     public Node() {
@@ -392,8 +418,8 @@ public abstract class Node {
         StringBuffer result = new StringBuffer();
         if (level > 0) {
             for (int i = 0; i <= level; i++)
-                result.append('\t');
-            result.append("|-");
+                result.append("|  ");
+            result.append("+--");
         }
         result.append("[" + toString() + "]\n");
         if (sons.size() > 0) {
@@ -410,6 +436,5 @@ public abstract class Node {
             if (n != null)
                 n.check();
     }
-
 
 }
