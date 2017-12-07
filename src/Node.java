@@ -82,7 +82,78 @@ public abstract class Node {
 
 
     public static class BinExpression extends Node {
+        public static final int BASIC = 1;
+        public static final int POW = 2;
+        public static final int MUL = 3;
+        public static final int DIV = 4;
+        public static final int SUM = 5;
+        public static final int SUB = 6;
+
+        public static final int LT = 7;
+        public static final int LE = 8;
+        public static final int GE = 9;
+        public static final int GT = 10;
+        public static final int EQU = 11;
+        public static final int NEQ = 12;
+
+        private int op;
+
         public BinExpression() {
+        }
+
+        public BinExpression(int op) {
+            this.op = op;
+        }
+        public void addSonNode(Node n) throws Exception {
+
+            if(n.getType() != Literal.NUMERIC)
+                throw new Exception("Sólo acepto números");
+
+            super.addSonNode(n);
+        }
+
+        public int getOp() {
+            return op;
+        }
+
+        public void setOp(int op) {
+            this.op = op;
+        }
+
+        public int getType(){
+            return Literal.NUMERIC;
+        }
+    }
+
+
+    public static class CondExpression extends Node {
+
+        public static final int LT = 7;
+        public static final int LE = 8;
+        public static final int GE = 9;
+        public static final int GT = 10;
+        public static final int EQU = 11;
+        public static final int NEQ = 12;
+
+        private int op;
+
+        public CondExpression() {
+        }
+
+        public CondExpression(int op) {
+            this.op = op;
+        }
+
+        public int getOp() {
+            return op;
+        }
+
+        public void setOp(int op) {
+            this.op = op;
+        }
+
+        public int getType(){
+            return Literal.NUMERIC;
         }
     }
 
@@ -91,10 +162,10 @@ public abstract class Node {
         }
     }
 
-    public static class Funcion extends Node {
+    public static class Funcion extends BinExpression {
         private boolean created;
-        private String value;
 
+        private String value;
         public Funcion(String value) {
             this.value = value;
             this.created = false;
@@ -128,7 +199,22 @@ public abstract class Node {
     }
 
     public static class Linea extends Node {
-        public Linea() {
+
+        private int lineNumber;
+        public Linea(int ln) {
+            this.lineNumber = ln;
+        }
+
+        public int getLineNumber() {
+            return lineNumber;
+        }
+
+        public void setLineNumber(int lineNumber) {
+            this.lineNumber = lineNumber;
+        }
+
+        public String toString(){
+            return this.lineNumber + " " + super.toString();
         }
     }
 
@@ -213,7 +299,7 @@ public abstract class Node {
         this.sons = new ArrayList<>();
     }
 
-    public void addSonNode(Node n) {
+    public void addSonNode(Node n) throws Exception {
         this.sons.add(n);
     }
 
@@ -228,5 +314,35 @@ public abstract class Node {
     public String getNodeType() {
         return this.getClass().getName();
     }
+
+    public int getType(){ return -1; }
+
+    public String getTree(){
+        return getTree(0);
+    }
+
+    public String getTree(int level){
+        StringBuffer result = new StringBuffer();
+        if(level > 0){
+            for(int i=0; i< level; i++)
+                result.append('\t');
+            result.append("|-");
+        }
+        result.append("[" + toString() + "]");
+        if(sons.size() > 0){
+            result.append("--\n");
+            for(Node n: sons)
+                if(n != null)
+                    result.append(n.getTree(level + 1));
+        }
+        return result.toString();
+    }
+
+    public void check() throws Exception{
+        for(Node n: sons)
+            if(n != null)
+                n.check();
+    }
+
 
 }

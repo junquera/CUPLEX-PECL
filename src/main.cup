@@ -1,6 +1,7 @@
 import java_cup.runtime.*;
 import java.util.HashMap;
 import semantic.*;
+import java.util.List;
 import java.util.ArrayList;
 
 parser code {:
@@ -23,22 +24,22 @@ parser code {:
     }
 :};
 
-non terminal Node.Variable var, var_num_simple, var_num_suscrita, var_cadena;
+non terminal Node var, var_num_simple, var_num_suscrita, var_cadena;
 
-non terminal Node.Literal literal, literal_num;
+non terminal Node literal, literal_num;
 
-non terminal Node.BinExpression basic_expression, pow_expression, multiplicative_expression,
+non terminal Node basic_expression, pow_expression, multiplicative_expression,
                            additive_expression, conditional_expression;
 
-non terminal Node.DeclDim declaracion_dim;
+non terminal Node declaracion_dim;
 
-non terminal Node.Funcion funcion_suministrada, funcion;
+non terminal Node funcion_suministrada, funcion;
 
 
-non terminal Node.Programa programa;
-non terminal Node.Linea[] lineas;
-non terminal Node.Linea linea;
-non terminal Node.Sentencia sentencia, asignacion, goto, if_then, gosub, on_goto, stop, for_to, next, print, input, def_funcion_nueva, data, read, dim;
+non terminal /*Node.Programa*/ Node.Programa programa;
+non terminal /*Node.Line*/ List<Node.Linea> lineas;
+non terminal /*Node.Linea*/ Node.Linea linea;
+non terminal /*Node.Sentencia*/ Node sentencia, asignacion, goto, if_then, gosub, on_goto, stop, for_to, next, print, input, def_funcion_nueva, data, read, dim;
 
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
@@ -54,12 +55,32 @@ terminal String STRING;
 // TODO Hay que ver si esto se puede poner (segun PECL)
 start with programa;
 
-programa ::= lineas;
-// TODO \n?
-lineas ::= linea | lineas linea;
+programa ::= lineas:ls {:
+    Node.Programa p = new Node.Programa();
+    for(Node.Linea nl: ls)
+        p.addSonNode(nl);
+    p.check();
+    System.out.println(p.getTree());
+    RESULT = p;
+:};
 
-linea ::= INTEGER:i sentencia CRLF {:
-              System.out.println(i);
+lineas ::=  linea:l {:
+                List<Node.Linea> lineas = new ArrayList<>();
+                Node.Linea linea = (Node.Linea) l;
+                lineas.add(linea);
+                RESULT = lineas;
+             :} |
+             lineas:ls linea:l {:
+                List<Node.Linea> lineas = ls;
+                Node.Linea linea = (Node.Linea) l;
+                lineas.add(linea);
+                RESULT = lineas;
+            :};
+
+linea ::= INTEGER:i sentencia:s CRLF {:
+              Node.Linea nl = new Node.Linea(i);
+              nl.addSonNode(s);
+              RESULT = nl;
           :};
 
 sentencia ::=  asignacion | goto | if_then | gosub |
@@ -113,26 +134,20 @@ literal_num ::= INTEGER:v {:
                  :};
 
 basic_expression ::= literal:e {:
-                        Node.BinExpression be = new Node.BinExpression();
-                        be.addSonNode(e);
-                        RESULT = be;
+                        RESULT = e;
                    :} |
                     var:e {:
-                          Node.BinExpression be = new Node.BinExpression();
-                          be.addSonNode(e);
-                          RESULT = be;
+                          RESULT = e;
                      :} |
                    LPAR basic_expression:b RPAR {:
                         RESULT = b;
                     :};
 
 pow_expression ::= basic_expression:e {:
-                        Node.BinExpression be = new Node.BinExpression();
-                        be.addSonNode(e);
-                        RESULT = be;
+                        RESULT = e;
                    :} |
                    pow_expression:e1 POW basic_expression:e2 {:
-                      Node.BinExpression be = new Node.BinExpression();
+                      Node.BinExpression be = new Node.BinExpression(Node.BinExpression.POW);
                       be.addSonNode(e1);
                       be.addSonNode(e2);
                       RESULT = be;
@@ -140,18 +155,16 @@ pow_expression ::= basic_expression:e {:
 
 multiplicative_expression ::=
 		pow_expression:e {:
-              Node.BinExpression be = new Node.BinExpression();
-              be.addSonNode(e);
-              RESULT = be;
+              RESULT = e;
          :} |
 		multiplicative_expression:e1 DIV basic_expression:e2 {:
-              Node.BinExpression be = new Node.BinExpression();
+              Node.BinExpression be = new Node.BinExpression(Node.BinExpression.DIV);
               be.addSonNode(e1);
               be.addSonNode(e2);
               RESULT = be;
        :} |
        multiplicative_expression:e1 MUL basic_expression:e2 {:
-              Node.BinExpression be = new Node.BinExpression();
+              Node.BinExpression be = new Node.BinExpression(Node.BinExpression.MUL);
               be.addSonNode(e1);
               be.addSonNode(e2);
               RESULT = be;
@@ -159,18 +172,16 @@ multiplicative_expression ::=
 
 additive_expression ::=
 		multiplicative_expression:e {:
-             Node.BinExpression be = new Node.BinExpression();
-             be.addSonNode(e);
-             RESULT = be;
+             RESULT = e;
         :}
 	|	additive_expression:e1 SUM multiplicative_expression:e2 {:
-              Node.BinExpression be = new Node.BinExpression();
+              Node.BinExpression be = new Node.BinExpression(Node.BinExpression.SUM);
               be.addSonNode(e1);
               be.addSonNode(e2);
               RESULT = be;
        :}
 	|	additive_expression:e1 SUB multiplicative_expression:e2 {:
-              Node.BinExpression be = new Node.BinExpression();
+              Node.BinExpression be = new Node.BinExpression(Node.BinExpression.SUB);
               be.addSonNode(e1);
               be.addSonNode(e2);
               RESULT = be;
@@ -234,9 +245,7 @@ funcion_suministrada ::= ABS LPAR funcion_suministrada:f RPAR {:
                             RESULT = nf;
                         :}  |
                          additive_expression:e {:
-                            Node.Funcion nf = new Node.Funcion("BIN_EXP");
-                            nf.addSonNode(e);
-                            RESULT = nf;
+                            RESULT = e;
                          :}
                          ;
 
@@ -248,6 +257,7 @@ def_funcion_nueva ::= DEF FN:f VAR_NUM:v EQU funcion:fn {:
         Node.Funcion nf = new Node.Funcion((String) f + (String) v, true);
         ndf.addSonNode(nf);
         ndf.addSonNode(fn);
+        RESULT = ndf;
     :} |
     DEF FN:f VAR_NUM:v LPAR funcion:fn1 RPAR EQU funcion:fn2 {:
         Node.DefFuncion ndf = new Node.DefFuncion();
@@ -255,6 +265,7 @@ def_funcion_nueva ::= DEF FN:f VAR_NUM:v EQU funcion:fn {:
         nf.addSonNode(fn1);
         ndf.addSonNode(nf);
         ndf.addSonNode(fn2);
+        RESULT = ndf;
     :}
 ;
 
@@ -273,17 +284,53 @@ funcion ::= FN:f VAR_NUM:v {:
 
 /** ES5.- Asignacion **/
 
-asignacion ::= LET var EQU funcion ;
+asignacion ::= LET var:v EQU funcion:f {:
+    Node.Asignacion na = new Node.Asignacion();
+    na.addSonNode(v);
+    na.addSonNode(f);
+    RESULT = na;
+ :};
 
 /** ES6.- Comparacion **/
-
-conditional_expression ::=  conditional_expression LT funcion |
-                            conditional_expression LE funcion |
-                            conditional_expression GE funcion |
-                            conditional_expression GT funcion |
-                            conditional_expression EQU funcion |
-                            conditional_expression NEQ funcion |
-                            funcion
+conditional_expression ::=  conditional_expression:e1 LT funcion:e2 {:
+                                   Node.CondExpression be = new Node.CondExpression(Node.CondExpression.LT);
+                                   be.addSonNode(e1);
+                                   be.addSonNode(e2);
+                                   RESULT = be;
+                            :} |
+                            conditional_expression:e1 LE funcion:e2 {:
+                                    Node.CondExpression be = new Node.CondExpression(Node.CondExpression.LE);
+                                    be.addSonNode(e1);
+                                    be.addSonNode(e2);
+                                    RESULT = be;
+                             :} |
+                            conditional_expression:e1 GE funcion:e2  {:
+                                  Node.CondExpression be = new Node.CondExpression(Node.CondExpression.GE);
+                                  be.addSonNode(e1);
+                                  be.addSonNode(e2);
+                                  RESULT = be;
+                           :} |
+                            conditional_expression:e1 GT funcion:e2  {:
+                                  Node.CondExpression be = new Node.CondExpression(Node.CondExpression.GT);
+                                  be.addSonNode(e1);
+                                  be.addSonNode(e2);
+                                  RESULT = be;
+                           :} |
+                            conditional_expression:e1 EQU funcion:e2 {:
+                                  Node.CondExpression be = new Node.CondExpression(Node.CondExpression.EQU);
+                                  be.addSonNode(e1);
+                                  be.addSonNode(e2);
+                                  RESULT = be;
+                           :} |
+                            conditional_expression:e1 NEQ funcion:e2  {:
+                                   Node.CondExpression be = new Node.CondExpression(Node.CondExpression.NEQ);
+                                   be.addSonNode(e1);
+                                   be.addSonNode(e2);
+                                   RESULT = be;
+                            :} |
+                            funcion:f {:
+                                RESULT = f;
+                            :}
                             ;
 
 /** ES7.- Sentencias de control**/
