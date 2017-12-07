@@ -417,9 +417,9 @@ public abstract class Node {
     public String getTree(int level) {
         StringBuffer result = new StringBuffer();
         if (level > 0) {
-            for (int i = 0; i <= level; i++)
+            for (int i = 1; i < level - 1; i++)
                 result.append("|  ");
-            result.append("+--");
+            result.append("+----");
         }
         result.append("[" + toString() + "]\n");
         if (sons.size() > 0) {

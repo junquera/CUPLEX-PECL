@@ -36,10 +36,10 @@ non terminal Node declaracion_dim;
 non terminal Node funcion_suministrada, funcion;
 
 
-non terminal /*Node.Programa*/ Node.Programa programa;
-non terminal /*Node.Line*/ List<Node.Linea> lineas;
-non terminal /*Node.Linea*/ Node.Linea linea;
-non terminal /*Node.Sentencia*/ Node sentencia, asignacion, goto, if_then, gosub, on_goto, for_to, next, print, input, def_funcion_nueva, data, read, dim;
+non terminal Node.Programa programa;
+non terminal List<Node.Linea> lineas;
+non terminal Node.Linea linea;
+non terminal Node sentencia, asignacion, goto, if_then, gosub, on_goto, for_to, next, print, input, def_funcion_nueva, data, read, dim;
 
 terminal POW, MUL, DIV, SUM, SUB, EQU, COMA, PCOMA,
          LT, LE, GE, GT, NEQ, DATA, DEF, DIM, END, FOR, GO,
@@ -85,7 +85,7 @@ linea ::= INTEGER:i sentencia:s CRLF {:
               RESULT = nl;
           :};
 
-sentencia ::=  asignacion:s {:
+sentencia ::=   asignacion:s {:
                     RESULT = s;
                 :} |
                 goto:s {:
@@ -97,7 +97,6 @@ sentencia ::=  asignacion:s {:
                 gosub:s {:
                     RESULT = s;
                 :} |
-
                 on_goto:s {:
                     RESULT = s;
                 :} |
@@ -116,7 +115,6 @@ sentencia ::=  asignacion:s {:
                 data:s {:
                     RESULT = s;
                 :} |
-
                 def_funcion_nueva:s {:
                     RESULT = s;
                 :} |
@@ -128,15 +126,20 @@ sentencia ::=  asignacion:s {:
                 :} |
                 REM {:
                     RESULT = new Node.Rem();
-                :} | RANDOMIZE {:
+                :} |
+                RANDOMIZE {:
                     RESULT = new Node.Randomize();
-                :} | RETURN {:
+                :} |
+                RETURN {:
                     RESULT = new Node.Return();
-                :} | RESTORE {:
+                :} |
+                RESTORE {:
                     RESULT = new Node.Restore();
-                :} | END {:
+                :} |
+                END {:
                     RESULT = new Node.End();
-                :} | STOP {:
+                :} |
+                STOP {:
                     RESULT = new Node.Stop();
                 :};
 
@@ -460,16 +463,30 @@ print ::= PRINT funcion:f {:
 
 /** ES10.- Input **/
 
-input ::= INPUT var |
-          input COMA var |
+input ::= INPUT var:v {:
+            Node.Input ni = new Node.Input();
+            ni.addSonNode(v);
+            RESULT = ni;
+          :} |
+          input:i COMA var:v {:
+            i.addSonNode(v);
+            RESULT = i;
+          :} |
           INPUT error:e {:
             parser.report_error("SyntaxError en input: ", e);
           :}
           ;
 
 /** ES11.- Data**/
-data ::= DATA funcion |
-         data COMA funcion |
+data ::= DATA funcion:f {:
+            Node.Data nd = new Node.Data();
+            nd.addSonNode(f);
+            RESULT = nd;
+         :} |
+         data:nd COMA funcion:f {:
+            nd.addSonNode(f);
+            RESULT = nd;
+         :} |
          DATA error:e {:
             parser.report_error("SyntaxError en data: ", e);
          :}
@@ -478,8 +495,15 @@ data ::= DATA funcion |
 
 /** ES12.- Read **/
 
-read ::= READ var |
-         read COMA var |
+read ::= READ var:v {:
+            Node.Read nr = new Node.Read();
+            nr.addSonNode(v);
+            RESULT = nr;
+         :} |
+         read:nr COMA var:v {:
+            nr.addSonNode(v);
+            RESULT = nr;
+         :} |
          READ error:e {:
              parser.report_error("SyntaxError en read: ", e);
          :}
