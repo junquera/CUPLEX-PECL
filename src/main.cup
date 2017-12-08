@@ -34,6 +34,7 @@ parser code {:
 
         System.exit(1);
     }
+
 :};
 
 non terminal Node var, var_num_simple, var_num_suscrita, var_cadena;
@@ -317,22 +318,22 @@ funcion_suministrada ::= ABS LPAR funcion_suministrada:f RPAR {:
 
 def_funcion_nueva ::= DEF FN:f VAR_NUM:v EQU funcion:fn {:
         Node.DefFuncion ndf = new Node.DefFuncion();
-        Node.Funcion nf = new Node.Funcion((String) f + (String) v, true);
+        Node.Funcion nf = new Node.Funcion(v, true);
         ndf.addSonNode(nf);
         ndf.addSonNode(fn);
 
-        parser.tabla.add(((Node.Funcion) nf).getValue(), nf);
+        parser.tabla.add(((Node.Funcion) nf).getName(), nf);
 
         RESULT = ndf;
     :} |
     DEF FN:f VAR_NUM:v LPAR funcion:fn1 RPAR EQU funcion:fn2 {:
         Node.DefFuncion ndf = new Node.DefFuncion();
-        Node.Funcion nf = new Node.Funcion((String) f + (String) v, true);
+        Node.Funcion nf = new Node.Funcion(v, true);
         nf.addSonNode(fn1);
         ndf.addSonNode(nf);
         ndf.addSonNode(fn2);
 
-        parser.tabla.add(((Node.Funcion) nf).getValue(), nf);
+        parser.tabla.add(((Node.Funcion) nf).getName(), nf);
 
         RESULT = ndf;
     :}
@@ -340,10 +341,10 @@ def_funcion_nueva ::= DEF FN:f VAR_NUM:v EQU funcion:fn {:
 
 // TODO Cómo hacer funcion + X ?
 funcion ::= FN:f VAR_NUM:v {:
-                Node.Funcion nf = new Node.Funcion((String) f + (String) v, true);
+                Node.Funcion nf = new Node.Funcion((String) v, true);
                 RESULT = nf;
             :} | FN:f VAR_NUM:v LPAR funcion:fe RPAR {:
-                Node.Funcion nf = new Node.Funcion((String) f + (String) v, true);
+                Node.Funcion nf = new Node.Funcion((String) v, true);
                 nf.addSonNode(fe);
                 RESULT = nf;
             :}  | funcion_suministrada:fs {:
@@ -358,9 +359,12 @@ asignacion ::= LET var:v EQU funcion:f {:
     if(v.getType() != f.getType()){
         parser.report_error("Las variables asignadas tienen que ser del mismo tipo");
     }
+    Node.Literal input = parser.tabla.getLiteral(f);
+
     na.addSonNode(v);
     na.addSonNode(f);
-    parser.tabla.add(((Node.Variable) v).getName(), f);
+
+    parser.tabla.add(((Node.Variable) v).getName(), input);
     RESULT = na;
  :};
 

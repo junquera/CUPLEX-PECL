@@ -1,8 +1,10 @@
 10 PRINT "Cual es tu nombre?: "
-20 INPUT U$
+20 READ U$
+21 DATA "Hola"
 30 PRINT "Hola "; U$
 40 PRINT "Cuantas estrellas quieres?: "
-50 INPUT N
+50 READ N
+51 DATA 1
 60 LET S$ = ""
 65 LET A(1) = 55
 70 FOR I = 1 TO N

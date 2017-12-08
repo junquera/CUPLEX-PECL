@@ -61,7 +61,8 @@ public class Main {
             }
 
         } catch (Exception e) {
-            System.err.println(e);
+            System.err.println("ERROR SEMÁNTICO:");
+            System.err.println(e.getMessage());
         }
     }
 

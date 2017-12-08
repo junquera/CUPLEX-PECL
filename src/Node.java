@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Created by junquera on 6/12/17.
@@ -58,6 +59,10 @@ public abstract class Node {
             return result;
         }
 
+        public String getPrintableValue(SymbolTable st) throws Exception {
+            return st.get(this.name).getPrintableValue(st);
+        }
+
         public Literal getLiteral(SymbolTable st) throws Exception {
             return (Node.Literal) st.get(this.name);
         }
@@ -90,6 +95,19 @@ public abstract class Node {
 
         public Object getValue() {
             return value;
+        }
+
+        public void limitSize(int size){
+            if(this.getType() == STRING){
+                String aux = (String) this.value;
+                if(aux.length() > size){
+                    this.value = aux.substring(0, size);
+                }
+            }
+        }
+
+        public String getPrintableValue(SymbolTable st){
+            return this.value.toString();
         }
 
         public void setValue(Object value) {
@@ -175,6 +193,30 @@ public abstract class Node {
                     return n1.toString()+ " SUM " + n2.toString();
                 case SUB:
                     return n1.toString()+ " SUB " + n2.toString();
+                default:
+                    return getNodeType() + ": OP. DESCONOCIDA";
+            }
+        }
+
+
+        public String getPrintableValue(SymbolTable st) throws Exception {
+            Node n1 = super.sons.get(0);
+            Node n2 = super.sons.get(1);
+            Float n1Num = Float.parseFloat(n1.getPrintableValue(st));
+            Float n2Num = Float.parseFloat(n2.getPrintableValue(st));
+            switch (op) {
+                case BASIC:
+                    return getNodeType() + ": BASIC";
+                case POW:
+                    return String.valueOf(Math.pow(n1Num, n2Num));
+                case MUL:
+                    return String.valueOf(n1Num * n2Num);
+                case DIV:
+                    return String.valueOf(n1Num / n2Num);
+                case SUM:
+                    return String.valueOf(n1Num + n2Num);
+                case SUB:
+                    return String.valueOf(n1Num - n2Num);
                 default:
                     return getNodeType() + ": OP. DESCONOCIDA";
             }
@@ -266,15 +308,15 @@ public abstract class Node {
     public static class Funcion extends BinExpression {
         private boolean created;
 
-        private String value;
+        private String name;
 
-        public Funcion(String value) {
-            this.value = value;
+        public Funcion(String name) {
+            this.name = name;
             this.created = false;
         }
 
-        public Funcion(String value, boolean created) {
-            this.value = value;
+        public Funcion(String name, boolean created) {
+            this.name = name;
             this.created = created;
         }
 
@@ -286,12 +328,12 @@ public abstract class Node {
             this.created = created;
         }
 
-        public String getValue() {
-            return value;
+        public String getName() {
+            return name;
         }
 
-        public void setValue(String value) {
-            this.value = value;
+        public void setName(String name) {
+            this.name = name;
         }
     }
 
@@ -331,24 +373,89 @@ public abstract class Node {
 
                 // Análisis de número de linea
                 if(nl.getLineNumber() < lastLineNumber)
-                    throw new Exception("Error en la linea " + i + ": número menor que linea anterior");
+                    throw new Exception("Error en la linea " + (i+1) + ": número menor que linea anterior");
                 lastLineNumber = nl.getLineNumber();
 
                 ns = nl.getSentence();
 
-                // Análisis de bucle FOR
-                if(ns instanceof Node.ForTo) {
-                    i = fillFor(i + 1, (ForTo) ns);
-                }
-
-                // Análisis de INPUT
-                if(ns instanceof Node.Input){
-
-                }
+                i = fillExtra(i, ns);
 
                 addSonNode(nl);
                 i++;
             } while(!(ns instanceof Node.End));
+
+        }
+
+        public int fillExtra(int start, Node ns) throws Exception{
+            int i = start;
+            if(ns instanceof Node.ForTo) {
+                // Análisis de bucle FOR
+                i = fillFor(i + 1, (ForTo) ns);
+            }else  if(ns instanceof Node.OnGoTo) {
+                // Análisis de ONGOTO
+                i = fillOnGoTo(i + 1, (OnGoTo) ns);
+            }else if(ns instanceof Node.Input){
+                // Análisis de INPUT
+                checkInput((Node.Input) ns);
+            } else if(ns instanceof Node.Read){
+                i = checkRead(i);
+            } else if(ns instanceof Node.Data){
+                throw new Exception("Error en linea " + (i+1) + ": La orden DATA debe ir precedida por READ");
+            }
+            return i;
+        }
+
+        public void checkInput(Node.Input ni) throws Exception {
+            List<Node> inputSons = ni.getSons();
+
+            Scanner sc = new Scanner(System.in);
+            for(Node n: inputSons){
+                Node.Variable nv = (Node.Variable) n;
+                String name = nv.getName();
+                System.out.print("Valor para " + name + ": ");
+                if(nv.getType() == Variable.STRING){
+                    String i = sc.next();
+                    tabla.add(name, new Node.Literal(i, Literal.STRING));
+                } else {
+                    Float f = sc.nextFloat();
+                    if(f.floatValue() > f.intValue()){
+                        tabla.add(name, new Node.Literal(f, Literal.NUMERIC));
+                    } else {
+                        tabla.add(name, new Node.Literal(new Integer(f.intValue()), Literal.NUMERIC));
+                    }
+                }
+            }
+        }
+
+        public int checkRead(int i) throws Exception {
+            Node.Linea nlInput = lineas.get(i);
+            Node.Linea nlData = lineas.get(i+1);
+
+            if(nlData.getSentence() instanceof Node.Data){
+                Node.Read ni = (Read) nlInput.getSentence();
+                Node.Data nd = (Data) nlData.getSentence();
+
+                List<Node> readSons = ni.getSons();
+                List<Node> dataSons = nd.getSons();
+
+                if(readSons.size() != dataSons.size())
+                    throw new Exception("Error en linea " + (i+1) + ": READ y DATA tienen que tener el mismo número de valores.");
+
+                for(int x=0; x < readSons.size(); x++){
+                    Node.Variable auxI = (Variable) readSons.get(x);
+                    Node auxD = dataSons.get(x);
+
+                    if(auxI.getType() != auxD.getType())
+                        throw new Exception("Error en el dato " + x + " de la linea " + (i+1) + ": Los valores de INPUT y DATA tienen que tener el mismo tipo.");
+
+                    tabla.add(auxI.getName(), auxD);
+                }
+
+            } else{
+                throw new Exception("Error en linea " + (i+1) + ": Tras una linea READ debe haber una DATA.");
+            }
+
+            return i+1;
 
         }
 
@@ -360,15 +467,38 @@ public abstract class Node {
             do{
                 nl = lineas.get(i);
                 if(nl.getLineNumber() < lastLineNumber)
-                    throw new Exception("Error en la linea " + i + ": número menor que linea anterior");
+                    throw new Exception("Error en la linea " + (i+1) + ": número menor que linea anterior");
                 lastLineNumber = nl.getLineNumber();
                 ns = nl.getSentence();
-                if(ns instanceof Node.ForTo) {
-                    i = fillFor(i, (ForTo) ns);
-                }
+
+                i = fillExtra(i, ns);
+
                 nf.addSonNode(nl);
                 i++;
             } while(!(ns instanceof Node.Next));
+            return i;
+        }
+
+        public int fillOnGoTo(int start, Node.OnGoTo ogt) throws Exception {
+            int i = start;
+            Node.Linea nl;
+            int lastLineNumber = -1;
+
+            Node.Sentencia ns;
+
+            do{
+                nl = lineas.get(i);
+                if(nl.getLineNumber() < lastLineNumber)
+                    throw new Exception("Error en la linea " + (i+1) + ": número menor que linea anterior");
+                lastLineNumber = nl.getLineNumber();
+                ns = nl.getSentence();
+
+                i = fillExtra(i, ns);
+
+                ogt.addSonNode(nl);
+                i++;
+            } while(!(ns instanceof Node.Return));
+
             return i;
         }
     }
@@ -565,6 +695,10 @@ public abstract class Node {
         for (Node n : sons)
             if (n != null)
                 n.check();
+    }
+
+    public String getPrintableValue(SymbolTable st) throws Exception {
+        return this.toString();
     }
 
 }

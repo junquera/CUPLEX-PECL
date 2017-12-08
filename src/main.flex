@@ -21,8 +21,8 @@ import java.lang.reflect.Field;
         return new BASICSymbol(type, yyline + 1, yycolumn + 1);
     }
 
-    private Symbol symbol(int type, Object value){
-        return new BASICSymbol(type, yyline + 1, yycolumn + 1, value);
+    private Symbol symbol(int type, Object name){
+        return new BASICSymbol(type, yyline + 1, yycolumn + 1, name);
     }
 
     public int getLine(){
