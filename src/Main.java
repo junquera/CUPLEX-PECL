@@ -46,7 +46,10 @@ public class Main {
                 }
                 System.out.println("Arregle los errores y vuelva a intentarlo.");
             } else {
+                Node.Programa programa = (Node.Programa) parse_tree.value;
                 System.out.println("Entrada correcta");
+                programa.check();
+                System.out.println(programa.getTree());
             }
 
         } catch (Exception e) {

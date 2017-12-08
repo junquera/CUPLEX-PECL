@@ -6,10 +6,9 @@ import java_cup.runtime.*;
 
 %unicode
 
+%cup
 %line
 %column
-
-%cup
 
 %{
     StringBuffer string = new StringBuffer();
@@ -19,6 +18,10 @@ import java_cup.runtime.*;
 
     private Symbol symbol(int type, Object value){
         return new BASICSymbol(type, yyline + 1, yycolumn + 1, value);
+    }
+
+    public int getLine(){
+        return yyline;
     }
 
 %}

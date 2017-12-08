@@ -7,7 +7,7 @@ public class SyntaxError {
     private int line;
     private int column;
 
-    public SyntaxError(String message, int line, int column){
+    public SyntaxError(String message, int line, int column) {
         this.message = message;
         this.line = line;
         this.column = column;
@@ -25,7 +25,11 @@ public class SyntaxError {
         return column;
     }
 
-    public String toString(){
-        return message + " at line " + line + " and column " + column;
+    public String toString() {
+
+        String res = message + " (at line " + line;
+        if(column >= 0)
+            res += " and column " + column;
+        return res + ")";
     }
 }

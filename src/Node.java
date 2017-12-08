@@ -131,7 +131,7 @@ public abstract class Node {
         public void addSonNode(Node n) throws Exception {
 
             if (n.getType() != Literal.NUMERIC)
-                throw new Exception("Sólo acepto números");
+                throw new Exception("ERROR SEMÁNTICO: Las expresiones numéricas solo aceptan valores numéricos");
 
             super.addSonNode(n);
         }
@@ -258,7 +258,59 @@ public abstract class Node {
     }
 
     public static class Programa extends Node {
-        public Programa() {
+        List<Linea> lineas;
+
+        public Programa(List<Linea> lineas) {
+            this.lineas = lineas;
+        }
+
+        public List<Linea> getLineas() {
+            return lineas;
+        }
+
+        public void setLineas(List<Linea> lineas) {
+            this.lineas = lineas;
+        }
+
+        public void check() throws Exception {
+
+            int i = 0;
+            Node.Linea nl;            int lastLineNumber = -1;
+
+            Node.Sentencia ns;
+            do{
+                nl = lineas.get(i);
+                if(nl.getLineNumber() < lastLineNumber)
+                    throw new Exception("Error en la linea " + nl.getLineNumber() + ": número menor que linea anterior");
+                lastLineNumber = nl.getLineNumber();
+                ns = nl.getSentence();
+                if(ns instanceof Node.ForTo) {
+                    i = fillFor(i + 1, (ForTo) ns);
+                }
+                addSonNode(nl);
+                i++;
+            } while(!(ns instanceof Node.End));
+
+        }
+
+        public int fillFor(int start, Node.ForTo nf) throws Exception {
+            int i = start;
+            Node.Linea nl;
+            int lastLineNumber = -1;
+            Node.Sentencia ns;
+            do{
+                nl = lineas.get(i);
+                if(nl.getLineNumber() < lastLineNumber)
+                    throw new Exception("Error en la linea " + nl.getLineNumber() + ": número menor que linea anterior");
+                lastLineNumber = nl.getLineNumber();
+                ns = nl.getSentence();
+                if(ns instanceof Node.ForTo) {
+                    i = fillFor(i, (ForTo) ns);
+                }
+                nf.addSonNode(nl);
+                i++;
+            } while(!(ns instanceof Node.Next));
+            return i;
         }
     }
 
@@ -303,6 +355,7 @@ public abstract class Node {
     public static class Asignacion extends Sentencia {
         public Asignacion() {
         }
+
     }
 
     public static class GoTo extends Sentencia {

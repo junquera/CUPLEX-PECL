@@ -12,9 +12,16 @@ parser code {:
     public void report_error(String message, Object info) {
         if(info instanceof BASICSymbol) {
             BASICSymbol s = ((BASICSymbol) info);
-            errors.add(new SyntaxError(message, s.getLine(), s.getColumn()));
+            report_error(message, s.getLine(), s.getColumn());
         }
+    }
 
+    public void report_error(String message, int line, int column) {
+        errors.add(new SyntaxError(message, line, column));
+    }
+    public void report_error(String message) {
+        int line = ((BASICLexer) getScanner()).getLine();
+        errors.add(new SyntaxError(message, line, -1));
     }
 
     public void report_fatal_error(String message, Object info) {
@@ -57,32 +64,7 @@ terminal String STRING;
 start with programa;
 
 programa ::= lineas:ls {:
-    Node.Programa p = new Node.Programa();
-    // TODO Controlar aquí gosub-return y for-end
-    int i = 0;
-    Node.Linea nl;
-    Node.Sentencia ns;
-    do{
-        nl = ls.get(i);
-        ns = nl.getSentence();
-        if(ns instanceof Node.ForTo) {
-            int for_index = i;
-            Node.Linea nlaux;
-            do {
-                i++;
-                nlaux = ls.get(i);
-                ns.addSonNode(nlaux);
-           } while(!(nlaux.getSentence() instanceof Node.Next));
-           nl.setSentence(ns);
-        }
-        p.addSonNode(nl);
-        i++;
-    } while(!(ns instanceof Node.End));
-
-
-    p.check();
-    System.out.println(p.getTree());
-    RESULT = p;
+    RESULT = new Node.Programa(ls);
 :};
 
 lineas ::=  linea:l {:
@@ -160,6 +142,9 @@ sentencia ::=   asignacion:s {:
                 :} |
                 STOP {:
                     RESULT = new Node.Stop();
+                :} |
+                ERROR:e {:
+                    parser.report_error("Error léxico", e);
                 :};
 
 
@@ -367,6 +352,9 @@ funcion ::= FN:f VAR_NUM:v {:
 
 asignacion ::= LET var:v EQU funcion:f {:
     Node.Asignacion na = new Node.Asignacion();
+    if(v.getType() != f.getType()){
+        parser.report_error("Las variables asignadas tienen que ser del mismo tipo");
+    }
     na.addSonNode(v);
     na.addSonNode(f);
     parser.tabla.add(((Node.Variable) v).getName(), f);
@@ -431,10 +419,10 @@ if_then ::= IF conditional_expression:ce THEN literal_num:l {:
                 RESULT = nit;
             :}|
             IF conditional_expression THEN error:e {:
-                parser.report_error("SyntaxError en if: IF c THEN (numero de linea)", e);
+                parser.report_error("SyntaxError en if: IF c THEN (numero de linea)");
             :} |
             IF error:e {:
-                parser.report_error("SyntaxError en if: ", e);
+                parser.report_error("SyntaxError en if: ");
             :};
 
 gosub ::= GOSUB literal_num:l {:
@@ -512,7 +500,7 @@ input ::= INPUT var:v {:
             RESULT = i;
           :} |
           INPUT error:e {:
-            parser.report_error("SyntaxError en input: ", e);
+            parser.report_error("SyntaxError en input: ");
           :}
           ;
 
@@ -527,7 +515,7 @@ data ::= DATA funcion:f {:
             RESULT = nd;
          :} |
          DATA error:e {:
-            parser.report_error("SyntaxError en data: ", e);
+            parser.report_error("SyntaxError en data: ");
          :}
          ;
 
@@ -544,7 +532,7 @@ read ::= READ var:v {:
             RESULT = nr;
          :} |
          READ error:e {:
-             parser.report_error("SyntaxError en read: ", e);
+             parser.report_error("SyntaxError en read: ");
          :}
          ;
 
@@ -563,7 +551,7 @@ declaracion_dim ::= VAR_NUM LPAR literal_num:l RPAR {:
                         RESULT = ndd;
                     :}  |
                     VAR_NUM LPAR error:e RPAR {:
-                        parser.report_error("Hay que introducir un entero; o dos separados por comas (','): ", e);
+                        parser.report_error("Hay que introducir un entero; o dos separados por comas (','): ");
                     :};
 
 dim ::= DIM declaracion_dim:dd {:
