@@ -5,25 +5,35 @@ import java.util.HashMap;
  */
 public class SymbolTable {
 
-    private HashMap<String, BASICSymbol> map;
+    private HashMap<String, Node> map;
 
-    public SymbolTable(){
+    public SymbolTable() {
         this.map = new HashMap<>();
     }
 
-    public void add(String name, BASICSymbol v){
+    // TODO Diferenciar variable de función
+    public void add(String name, Node v) throws Exception {
+        if (exists(name)) {
+            update(name, v);
+        }
         this.map.put(name, v);
     }
 
-    public BASICSymbol get(String name){
+    public Node get(String name) throws Exception {
+        if (!exists(name)) {
+            throw new Exception("ERROR SEMÁNTICO: LA VARIABLE " + name + " NO HA SIDO DEFINIDA");
+        }
         return this.map.get(name);
     }
 
-    public void update(String name, BASICSymbol v){
+    public void update(String name, Node v) throws Exception {
+        if (!exists(name)) {
+            throw new Exception("ERROR, LA VARIABLE NO EXISTE");
+        }
         this.map.put(name, v);
     }
 
-    public boolean exists(String name){
+    public boolean exists(String name) {
         return this.map.containsKey(name);
     }
 

@@ -59,8 +59,27 @@ start with programa;
 programa ::= lineas:ls {:
     Node.Programa p = new Node.Programa();
     // TODO Controlar aquí gosub-return y for-end
-    for(Node.Linea nl: ls)
+    int i = 0;
+    Node.Linea nl;
+    Node.Sentencia ns;
+    do{
+        nl = ls.get(i);
+        ns = nl.getSentence();
+        if(ns instanceof Node.ForTo) {
+            int for_index = i;
+            Node.Linea nlaux;
+            do {
+                i++;
+                nlaux = ls.get(i);
+                ns.addSonNode(nlaux);
+           } while(!(nlaux.getSentence() instanceof Node.Next));
+           nl.setSentence(ns);
+        }
         p.addSonNode(nl);
+        i++;
+    } while(!(ns instanceof Node.End));
+
+
     p.check();
     System.out.println(p.getTree());
     RESULT = p;
@@ -313,6 +332,9 @@ def_funcion_nueva ::= DEF FN:f VAR_NUM:v EQU funcion:fn {:
         Node.Funcion nf = new Node.Funcion((String) f + (String) v, true);
         ndf.addSonNode(nf);
         ndf.addSonNode(fn);
+
+        parser.tabla.add(((Node.Funcion) nf).getValue(), nf);
+
         RESULT = ndf;
     :} |
     DEF FN:f VAR_NUM:v LPAR funcion:fn1 RPAR EQU funcion:fn2 {:
@@ -321,6 +343,9 @@ def_funcion_nueva ::= DEF FN:f VAR_NUM:v EQU funcion:fn {:
         nf.addSonNode(fn1);
         ndf.addSonNode(nf);
         ndf.addSonNode(fn2);
+
+        parser.tabla.add(((Node.Funcion) nf).getValue(), nf);
+
         RESULT = ndf;
     :}
 ;
@@ -344,6 +369,7 @@ asignacion ::= LET var:v EQU funcion:f {:
     Node.Asignacion na = new Node.Asignacion();
     na.addSonNode(v);
     na.addSonNode(f);
+    parser.tabla.add(((Node.Variable) v).getName(), f);
     RESULT = na;
  :};
 
@@ -428,8 +454,21 @@ on_goto ::= ON conditional_expression:ce GOTO {:
             :};
 
 /** ES8.- For-To **/
-for_to ::= FOR var EQU funcion TO funcion |
-           FOR var EQU funcion TO funcion STEP funcion
+for_to ::= FOR var:v EQU funcion:f1 TO funcion:f2 {:
+            Node.ForTo nft = new Node.ForTo();
+            nft.addSonNode(v);
+            nft.addSonNode(f1);
+            nft.addSonNode(f2);
+            RESULT = nft;
+           :} |
+           FOR var:v EQU funcion:f1 TO funcion:f2 STEP funcion:f3 {:
+              Node.ForTo nft = new Node.ForTo();
+              nft.addSonNode(v);
+              nft.addSonNode(f1);
+              nft.addSonNode(f2);
+              nft.addSonNode(f3);
+              RESULT = nft;
+         :}
            ;
 
 next ::= NEXT var:v {:
@@ -512,14 +551,30 @@ read ::= READ var:v {:
 
 /** ES13.- Dim **/
 // TODO Revisar esto
-declaracion_dim ::= VAR_NUM LPAR INTEGER RPAR |
-                    VAR_NUM LPAR INTEGER COMA INTEGER RPAR |
+declaracion_dim ::= VAR_NUM LPAR literal_num:l RPAR {:
+                        Node.DeclDim ndd = new Node.DeclDim();
+                        ndd.addSonNode(l);
+                        RESULT = ndd;
+                    :} |
+                    VAR_NUM LPAR literal_num:l1 COMA literal_num:l2 RPAR {:
+                        Node.DeclDim ndd = new Node.DeclDim();
+                        ndd.addSonNode(l1);
+                        ndd.addSonNode(l2);
+                        RESULT = ndd;
+                    :}  |
                     VAR_NUM LPAR error:e RPAR {:
                         parser.report_error("Hay que introducir un entero; o dos separados por comas (','): ", e);
                     :};
 
-dim ::= DIM declaracion_dim
-        | dim COMA declaracion_dim
+dim ::= DIM declaracion_dim:dd {:
+            Node.Dim nd = new Node.Dim();
+            nd.addSonNode(dd);
+            RESULT = nd;
+        :} |
+        dim:nd COMA declaracion_dim:dd {:
+            nd.addSonNode(dd);
+            RESULT = nd;
+        :}
         ;
 
 

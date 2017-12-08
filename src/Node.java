@@ -283,6 +283,16 @@ public abstract class Node {
         }
 
         // TODO Nuevo método para saber qué clase tiene la sentencia
+        public Class getSentenceClass(){
+            return super.getSons().get(0).getClass();
+        }
+
+        public Sentencia getSentence(){
+            return (Sentencia) super.getSons().get(0);
+        }
+        public void setSentence(Sentencia n){
+            super.sons.set(0, n);
+        }
     }
 
     public static class Sentencia extends Node {
@@ -290,17 +300,17 @@ public abstract class Node {
         }
     }
 
-    public static class Asignacion extends Node {
+    public static class Asignacion extends Sentencia {
         public Asignacion() {
         }
     }
 
-    public static class GoTo extends Node {
+    public static class GoTo extends Sentencia {
         public GoTo() {
         }
     }
 
-    public static class IfThen extends Node {
+    public static class IfThen extends Sentencia {
 
         public IfThen() {
         }
@@ -308,78 +318,78 @@ public abstract class Node {
 
     }
 
-    public static class GoSub extends Node {
+    public static class GoSub extends Sentencia {
         public GoSub() {
         }
     }
 
-    public static class OnGoTo extends Node {
+    public static class OnGoTo extends Sentencia {
         public OnGoTo() {
         }
     }
 
-    public static class Stop extends Node {
+    public static class Stop extends Sentencia {
         public Stop() {
         }
     }
 
-    public static class ForTo extends Node {
+    public static class ForTo extends Sentencia {
         public ForTo() {
         }
     }
 
-    public static class Next extends Node {
+    public static class Next extends Sentencia {
         public Next() {
         }
     }
 
-    public static class Print extends Node {
+    public static class Print extends Sentencia {
         public Print() {
         }
     }
 
-    public static class Input extends Node {
+    public static class Input extends Sentencia {
         public Input() {
         }
     }
 
-    public static class DefFuncion extends Node {
+    public static class DefFuncion extends Sentencia {
         public DefFuncion() {
         }
     }
 
-    public static class Data extends Node {
+    public static class Data extends Sentencia {
         public Data() {
         }
     }
 
-    public static class Read extends Node {
+    public static class Read extends Sentencia {
         public Read() {
         }
     }
 
-    public static class Dim extends Node {
+    public static class Dim extends Sentencia {
         public Dim() {
         }
     }
 
-    public static class Rem extends Node {
+    public static class Rem extends Sentencia {
         public Rem() {
         }
     }
-    public static class Randomize extends Node {
+    public static class Randomize extends Sentencia {
         public Randomize() {
         }
     }
-    public static class Return extends Node {
+    public static class Return extends Sentencia {
         public Return() {
         }
     }
-    public static class Restore extends Node {
+    public static class Restore extends Sentencia {
         public Restore() {
         }
     }
-    public static class End extends Node {
+    public static class End extends Sentencia {
         public End() {
         }
     }
@@ -417,8 +427,8 @@ public abstract class Node {
     public String getTree(int level) {
         StringBuffer result = new StringBuffer();
         if (level > 0) {
-            for (int i = 1; i < level - 1; i++)
-                result.append("|  ");
+            for (int i = 0; i < level - 1; i++)
+                result.append("|    ");
             result.append("+----");
         }
         result.append("[" + toString() + "]\n");
@@ -428,6 +438,7 @@ public abstract class Node {
                     result.append(n.getTree(level + 1));
                 }
         }
+
         return result.toString();
     }
 
