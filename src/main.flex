@@ -1,4 +1,6 @@
 import java_cup.runtime.*;
+import java.util.*;
+import java.lang.reflect.Field;
 
 %%
 
@@ -9,9 +11,12 @@ import java_cup.runtime.*;
 %cup
 %line
 %column
-
+%function nextToken
 %{
+    List<BASICSymbol> tokens = new ArrayList<>();
+
     StringBuffer string = new StringBuffer();
+
     private Symbol symbol(int type) {
         return new BASICSymbol(type, yyline + 1, yycolumn + 1);
     }
@@ -24,6 +29,32 @@ import java_cup.runtime.*;
         return yyline;
     }
 
+    // Funcion para guardar los tokens
+    public Symbol next_token() throws java.io.IOException{
+        BASICSymbol s = (BASICSymbol) nextToken();
+        tokens.add(s);
+        return s;
+    }
+
+    public String toString(){
+        HashMap<Integer, String> tokenValues = new HashMap<>();
+
+        Field[] fields = sym.class.getFields();
+
+        for(Field f: fields){
+            try{
+                tokenValues.put(f.getInt(null), f.getName());
+            }catch(Exception e){}
+        }
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("[");
+        for(BASICSymbol s: tokens){
+            sb.append(s.toTokenString(tokenValues) + ",");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 %}
 
 

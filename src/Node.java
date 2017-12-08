@@ -57,48 +57,66 @@ public abstract class Node {
             }
             return result;
         }
+
+        public Literal getLiteral(SymbolTable st) throws Exception {
+            return (Node.Literal) st.get(this.name);
+        }
     }
 
+    // TODO Get values
     public static class Literal extends Node {
 
         public static final int NUMERIC = 0;
         public static final int STRING = 1;
         public static final int BOOL = 2;
 
-        private Object content;
+        private Object value;
         private int type;
+        private boolean isFloat;
 
         public Literal() {
         }
 
-        public Literal(Object content) {
-            this.content = content;
+        public Literal(Object value) {
+            this.value = value;
+            this.isFloat = value instanceof Float;
+            this.type = NUMERIC;
         }
 
-        public Literal(Object content, int type) {
-            this.content = content;
+        public Literal(Object value, int type) {
+            this(value);
             this.type = type;
         }
 
-        public Object getContent() {
-            return content;
+        public Object getValue() {
+            return value;
         }
 
-        public void setContent(Object content) {
-            this.content = content;
+        public void setValue(Object value) {
+            this.value = value;
         }
 
         public String toString() {
             switch (type) {
                 case NUMERIC:
-                    return "Literal numérico: " + content;
+                    return "Literal numérico: " + value;
                 case STRING:
-                    return "Literal cadena: " + content;
+                    return "Literal cadena: " + value;
                 case BOOL:
-                    return "Literal booleano: " + content;
+                    return "Literal booleano: " + value;
                 default:
                     return "Literal desconocido...";
             }
+        }
+
+        public boolean isFloat(){
+            return this.isFloat;
+        }
+
+        public void castToInt() {
+            if(this.type == NUMERIC && isFloat)
+                this.value = Integer.valueOf((int) ((Float) value).floatValue());
+            this.isFloat = false;
         }
 
         public int getType() {
@@ -107,6 +125,10 @@ public abstract class Node {
 
         public void setType(int type) {
             this.type = type;
+        }
+
+        public Literal getLiteral(SymbolTable st) throws Exception {
+            return this;
         }
     }
 
@@ -138,19 +160,21 @@ public abstract class Node {
 
 
         public String toString() {
+            Node n1 = super.sons.get(0);
+            Node n2 = super.sons.get(1);
             switch (op) {
                 case BASIC:
                     return getNodeType() + ": BASIC";
                 case POW:
-                    return getNodeType() + ": POW";
+                    return n1.toString()+ " POW " + n2.toString();
                 case MUL:
-                    return getNodeType() + ": MUL";
+                    return n1.toString()+ " MUL " + n2.toString();
                 case DIV:
-                    return getNodeType() + ": DIV";
+                    return n1.toString()+ " DIV " + n2.toString();
                 case SUM:
-                    return getNodeType() + ": SUM";
+                    return n1.toString()+ " SUM " + n2.toString();
                 case SUB:
-                    return getNodeType() + ": SUB";
+                    return n1.toString()+ " SUB " + n2.toString();
                 default:
                     return getNodeType() + ": OP. DESCONOCIDA";
             }
@@ -162,6 +186,20 @@ public abstract class Node {
 
         public void setOp(int op) {
             this.op = op;
+        }
+
+        public boolean isFloat(){
+            for(Node n: super.sons){
+                if(n.isFloat())
+                    return true;
+            }
+            return false;
+        }
+
+        public void castToInt() {
+            for(Node n: super.sons){
+                n.castToInt();
+            }
         }
 
         public int getType() {
@@ -259,9 +297,11 @@ public abstract class Node {
 
     public static class Programa extends Node {
         List<Linea> lineas;
+        public SymbolTable tabla;
 
-        public Programa(List<Linea> lineas) {
+        public Programa(List<Linea> lineas, SymbolTable tabla) {
             this.lineas = lineas;
+            this.tabla = tabla;
         }
 
         public List<Linea> getLineas() {
@@ -272,6 +312,14 @@ public abstract class Node {
             this.lineas = lineas;
         }
 
+        public SymbolTable getTabla() {
+            return tabla;
+        }
+
+        public void setTabla(SymbolTable tabla) {
+            this.tabla = tabla;
+        }
+
         public void check() throws Exception {
 
             int i = 0;
@@ -280,13 +328,24 @@ public abstract class Node {
             Node.Sentencia ns;
             do{
                 nl = lineas.get(i);
+
+                // Análisis de número de linea
                 if(nl.getLineNumber() < lastLineNumber)
-                    throw new Exception("Error en la linea " + nl.getLineNumber() + ": número menor que linea anterior");
+                    throw new Exception("Error en la linea " + i + ": número menor que linea anterior");
                 lastLineNumber = nl.getLineNumber();
+
                 ns = nl.getSentence();
+
+                // Análisis de bucle FOR
                 if(ns instanceof Node.ForTo) {
                     i = fillFor(i + 1, (ForTo) ns);
                 }
+
+                // Análisis de INPUT
+                if(ns instanceof Node.Input){
+
+                }
+
                 addSonNode(nl);
                 i++;
             } while(!(ns instanceof Node.End));
@@ -301,7 +360,7 @@ public abstract class Node {
             do{
                 nl = lineas.get(i);
                 if(nl.getLineNumber() < lastLineNumber)
-                    throw new Exception("Error en la linea " + nl.getLineNumber() + ": número menor que linea anterior");
+                    throw new Exception("Error en la linea " + i + ": número menor que linea anterior");
                 lastLineNumber = nl.getLineNumber();
                 ns = nl.getSentence();
                 if(ns instanceof Node.ForTo) {
@@ -493,6 +552,13 @@ public abstract class Node {
         }
 
         return result.toString();
+    }
+
+    public boolean isFloat(){
+        return false;
+    }
+
+    public void castToInt() {
     }
 
     public void check() throws Exception {

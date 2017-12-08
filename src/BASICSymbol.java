@@ -1,3 +1,5 @@
+import java.util.HashMap;
+
 /**
  * Created by junquera on 4/12/17.
  */
@@ -26,6 +28,10 @@ public class BASICSymbol extends java_cup.runtime.Symbol {
 
     public int getColumn() {
         return column;
+    }
+
+    public String toTokenString(HashMap<Integer, String> tokenValues) {
+        return tokenValues.get(sym)  + (value == null ? "" : ("("+value+")"));
     }
 
     public String toString() {

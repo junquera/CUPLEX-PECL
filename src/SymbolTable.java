@@ -27,9 +27,16 @@ public class SymbolTable {
     }
 
     public void update(String name, Node v) throws Exception {
-        if (!exists(name)) {
+        if (!exists(name))
             throw new Exception("ERROR, LA VARIABLE NO EXISTE");
-        }
+
+        if(v instanceof Node.Funcion)
+            if(!(get(name) instanceof Node.Funcion))
+                throw new Exception("ERROR: " + name + " is not a function");
+        else
+            if(get(name) instanceof Node.Funcion)
+                throw new Exception("ERROR: " + name + " is a function");
+
         this.map.put(name, v);
     }
 
@@ -37,5 +44,17 @@ public class SymbolTable {
         return this.map.containsKey(name);
     }
 
+    public String toString(){
+        StringBuffer sb = new StringBuffer();
+        for(String key: map.keySet()){
+            try {
+                Node n = get(key);
+                sb.append("" + key + "\t|\t" + n.getNodeType() + "\t\t|\t" + n.toString() + "\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return sb.toString();
+    }
 
 }

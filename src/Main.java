@@ -47,14 +47,21 @@ public class Main {
                 System.out.println("Arregle los errores y vuelva a intentarlo.");
             } else {
                 Node.Programa programa = (Node.Programa) parse_tree.value;
-                System.out.println("Entrada correcta");
+
                 programa.check();
+
+                System.out.println("Análisis léxico:");
+                System.out.println(bl);
+                System.out.println("Análisis sintáctico:");
                 System.out.println(programa.getTree());
+                System.out.println("Tabla de símbolos:");
+                System.out.println(programa.getTabla());
+
+                System.out.println("Entrada correcta");
             }
 
         } catch (Exception e) {
             System.err.println(e);
-            System.out.println("Horror");
         }
     }
 
@@ -67,7 +74,6 @@ public class Main {
 
 
         for(Field f: fields){
-
             tokenValues.put(f.getInt(null), f.getName());
         }
 

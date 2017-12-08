@@ -26,7 +26,12 @@ parser code {:
 
     public void report_fatal_error(String message, Object info) {
         System.err.println("!! FATAL ERROR !!");
-        report_error(message, info);
+
+        if(info instanceof BASICSymbol) {
+            BASICSymbol s = ((BASICSymbol) info);
+            System.err.println(message + " (line " + s.getLine() + ", column " + s.getColumn() + ")");
+        }
+
         System.exit(1);
     }
 :};
@@ -64,7 +69,7 @@ terminal String STRING;
 start with programa;
 
 programa ::= lineas:ls {:
-    RESULT = new Node.Programa(ls);
+    RESULT = new Node.Programa(ls, parser.tabla);
 :};
 
 lineas ::=  linea:l {:
@@ -198,10 +203,7 @@ basic_expression ::= literal:e {:
                    :} |
                     var:e {:
                           RESULT = e;
-                     :} |
-                   LPAR basic_expression:b RPAR {:
-                        RESULT = b;
-                    :};
+                     :};
 
 pow_expression ::= basic_expression:e {:
                         RESULT = e;
@@ -230,23 +232,24 @@ multiplicative_expression ::=
               RESULT = be;
        :};
 
-additive_expression ::=
-		multiplicative_expression:e {:
-             RESULT = e;
-        :}
-	|	additive_expression:e1 SUM multiplicative_expression:e2 {:
-              Node.BinExpression be = new Node.BinExpression(Node.BinExpression.SUM);
-              be.addSonNode(e1);
-              be.addSonNode(e2);
-              RESULT = be;
-       :}
-	|	additive_expression:e1 SUB multiplicative_expression:e2 {:
-              Node.BinExpression be = new Node.BinExpression(Node.BinExpression.SUB);
-              be.addSonNode(e1);
-              be.addSonNode(e2);
-              RESULT = be;
-       :}
-	;
+additive_expression ::= multiplicative_expression:e {:
+                             RESULT = e;
+                        :} |
+                        LPAR additive_expression:e RPAR {:
+                           RESULT = e;
+                        :} |
+                        additive_expression:e1 SUM multiplicative_expression:e2 {:
+                              Node.BinExpression be = new Node.BinExpression(Node.BinExpression.SUM);
+                              be.addSonNode(e1);
+                              be.addSonNode(e2);
+                              RESULT = be;
+                        :} |
+                        additive_expression:e1 SUB multiplicative_expression:e2 {:
+                              Node.BinExpression be = new Node.BinExpression(Node.BinExpression.SUB);
+                              be.addSonNode(e1);
+                              be.addSonNode(e2);
+                              RESULT = be;
+                        :};
 
 /** ES3.- Funciones suministradas**/
 
@@ -415,6 +418,7 @@ goto ::= GOTO literal_num:l {:
 if_then ::= IF conditional_expression:ce THEN literal_num:l {:
                 Node.IfThen nit = new Node.IfThen();
                 nit.addSonNode(ce);
+                l.castToInt();
                 nit.addSonNode(l);
                 RESULT = nit;
             :}|
@@ -427,6 +431,7 @@ if_then ::= IF conditional_expression:ce THEN literal_num:l {:
 
 gosub ::= GOSUB literal_num:l {:
             Node.GoSub ngs = new Node.GoSub();
+            l.castToInt();
             ngs.addSonNode(l);
             RESULT = ngs;
         :};
