@@ -50,7 +50,7 @@ import java.lang.reflect.Field;
         StringBuffer sb = new StringBuffer();
         sb.append("[");
         for(BASICSymbol s: tokens){
-            sb.append(s.toTokenString(tokenValues) + ",");
+            sb.append(s.toTokenString(tokenValues) + ", ");
         }
         sb.append("]");
         return sb.toString();
@@ -167,8 +167,9 @@ Num_Escalar = {Num_Real}[E]{Num_Entero}
     /* {EOF} { return symbol(sym.EOF); } */
     <<EOF>> { return symbol(sym.EOF); }
 
+    /* RL 1. */
     . {
-        System.out.println("LexError <" + yytext() + "> linea: " + (yyline + 1) + " columna: " + (yycolumn + 1));
+        System.err.println("LexError <" + yytext() + "> linea: " + (yyline + 1) + " columna: " + (yycolumn + 1));
         return symbol(sym.ERROR, new LexError(yytext(), yyline, yycolumn));
     }
 }

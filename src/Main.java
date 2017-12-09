@@ -10,7 +10,6 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public class Main {
     static boolean do_debug_parse = false;
     private Symbol s;
@@ -20,7 +19,7 @@ public class Main {
     }
 
     public static void parse(String[] args) throws Exception {
-        String program = "src/programa1.bas";
+        String program = "src/programa_simple.bas";
         if (args.length > 1)
             program = args[1];
 
@@ -50,19 +49,26 @@ public class Main {
 
                 programa.check();
 
-                System.out.println("Análisis léxico:");
-                System.out.println(bl);
-                System.out.println("Análisis sintáctico:");
-                System.out.println(programa.getTree());
-                System.out.println("Tabla de símbolos:");
-                System.out.println(programa.getTabla());
+                String lex = bl.toString();
+                String syn = programa.getTree();
+                String tab = programa.getTabla().toString();
+
+                System.out.println("\n/**************************/\n/** Análisis léxico     **/\n/**************************/\n");
+                System.out.println(lex);
+
+                System.out.println("\n/**************************/\n/** Análisis sintáctico **/\n/**************************/\n");
+                System.out.println(syn);
+
+                System.out.println("\n/**************************/\n/** Tabla de símbolos   **/\n/**************************/\n");
+                System.out.println(tab);
 
                 System.out.println("Entrada correcta");
             }
 
         } catch (Exception e) {
-            System.err.println("ERROR SEMÁNTICO:");
+            System.err.println("ERROR IRRECUPERABLE:");
             System.err.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 

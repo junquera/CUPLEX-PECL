@@ -85,7 +85,6 @@ public abstract class Node {
         public Literal(Object value) {
             this.value = value;
             this.isFloat = value instanceof Float;
-            this.type = NUMERIC;
         }
 
         public Literal(Object value, int type) {
@@ -107,6 +106,8 @@ public abstract class Node {
         }
 
         public String getPrintableValue(SymbolTable st){
+            if(this.value == null)
+                return "0";
             return this.value.toString();
         }
 
@@ -318,6 +319,45 @@ public abstract class Node {
         public Funcion(String name, boolean created) {
             this.name = name;
             this.created = created;
+        }
+
+        public String getPrintableValue(SymbolTable st) throws Exception {
+            if(super.getSons().size() <= 0){
+                return this.toString();
+            }
+            Node n1 = super.getSons().get(0);
+            Float n1Num = Float.parseFloat(n1.getPrintableValue(st));
+
+            if (name == "ABS") {
+            } else if( name == "ATN") {
+                return String.valueOf(Math.atan(n1Num));
+            } else if( name == "COS") {
+                return String.valueOf(Math.cos(n1Num));
+            } else if( name == "EXP") {
+                return String.valueOf(Math.exp(n1Num));
+            } else if( name == "INT") {
+                return String.valueOf(Math.rint(n1Num));
+            } else if( name == "LOG") {
+                if(n1Num <= 0)
+                    throw new Exception("El valor de LOG no puede ser negativo");
+                return String.valueOf(Math.log(n1Num));
+            } else if( name == "SIN") {
+                return String.valueOf(Math.sin(n1Num));
+            } else if( name == "SQR") {
+                if(n1Num < 0)
+                    throw new Exception("El valor de SQR no puede ser negativo");
+                return String.valueOf(Math.sqrt(n1Num));
+            } else if( name == "TAN") {
+                return String.valueOf(Math.tan(n1Num));
+            } else if (this.created){
+                return n1.getPrintableValue(st);
+            }
+            return this.toString();
+
+        }
+
+        public String toString(){
+            return this.getNodeType() + " " + name + " ";
         }
 
         public boolean isCreated() {

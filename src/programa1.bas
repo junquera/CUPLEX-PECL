@@ -5,6 +5,7 @@
 40 PRINT "Cuantas estrellas quieres?: "
 50 READ N
 51 DATA 1
+55 DEF FNK = 5
 60 LET S$ = ""
 65 LET A(1) = 55
 70 FOR I = 1 TO N
@@ -13,6 +14,7 @@
 91 NEXT I
 100 PRINT S$
 101 LET A = 1 ^ 5 * 2 + 1
+102 LET A = 1 - 2 - 3
 110 PRINT "Quieres mas estrellas? "
 120 INPUT A$
 130 IF A$ = "S" THEN 30

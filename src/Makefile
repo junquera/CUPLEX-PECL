@@ -2,7 +2,7 @@ all: lex cup
 	echo "Lex + Cup"
 
 lex:
-	jflex main.flex
+	jflex main.jflex
 
 cup:
 	jcup main.cup

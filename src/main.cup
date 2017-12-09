@@ -236,9 +236,6 @@ multiplicative_expression ::=
 additive_expression ::= multiplicative_expression:e {:
                              RESULT = e;
                         :} |
-                        LPAR additive_expression:e RPAR {:
-                           RESULT = e;
-                        :} |
                         additive_expression:e1 SUM multiplicative_expression:e2 {:
                               Node.BinExpression be = new Node.BinExpression(Node.BinExpression.SUM);
                               be.addSonNode(e1);
@@ -318,9 +315,9 @@ funcion_suministrada ::= ABS LPAR funcion_suministrada:f RPAR {:
 
 def_funcion_nueva ::= DEF FN:f VAR_NUM:v EQU funcion:fn {:
         Node.DefFuncion ndf = new Node.DefFuncion();
-        Node.Funcion nf = new Node.Funcion(v, true);
+        Node.Funcion nf = new Node.Funcion((String) v, true);
+        nf.addSonNode(fn);
         ndf.addSonNode(nf);
-        ndf.addSonNode(fn);
 
         parser.tabla.add(((Node.Funcion) nf).getName(), nf);
 
@@ -347,9 +344,14 @@ funcion ::= FN:f VAR_NUM:v {:
                 Node.Funcion nf = new Node.Funcion((String) v, true);
                 nf.addSonNode(fe);
                 RESULT = nf;
-            :}  | funcion_suministrada:fs {:
+            :} |
+            LPAR funcion:f RPAR {:
+               RESULT = f;
+            :} |
+            funcion_suministrada:fs {:
                 RESULT = fs;
             :};
+
 
 
 /** ES5.- Asignacion **/
@@ -502,10 +504,12 @@ print ::= PRINT funcion:f {:
 input ::= INPUT var:v {:
             Node.Input ni = new Node.Input();
             ni.addSonNode(v);
+            parser.tabla.add((((Node.Variable) v)).getName(), new Node.Literal());
             RESULT = ni;
           :} |
           input:i COMA var:v {:
             i.addSonNode(v);
+            parser.tabla.add((((Node.Variable) v)).getName(), new Node.Literal());
             RESULT = i;
           :} |
           INPUT error:e {:
@@ -534,10 +538,12 @@ data ::= DATA funcion:f {:
 read ::= READ var:v {:
             Node.Read nr = new Node.Read();
             nr.addSonNode(v);
+            parser.tabla.add((((Node.Variable) v)).getName(), new Node.Literal());
             RESULT = nr;
          :} |
          read:nr COMA var:v {:
             nr.addSonNode(v);
+            parser.tabla.add((((Node.Variable) v)).getName(), new Node.Literal());
             RESULT = nr;
          :} |
          READ error:e {:
