@@ -319,7 +319,7 @@ def_funcion_nueva ::= DEF FN:f VAR_NUM:v EQU funcion:fn {:
         nf.addSonNode(fn);
         ndf.addSonNode(nf);
 
-        parser.tabla.add(((Node.Funcion) nf).getName(), nf);
+        parser.tabla.add(nf, nf);
 
         RESULT = ndf;
     :} |
@@ -330,7 +330,7 @@ def_funcion_nueva ::= DEF FN:f VAR_NUM:v EQU funcion:fn {:
         ndf.addSonNode(nf);
         ndf.addSonNode(fn2);
 
-        parser.tabla.add(((Node.Funcion) nf).getName(), nf);
+        parser.tabla.add(nf, nf);
 
         RESULT = ndf;
     :}
@@ -366,7 +366,7 @@ asignacion ::= LET var:v EQU funcion:f {:
     na.addSonNode(v);
     na.addSonNode(f);
 
-    parser.tabla.add(((Node.Variable) v).getName(), input);
+    parser.tabla.add(v, input);
     RESULT = na;
  :};
 
@@ -504,12 +504,12 @@ print ::= PRINT funcion:f {:
 input ::= INPUT var:v {:
             Node.Input ni = new Node.Input();
             ni.addSonNode(v);
-            parser.tabla.add((((Node.Variable) v)).getName(), new Node.Literal());
+            parser.tabla.add(v, new Node.Literal());
             RESULT = ni;
           :} |
           input:i COMA var:v {:
             i.addSonNode(v);
-            parser.tabla.add((((Node.Variable) v)).getName(), new Node.Literal());
+            parser.tabla.add(v, new Node.Literal());
             RESULT = i;
           :} |
           INPUT error:e {:
@@ -538,12 +538,12 @@ data ::= DATA funcion:f {:
 read ::= READ var:v {:
             Node.Read nr = new Node.Read();
             nr.addSonNode(v);
-            parser.tabla.add((((Node.Variable) v)).getName(), new Node.Literal());
+            parser.tabla.add(v, new Node.Literal());
             RESULT = nr;
          :} |
          read:nr COMA var:v {:
             nr.addSonNode(v);
-            parser.tabla.add((((Node.Variable) v)).getName(), new Node.Literal());
+            parser.tabla.add(v, new Node.Literal());
             RESULT = nr;
          :} |
          READ error:e {:

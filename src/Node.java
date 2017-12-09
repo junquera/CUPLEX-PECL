@@ -39,10 +39,6 @@ public abstract class Node {
             return type;
         }
 
-        public void setType(int type) {
-            this.type = type;
-        }
-
         @Override
         public String toString() {
             String result = "Variable " + this.name + ", type: ";
@@ -80,11 +76,13 @@ public abstract class Node {
         private boolean isFloat;
 
         public Literal() {
+            this.type = -1;
         }
 
         public Literal(Object value) {
             this.value = value;
             this.isFloat = value instanceof Float;
+            this.type = -1;
         }
 
         public Literal(Object value, int type) {
@@ -107,7 +105,10 @@ public abstract class Node {
 
         public String getPrintableValue(SymbolTable st){
             if(this.value == null)
-                return "0";
+                if(this.type == NUMERIC)
+                    return "0";
+                else
+                    return "";
             return this.value.toString();
         }
 
@@ -124,7 +125,7 @@ public abstract class Node {
                 case BOOL:
                     return "Literal booleano: " + value;
                 default:
-                    return "Literal desconocido...";
+                    return "Literal indefinido...";
             }
         }
 
@@ -451,17 +452,16 @@ public abstract class Node {
             Scanner sc = new Scanner(System.in);
             for(Node n: inputSons){
                 Node.Variable nv = (Node.Variable) n;
-                String name = nv.getName();
-                System.out.print("Valor para " + name + ": ");
+                System.out.print("Valor para " + nv.getName() + ": ");
                 if(nv.getType() == Variable.STRING){
                     String i = sc.next();
-                    tabla.add(name, new Node.Literal(i, Literal.STRING));
+                    tabla.add(nv, new Node.Literal(i, Literal.STRING));
                 } else {
                     Float f = sc.nextFloat();
                     if(f.floatValue() > f.intValue()){
-                        tabla.add(name, new Node.Literal(f, Literal.NUMERIC));
+                        tabla.add(nv, new Node.Literal(f, Literal.NUMERIC));
                     } else {
-                        tabla.add(name, new Node.Literal(new Integer(f.intValue()), Literal.NUMERIC));
+                        tabla.add(nv, new Node.Literal(new Integer(f.intValue()), Literal.NUMERIC));
                     }
                 }
             }
@@ -488,7 +488,7 @@ public abstract class Node {
                     if(auxI.getType() != auxD.getType())
                         throw new Exception("Error en el dato " + x + " de la linea " + (i+1) + ": Los valores de INPUT y DATA tienen que tener el mismo tipo.");
 
-                    tabla.add(auxI.getName(), auxD);
+                    tabla.add(auxI, auxD);
                 }
 
             } else{
@@ -520,9 +520,13 @@ public abstract class Node {
         }
 
         public int fillOnGoTo(int start, Node.OnGoTo ogt) throws Exception {
+
+            checkOnGoTo(ogt);
+
             int i = start;
             Node.Linea nl;
             int lastLineNumber = -1;
+
 
             Node.Sentencia ns;
 
@@ -541,6 +545,22 @@ public abstract class Node {
 
             return i;
         }
+
+        public void checkOnGoTo(Node.OnGoTo ogt) throws Exception{
+            List<Node> sons = ogt.getSons();
+
+            Float f;
+            try{
+                f = Float.parseFloat(sons.get(0).getPrintableValue(this.tabla));
+            } catch (Exception e){
+                throw new Exception("ERROR SEMÁNTICO: El valor introducido en OnGoTo tiene que ser numérico");
+            }
+            if(f.intValue() > sons.size()){
+                throw new Exception("ERROR SEMÁNTICO: El valor introducido en OnGoTo supera el número de indices indicado");
+            }
+        }
+
+
     }
 
     public static class Linea extends Node {
@@ -677,9 +697,11 @@ public abstract class Node {
     }
 
     private ArrayList<Node> sons;
+    private int type;
 
     public Node() {
         this.sons = new ArrayList<>();
+        this.type = -1;
     }
 
     public void addSonNode(Node n) throws Exception {
@@ -700,6 +722,10 @@ public abstract class Node {
 
     public int getType() {
         return -1;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 
     public String getTree() {
@@ -737,6 +763,9 @@ public abstract class Node {
                 n.check();
     }
 
+    public String getName(){
+        return "";
+    }
     public String getPrintableValue(SymbolTable st) throws Exception {
         return this.toString();
     }

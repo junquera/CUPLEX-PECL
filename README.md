@@ -18,38 +18,38 @@ Al principio iba a indicar las especificaciones léxicas con comentarios en el c
 
 Pero al aumentar la complejidad del código, considero necesario explicar algunas cosas de forma más detallada:
 
-- EL 4. 
+- **EL 4.** 
 
 Para los identificadores de variable he decidido hacer el análisis a través del léxico, y que devuelva un token `VAR_NUM` para las variables numéricas (sólo una letra) y `VAR_TXT` para las variables de cadena.
 
-- EL 5.
+- **EL 5.**
 
 Para los número enteros (`Num_Entero= [+-]?{Digito}+`) devuelvo el token `INTEGER`. Tanto para los números reales (`Num_Real = {Num_Entero}\.{Digito}+`) como para los escalares (`Num_Escalar = {Num_Real}[E]{Num_Entero}`) devuelvo el token `FLOAT`, porque ví que java interpreta correctamente los valores del tipo `1.2E5` como valores de coma flotante.
 
 
-- EL 6.
+- **EL 6.**
 
 Sólo he programado que se pasen por alto los espacios en blanco correspondientes a tabulaciones y a espacios, porque los saltos de línea quería que generasen un token para el analizador sintáctico (las lineas del programa terminan cuando reciben el token `CRLF`).
 
-- EL 7.
+- **EL 7.**
 
 Aunque encontré la forma de que el programa pudiese leer el *EOF* con la expresión `\x00 | \x03`, ví que el propio *JFlex* ofrece el método `<<EOF>>` y me parecía mucho más limpio y seguro.
 
 ### Requisitos léxicos
 
-- RL 1.
+- **RL 1.**
 
 Para cualquier caracter no definido en las especificaciones léxicas devuelvo un token `ERROR`, que puede ser recogido por el analizador sintáctico. Así mismo, imprimo por pantalla la línea y la columna en la que ha sido encontrado.
 
-- RL 2.
+- **RL 2.**
 
 Definidos en el apartado [Autómatas](#aut)
 
-- RL 3.
+- **RL 3.**
 
 Definidos en el apartado [Uso de estados léxicos](#lex_state)
 
-- RL 4.
+- **RL 4.**
 
 Durante el análisis léxico, voy recogiendo todos los tokens en la estructura `List<BASICSymbol> tokens`. Para hacerlo, defino el nombre que tiene que tener el método que devuelve el siguiente token (`%function nextToken`) y escribo una función `next_token` (que es a la que llamará *CUP*) que hace de interfaz de `nextToken` guardando los tokens en la estructura mencionada antes de devolverlos.
 
@@ -121,15 +121,17 @@ Tanto para el analizador sintáctico como para el analizador semántico utilizar
 
 Defino el `programa` como `lineas`, `lineas` como un conjunto de producciones `linea`, y cada `linea` como un entero (token `INTEGER`) seguido por una `sentencia` y un salto de linea (token `CRLF`). Más adelante expondremos cada una de estas producciones.
 
-Para construir el árbol, todas las producciones generan un objeto java que hereda de la clase `Node`. Cuando una sentencia deriva en otra producción, la añado como nodo hijo con el método `addSonNode(n)` y a la hora de mostrar el árbol, lo recorro todo de forma recursiva hasta los nodos hoja.
+###  Arbol de derivación
+
+Para construir el árbol, todas las producciones generan un objeto java que hereda de la clase `Node`. Cuando una sentencia deriva en otra producción, la añado como nodo hijo con el método `addSonNode(n)` y a la hora de mostrar el árbol, lo recorro todo de forma recursiva hasta los nodos hoja. Nos extenderemos más en su descripción en el [requisito sintáctico 4](#rs4)
 
 ### Especificaciones sintácticas
 
-- ES 1.
+- **ES 1.**
 
 Las variables están recogidas en el no terminal `var`, que puede derivar en `var_num_simple`, `var_num_suscrita` o `var_cadena`. He decidido hacer estas derivaciones (en lugar de insertar directamente todo en `var`) para poder reutilizarlas si fuese necesario en alguna producción posterior.
 
-- ES 2.
+- **ES 2.**
 
 Para simplificar su uso más adelante, tanto los literales numéricos como las cadenas (`STRING`) pueden derivar de `literal`. Así, recojo los valores correspondientes a los nodos hoja en la producción `basic_expression`. En las expresiones binarias (suma, exponenciación, multiplicación...) compruebo el tipo del expresión básica para que sólo operen con expresiones de tipo numérico.
 
@@ -148,23 +150,23 @@ pow_expression ::= basic_expression:e |
                    pow_expression:e1 POW basic_expression:e2;
 ```
 
-- ES 3.
+- **ES 3.**
 
 Para que las funciones puedan tener como parámetro otra función, todas derivan recursivamente en `funcion_suministrada` o pueden producir `additive_expression` para llegar hasta los símbolos terminales.
 
-- ES 4.
+- **ES 4.**
 
 Cuando se define una nueva función, sólo guardamos para identificarla en la tabla de símbolos el último caracter de su definición (FN**X** almacenaría sólo **X**). Como no comprobamos la completa validez de la función hasta el final del análisis sintáctico (en la fase de análisis semántico) sólo puede derivar en error si la expresión está mal formada o si el símbolo ya está definido como variable numérica.
 
-- ES 5.
+- **ES 5.**
 
 En la asignación (en esta fase) sólo hacemos comprobación de tipos y si existe o no en la tabla de símbolos.
 
-- ES 6.
+- **ES 6.**
 
 Con esta producción he tenido algún problema al principio por la comprobación de tipos porque *hereda* de las expresioens binarias, y al tener recursividad, uno de los dos parámetros puede no ser de tipo numérico. Al final lo he resuelto definiendo el nuevo tipo en la clase de java correspondiente.
 
-- ES 7. y ES 8.
+- **ES 7. y ES 8.**
 
 Lo más reseñable de esta especificación son las sentencias `FOR` y `GOSUB`. He tenido que tratar las dos de forma especial en el análisis final del programa. Mientras que el resto de sentencias acaban siendo una linea que cuelga del nodo `Programa`, cuando detecto una sentencia `FOR` o una `GOSUB` anido el resto de lineas hasta llegar a `NEXT` o `RETURN` (respectivamente).
 
@@ -176,41 +178,41 @@ for_to ::= FOR var:v1 EQU funcion:f1 TO funcion:f2 lineas:ls INTEGER:i NEXT var:
 
 Pero finalmente decidí independizar las dos sentencias y comprobar que están introducidas de forma correcta en el análisis final.
 
-- ES 9.
+- **ES 9.**
 
 En la sentencia `print` convierto los token `PCOMA` y `COMA` en sus respectivos valores de impresión en el método `toString()` del nodo.
 
-- ES 10., ES 11. y ES 12.
+- **ES 10., ES 11. y ES 12.**
 
 Para la sentencia `INPUT`, a la hora de hacer las últimas comprobaciones hago que el programa pida un valor. Como en la práctica no generamos código, no puedo meter especificaciones semánticas posteriores a esta fase, y no tengo otra forma de comprobar que los valores introducidos sean correctos.
 
 Para las sentencias `READ` y `DATA` hago también una comprobación específica. Tras un `READ` tiene que haber siempre un `DATA`, que tiene que tener el mismo número de valores y todos los valores tienen que tener correspondencia de tipo *dos a dos*. Si encuentro una línea con `DATA` sin que haya antes una `READ` muestro un error (irrecuperable).
 
-- ES 13.
+- **ES 13.**
 
 No hay nada reseñable.
 
-- ES 14.
+- **ES 14.**
 
 Aunque recibamos el token de una declaración `REM` no hacemos nada.
 
-- ES 15.
+- **ES 15.**
 
 Tampoco hay nada reseñable.
 
 ### Requisitons sintácticos
 
-- RS 1.
+- **RS 1.**
 
 Compruebo el nombre del programa en el archivo `Main.java`, que es realmente el que lanza todo el sistema. Si diese algún problema, lanzaría una excepción (equivalente a un error no recuperable del analizador sintáctico).
 
-- RS 2.
+- **RS 2.**
 
 Guardo los errores generados como `SyntaxError` (una clase que he creado) en un array para mostrarlo al final. Los errorres irrecuperables los muestro como una excepción de java (`Exception`) y los capturo en el bloque `try-catch` que contiene el análisis del programa.
 
 Al final del análisis recorro dicho array y voy mostrando los errores, indicando que tienen que ser corregidos para que el análisis tenga éxito. En caso de que no haya ningún error, muestro el resultado del análisis léxico, el árbol sintáctico producido y la tabla de símbolos.
 
-- RS 3.
+- **RS 3.**
 
 Dentro de la gramática, capturo los errores con la producción `error` (ofrecida por la librería `CUP`). En algunas de las sentencias, declaro que la gramática puede producir o la gramática que he definido yo, o parte de dicha gramática y una producción `error`. Así puedo averigüar dónde se ha producido.
 
@@ -218,7 +220,7 @@ Como no todas las producciones derivan de un token ofrecido por el analizador l�
 
 <!-- TODO Comentar más! -->
 
-- RS 4.
+- <tag id="rs4">**RS 4.**</tag>
 
 He creado los métodos `getTree()` y `getTree(int level)` dentro de la clase `Node`. Cuando termina el análisis (tras producción de `programa`) creo un chequeo que verifica la correctitud de las lineas del programa y genera las partes del árbol que estén sin generar o que tengan que cambiar (por ejemplo, lo indicado con las producciones `for`). Después ejecuto el primer método sobre el nodo `Node.Programa` obtenido y este, recursivamente, va recorriendo todos sus hijos generando un `String` con el esquema del árbol. Como representación de los nodos, dependiendo de su tipo, tienen un método distinto, por ejemplo: los literales muestran su valor, las variables su nombre... Al terminar, recojo el `String` y lo imprimo por pantalla con el formato indicado.
 
@@ -226,6 +228,136 @@ He decidido hacerlo por un método recursivo que utilice métodos que todas las 
 
 ### Gramática
 
+A continuación, muestro la gramática que he diseñado en el formato de **CUP**.
+
+```
+programa ::= lineas;
+
+lineas ::= linea |
+           lineas linea;
+
+linea ::= INTEGER sentencia CRLF;
+
+sentencia ::=   asignacion |
+                goto |
+                if_then |
+                gosub |
+                on_goto |
+                for_to
+                next |
+                print |
+                input |
+                data |
+                def_funcion_nueva |
+                read |
+                dim |
+                REM |
+                RANDOMIZE |
+                RETURN |
+                RESTORE |
+                END |
+                STOP |
+                ERROR;
+
+
+var ::= var_num_simple |
+        var_cadena |
+        var_num_suscrita;
+
+var_num_simple ::= VAR_NUM;
+
+var_num_suscrita ::= VAR_NUM LPAR literal_num RPAR |
+                    VAR_NUM LPAR literal_num COMA literal_num RPAR;
+
+var_cadena ::= VAR_TXT;
+
+literal ::= literal_num |
+            STRING;
+
+literal_num ::= INTEGER |
+                FLOAT;
+
+basic_expression ::= literal |
+                    var;
+
+pow_expression ::= basic_expression |
+                   pow_expression POW basic_expression;
+
+multiplicative_expression ::= pow_expression |
+                              multiplicative_expression DIV basic_expression |
+                              multiplicative_expression MUL basic_expression;
+
+additive_expression ::= multiplicative_expression |
+                        additive_expression SUM multiplicative_expression |
+                        additive_expression SUB multiplicative_expression;
+
+funcion_suministrada ::=  ABS LPAR funcion_suministrada RPAR |
+                          ATN LPAR funcion_suministrada RPAR |
+                          COS LPAR funcion_suministrada RPAR |
+                          EXP LPAR funcion_suministrada RPAR |
+                          INT LPAR funcion_suministrada RPAR |
+                          LOG LPAR funcion_suministrada RPAR |
+                          SGN LPAR funcion_suministrada RPAR |
+                          SIN LPAR funcion_suministrada RPAR |
+                          SQR LPAR funcion_suministrada RPAR |
+                          TAN LPAR funcion_suministrada RPAR |
+                          RND |
+                          additive_expression;
+
+
+
+def_funcion_nueva ::= DEF FN VAR_NUM EQU funcion |
+                      DEF FN VAR_NUM LPAR funcion RPAR EQU funcion;
+
+funcion ::= FN VAR_NUM |
+            FN VAR_NUM LPAR funcion RPAR |
+            LPAR funcion RPAR |
+            funcion_suministrada;
+
+asignacion ::= LET var EQU funcion;
+
+conditional_expression ::=  conditional_expression LT funcion  |
+                            conditional_expression LE funcion  |
+                            conditional_expression GE funcion  |
+                            conditional_expression GT funcion  |
+                            conditional_expression EQU funcion |
+                            conditional_expression NEQ funcion |
+                            funcion;
+
+goto ::= GOTO literal_num;
+
+if_then ::= IF conditional_expression THEN literal_num |
+            IF conditional_expression THEN error;
+
+gosub ::= GOSUB literal_num;
+
+on_goto ::= ON conditional_expression GOTO |
+            on_goto COMA literal_num;
+
+for_to ::= FOR var EQU funcion TO funcion |
+           FOR var EQU funcion TO funcion STEP funcion;
+
+next ::= NEXT var;
+
+print ::= PRINT funcion |
+          print PCOMA funcion |
+          print COMA funcion;
+
+input ::= INPUT var |
+          input COMA var;
+
+data ::= DATA funcion |
+         data COMA funcion;
+
+read ::= READ var |
+         read COMA var;
+
+declaracion_dim ::= VAR_NUM LPAR literal_num RPAR |
+                    VAR_NUM LPAR literal_num COMA literal_num RPAR;
+
+dim ::= DIM declaracion_dim |
+        dim COMA declaracion_dim;
+```
 
 
 ### Otros
@@ -234,79 +366,269 @@ Aunque no lo pusiese en las especificaciones, he decidido que la última línea 
 
 ## Análisis semántico
 
-- Diseño del Analizador Semántico: Traducción Dirigida por la Sintaxis con las acciones semánticas.
+Mediante las anotaciones del archivo *.cup* (`{: ... :}`) y el código escrito en el archivo `Node.java` realizo, además de la lógica para la generación del árbol de análisis sintáctico, todas las comprobaciones semánticas requeridas.
 
 ### Especificaciones semánticas
 
-- ESm 1.
+A continuación veremos cómo he resuelto las distintas especificaciones semánticas:
+
+- **ESm 1.**
+
+Esta comprobación la realizo en la clase `SymbolTable`, a la hora de acceder a un parámetro:
+
+```java
+public Node get(String name) throws Exception {
+    if (!exists(name)) {
+        throw new Exception("ERROR SEMÁNTICO: LA VARIABLE " + name + " NO HA SIDO DEFINIDA");
+    }
+    return this.map.get(name);
+}
+```
+
+- **ESm 2. y ESm 3.**
+
+En el archivo *.cup* compruebo que el tipo de la variable es igual que el del valor introducido:
+
+```
+asignacion ::= LET var:v EQU funcion:f {:
+    ...
+    if(v.getType() != f.getType()){
+        parser.report_error("Las variables asignadas tienen que ser del mismo tipo");
+    }
+    ...
+:};
+```
+
+Para ello, en la producción `var` defino el tipo de variable que tiene que ser.
+
+- **ESm 4.**
+
+En la clase `Node.BinExpression` compruebo que los hijos añadidos (los operandos de la expresión) son del tipo numérico:
+
+```java
+public void addSonNode(Node n) throws Exception {
+
+    if (n.getType() != Literal.NUMERIC)
+        throw new Exception("ERROR SEMÁNTICO: Las expresiones numéricas solo " +
+                            "aceptan valores numéricos");
+
+    super.addSonNode(n);
+}
+```
+
+- **ESm 6. y ESm 12.**
+
+
+En la tabla de símbolos compruebo que la expresión añadida a el nombre de una variable de la tabla sea del mismo tipo que la que hay previamente:
+
+```java
+if (aux.getType() != l.getType() && aux.getType() >= 0)
+        throw new Exception(
+                    "ERROR SEMÁNTICO: El valor añadido " + 
+                    name 
+                    + " no es del mismo tipo que el previamente declarado."
+        );
+```
+
+- **ESm 7.**
+
+También en la tabla de símbolos, al insertar una variable de tipo `STRING`, limito su tamaño ejecutando el método `limitSize`:
+
+```java
+public static class Literal extends Node {
+    
+    ...
+   
+    public void limitSize(int size){
+        if(this.getType() == STRING){
+            String aux = (String) this.value;
+            if(aux.length() > size){
+                this.value = aux.substring(0, size);
+            }
+        }
+    }
+    
+    ...
+    
+}
+```
+
+- **ESm 9.**
+
+Dentro de la clase `Node.Funcion`:
+
+```java
+} else if( name == "LOG") {
+    if(n1Num <= 0)
+        throw new Exception("El valor de LOG no puede ser negativo");
+    return String.valueOf(Math.log(n1Num));
+} else if( name == "SIN") {
+
+    ...
+
+} else if( name == "SQR") {
+    if(n1Num < 0)
+        throw new Exception("El valor de SQR no puede ser negativo");
+    return String.valueOf(Math.sqrt(n1Num));
+} 
+```
+
+- **ESm 11.**
 
 
 
-- ESm 2.
+- **ESm 13.**
+
+Como hemos comentado anteriormente, a la hora de hacer `INPUT`, dentro del método `check()` de la clase `Node.Programa` llamo al método `checkInput()`:
 
 
+```java
+public void checkInput(Node.Input ni) throws Exception {
+    List<Node> inputSons = ni.getSons();
 
-- ESm 3.
+    Scanner sc = new Scanner(System.in);
+    for(Node n: inputSons){
+        Node.Variable nv = (Node.Variable) n;
+        System.out.print("Valor para " + nv.getName() + ": ");
+        if(nv.getType() == Variable.STRING){
+            String i = sc.next();
+            tabla.add(nv, new Node.Literal(i, Literal.STRING));
+        } else {
+            Float f = sc.nextFloat();
+            if(f.floatValue() > f.intValue()){
+                tabla.add(nv, new Node.Literal(f, Literal.NUMERIC));
+            } else {
+                tabla.add(nv, new Node.Literal(new Integer(f.intValue()), Literal.NUMERIC));
+            }
+        }
+    }
+}
+```
 
+- **ESm 14.**
 
+Esto está resuelto en la definición de la gramática:
 
-- ESm 4.
+```
+if_then ::= IF conditional_expression:ce THEN literal_num:l
+```
 
+La producción de `conditional_expression` es de tipo *booleano*.
 
+- **ESm 15.**
 
-- ESm 5.
+Esta comprobación se realiza en el método `checkOnGoTo()` de `Node.Programa`:
 
+```java
 
+public void checkOnGoTo(Node.OnGoTo ogt) throws Exception{
+    List<Node> sons = ogt.getSons();
 
-- ESm 6.
+    Float f;
+    try{
+        f = Float.parseFloat(sons.get(0).getPrintableValue(this.tabla));
+    } catch (Exception e){
+        throw new Exception("ERROR SEMÁNTICO: El valor introducido en OnGoTo tiene que ser" +
+                            " numérico");
+    }
+    if(f.intValue() > sons.size()){
+        throw new Exception("ERROR SEMÁNTICO: El valor introducido en OnGoTo supera el " +
+                            "número de indices indicado");
+    }
+}
 
-
-
-- ESm 7.
-
-
-
-- ESm 8.
-
-
-
-- ESm 9.
-
-
-
-- ESm 10.
-
-
-
-- ESm 11.
-
-
-
-- ESm 12.
-
-
-
-- ESm 13.
-
-
-
-- ESm 14.
-
-
-
-- ESm 15.
-
-
+```
 
 ## Tabla de símbolos
 
 - Diseño de la Tabla de Símbolos: Descripción de su estructura y organización.
 
-## Arbol de derivación
-
-- Diseño del árbol de derivación: Descripción de su estructura y organización.
-
 ## Casos de prueba
+
+### Casos correctos
+
+- `programa_simple.bas`
+
+Es un ejemplo básico en el que compruebo las principales especificaciones. Su salida es:
+
+```
+Valor para N: 1
+
+/**************************/
+/** Análisis léxico     **/
+/**************************/
+
+[INTEGER(0), REM, CRLF, INTEGER(10), PRINT, STRING(Cual es tu nombre?: ), CRLF, INTEGER(20), READ, VAR_TXT(U$), CRLF, INTEGER(30), DATA, STRING(Javier), CRLF, INTEGER(40), PRINT, STRING(Hola ), PCOMA, VAR_TXT(U$), CRLF, INTEGER(50), PRINT, STRING(Cuantas estrellas quieres?: ), CRLF, INTEGER(60), INPUT, VAR_NUM(N), CRLF, INTEGER(70), PRINT, STRING(Cuantas puntas tiene una estrella?: ), CRLF, INTEGER(80), READ, VAR_NUM(P), CRLF, INTEGER(90), DATA, INTEGER(5), CRLF, INTEGER(100), LET, VAR_NUM(R), EQU, VAR_NUM(P), MUL, VAR_NUM(N), CRLF, INTEGER(110), PRINT, STRING(Total:), PCOMA, VAR_NUM(R), PCOMA, STRING( puntas), CRLF, INTEGER(120), PRINT, STRING(Adios !! ), PCOMA, VAR_TXT(U$), CRLF, INTEGER(130), END, CRLF, EOF, EOF, ]
+
+/**************************/
+/** Análisis sintáctico **/
+/**************************/
+
+[Node$Programa]
++----[0 Node$Linea]
+|    +----[Node$Rem]
++----[10 Node$Linea]
+|    +----[Node$Print]
+|    |    +----[Literal cadena: Cual es tu nombre?: ]
++----[20 Node$Linea]
+|    +----[Node$Read]
+|    |    +----[Variable U$, type: string]
++----[40 Node$Linea]
+|    +----[Node$Print]
+|    |    +----[Literal cadena: Hola ]
+|    |    +----[Literal cadena: SPACE]
+|    |    +----[Variable U$, type: string]
++----[50 Node$Linea]
+|    +----[Node$Print]
+|    |    +----[Literal cadena: Cuantas estrellas quieres?: ]
++----[60 Node$Linea]
+|    +----[Node$Input]
+|    |    +----[Variable N, type: numeric]
++----[70 Node$Linea]
+|    +----[Node$Print]
+|    |    +----[Literal cadena: Cuantas puntas tiene una estrella?: ]
++----[80 Node$Linea]
+|    +----[Node$Read]
+|    |    +----[Variable P, type: numeric]
++----[100 Node$Linea]
+|    +----[Node$Asignacion]
+|    |    +----[Variable R, type: numeric]
+|    |    +----[Variable P, type: numeric MUL Variable N, type: numeric]
+|    |    |    +----[Variable P, type: numeric]
+|    |    |    +----[Variable N, type: numeric]
++----[110 Node$Linea]
+|    +----[Node$Print]
+|    |    +----[Literal cadena: Total:]
+|    |    +----[Literal cadena: SPACE]
+|    |    +----[Variable R, type: numeric]
+|    |    +----[Literal cadena: SPACE]
+|    |    +----[Literal cadena:  puntas]
++----[120 Node$Linea]
+|    +----[Node$Print]
+|    |    +----[Literal cadena: Adios !! ]
+|    |    +----[Literal cadena: SPACE]
+|    |    +----[Variable U$, type: string]
++----[130 Node$Linea]
+|    +----[Node$End]
+
+
+/**************************/
+/** Tabla de símbolos   **/
+/**************************/
+
+P	|	Node$Literal		|	5
+R	|	Node$Literal		|	0
+N	|	Node$Literal		|	1
+U$	|	Node$Literal		|	Javier
+
+Entrada correcta
+```
+
+- `programa1.bas`
+
+Una versión ligeramente modificada del programa del enunciado.
+
+### Casos fallidos
 
 - Diez casos de prueba y su salida. Deberá incluirse en la memoria un anexo con los diez casos listados. Dos de ellos serán correctos y los otros erróneos, de tal manera que permitan observar el comportamiento de la solución dada.
 

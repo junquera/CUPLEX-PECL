@@ -12,17 +12,23 @@ public class SymbolTable {
     }
 
     // TODO Diferenciar variable de función
-    public void add(String name, Node v) throws Exception {
+    public void add(Node n, Node v) throws Exception {
         Node l;
+        String name = n.getName();
         if (!(v instanceof Node.Funcion)) {
+            if(v.getType() == -1)
+                v.setType(n.getType());
             l = getLiteral(v);
-            ((Node.Literal)l).limitSize(18);
+            ((Node.Literal) l).limitSize(18);
         } else {
             l = v;
         }
 
 
         if (exists(name)) {
+            Node aux = get(name);
+            if (aux.getType() != l.getType() && aux.getType() >= 0)
+                throw new Exception("ERROR SEMÁNTICO: El valor añadido " + name + " no es del mismo tipo que el previamente declarado.");
             update(name, l);
         }
         this.map.put(name, l);
@@ -30,15 +36,22 @@ public class SymbolTable {
 
     public Node.Literal getLiteral(Node f) throws Exception {
         Node.Literal input;
-        if (f.getType() == Node.Literal.NUMERIC) {
-            Float auxValue = Float.parseFloat(f.getPrintableValue(this));
-            if (auxValue.intValue() != auxValue.floatValue())
-                input = new Node.Literal(auxValue, Node.Literal.NUMERIC);
-            else
-                input = new Node.Literal(new Integer(auxValue.intValue()), Node.Literal.NUMERIC);
-        } else {
+        try {
+            if (f.getType() == Node.Literal.NUMERIC || f.getType() == -1) {
+                Float auxValue = Float.parseFloat(f.getPrintableValue(this));
+                if (auxValue.intValue() != auxValue.floatValue())
+                    input = new Node.Literal(auxValue, Node.Literal.NUMERIC);
+                else
+                    input = new Node.Literal(new Integer(auxValue.intValue()), Node.Literal.NUMERIC);
+            } else if (f.getType() == Node.Literal.STRING) {
+                input = new Node.Literal(f.getPrintableValue(this), Node.Literal.STRING);
+            } else {
+                throw new Exception();
+            }
+        } catch (Exception e) {
             input = new Node.Literal(f.getPrintableValue(this), Node.Literal.STRING);
         }
+
         return input;
     }
 
