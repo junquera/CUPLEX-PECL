@@ -188,33 +188,41 @@ Para las sentencias `READ` y `DATA` hago también una comprobación específica.
 
 - ES 13.
 
-
+No hay nada reseñable.
 
 - ES 14.
 
-
+Aunque recibamos el token de una declaración `REM` no hacemos nada.
 
 - ES 15.
 
-
+Tampoco hay nada reseñable.
 
 ### Requisitons sintácticos
 
 - RS 1.
 
-
+Compruebo el nombre del programa en el archivo `Main.java`, que es realmente el que lanza todo el sistema. Si diese algún problema, lanzaría una excepción (equivalente a un error no recuperable del analizador sintáctico).
 
 - RS 2.
 
+Guardo los errores generados como `SyntaxError` (una clase que he creado) en un array para mostrarlo al final. Los errorres irrecuperables los muestro como una excepción de java (`Exception`) y los capturo en el bloque `try-catch` que contiene el análisis del programa.
 
+Al final del análisis recorro dicho array y voy mostrando los errores, indicando que tienen que ser corregidos para que el análisis tenga éxito. En caso de que no haya ningún error, muestro el resultado del análisis léxico, el árbol sintáctico producido y la tabla de símbolos.
 
 - RS 3.
 
+Dentro de la gramática, capturo los errores con la producción `error` (ofrecida por la librería `CUP`). En algunas de las sentencias, declaro que la gramática puede producir o la gramática que he definido yo, o parte de dicha gramática y una producción `error`. Así puedo averigüar dónde se ha producido.
 
+Como no todas las producciones derivan de un token ofrecido por el analizador léxico (pueden estar ya *sintetizados* de una producción anterior que genere un nodo), no siempre puedo saber la columna concreta en la que se ha producido, pero he creado un método en el `parser` por el cual, como mínimo, consigo obtener la línea. Para poder aportar más información en los errores en los que sólo tengo la línea, cuando es necesario, muestro en el mensaje de error el patrón que debería seguir la sentencia fallida.
+
+<!-- TODO Comentar más! -->
 
 - RS 4.
 
+He creado los métodos `getTree()` y `getTree(int level)` dentro de la clase `Node`. Cuando termina el análisis (tras producción de `programa`) creo un chequeo que verifica la correctitud de las lineas del programa y genera las partes del árbol que estén sin generar o que tengan que cambiar (por ejemplo, lo indicado con las producciones `for`). Después ejecuto el primer método sobre el nodo `Node.Programa` obtenido y este, recursivamente, va recorriendo todos sus hijos generando un `String` con el esquema del árbol. Como representación de los nodos, dependiendo de su tipo, tienen un método distinto, por ejemplo: los literales muestran su valor, las variables su nombre... Al terminar, recojo el `String` y lo imprimo por pantalla con el formato indicado.
 
+He decidido hacerlo por un método recursivo que utilice métodos que todas las clases heredan para que, a la hora de darle un comportamiento especial a cada una no haya más que definir el método en la misma y a su vez, para que podamos cambiar el formato rápidamente si lo necesitásemos; por ejemplo, si en vez de obtener un árbol apra imprimir quisiésemos otra estructura de datos (*XML* o *JSON*) para exportarla a un método de representación gráfica, a una base de datos orientada a grafos...
 
 ### Gramática
 
@@ -230,20 +238,81 @@ Aunque no lo pusiese en las especificaciones, he decidido que la última línea 
 
 ### Especificaciones semánticas
 
+- ESm 1.
+
+
+
+- ESm 2.
+
+
+
+- ESm 3.
+
+
+
+- ESm 4.
+
+
+
+- ESm 5.
+
+
+
+- ESm 6.
+
+
+
+- ESm 7.
+
+
+
+- ESm 8.
+
+
+
+- ESm 9.
+
+
+
+- ESm 10.
+
+
+
+- ESm 11.
+
+
+
+- ESm 12.
+
+
+
+- ESm 13.
+
+
+
+- ESm 14.
+
+
+
+- ESm 15.
+
+
+
 ## Tabla de símbolos
+
 - Diseño de la Tabla de Símbolos: Descripción de su estructura y organización.
 
 ## Arbol de derivación
+
 - Diseño del árbol de derivación: Descripción de su estructura y organización.
 
 ## Casos de prueba
 
 - Diez casos de prueba y su salida. Deberá incluirse en la memoria un anexo con los diez casos listados. Dos de ellos serán correctos y los otros erróneos, de tal manera que permitan observar el comportamiento de la solución dada.
+
 - Para uno de los ejemplos correctos, se incluirá el listado de tokens, la salida de las reglas aplicadas por el analizador sintáctico, el árbol de derivación y el volcado de la tabla de símbolos.
+
 - Para los ejemplos erróneos se incluirá el mensaje o mensajes de error obtenidos.
 
-### Errores
+## Bibliografía
 
-- [x] Hay un error en los bucles `for`. No sé cómo indicar la línea del `NEXT` sin incluir el entero del principio.
-
-- [ ] Ver si hay una forma más limpia (por contexto a lo mejor) de arreglar el problema del `NEXT` en el `FOR`.
