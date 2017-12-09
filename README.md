@@ -6,7 +6,7 @@ Se propone la creación de un sistema capaz de realizar las fases de análisis l
 
 ## Analizador léxico
 
-- Diseño del Analizador Léxico: tokens, expresiones, autómata, acciones y errores.
+Para el analizador léxico, como hemos comentado, utilizaremos **JFlex**. Símplemente tendremos que definir las expresiones regulares que generaran los tokens y definir la funcionalidad extra que le queramos dar (gestión de errores, clases específicas para la generación de los simbolos...).
 
 ### Especificaciones léxicas
  
@@ -105,24 +105,124 @@ Para no capturar dentro del token las comillas del string, he creado un estado l
 
 Como la declaración de que es una línea *REM* se produce después de el identificador de número de línea, si no introducía en el token (más bien, hago que el token se lo coma, porque no lo guardo) todo lo que hubiese hasta el salto de línea, el analizador sintáctico fallaba. Así que, ante el token `REM`, nos ponemos a pasar por alto cualquier entrada hasta el salto de línea.
 
-### <tag id="aut">Autómatas</tag>
+### <tag id="aut">Autómatas y expresiones regulares</tag>
 
 
+
+### Otros
+
+Para la generación de los tokens he creado la clase `BASICSymbol`. Así puedo definir la expresión que quiero que devuelva en el método `toString()` (para depurar) y el comportamiento adicional que quiera.
+
+<!-- TODO Otras cosas que quiera apuntar... -->
 
 ## Analizador sintáctico
 
-La última línea tiene que tener salto de línea.
+Tanto para el analizador sintáctico como para el analizador semántico utilizaremos la librería **CUP**. Aquí definiremos la gramática, qué hacer con las producciones correctas, qué errores se pueden detectar y qué hacer comprobaciones adicionales a la gramática (comprobación de tipo, comprobación de orden de las sentencias...).
 
-- Diseño del Analizador Sintáctico: gramática, demostración de que la gramática es adecuada y las tablas o procedimientos de dicho Analizador.
+Defino el `programa` como `lineas`, `lineas` como un conjunto de producciones `linea`, y cada `linea` como un entero (token `INTEGER`) seguido por una `sentencia` y un salto de linea (token `CRLF`). Más adelante expondremos cada una de estas producciones.
+
+Para construir el árbol, todas las producciones generan un objeto java que hereda de la clase `Node`. Cuando una sentencia deriva en otra producción, la añado como nodo hijo con el método `addSonNode(n)` y a la hora de mostrar el árbol, lo recorro todo de forma recursiva hasta los nodos hoja.
 
 ### Especificaciones sintácticas
+
+- ES 1.
+
+Las variables están recogidas en el no terminal `var`, que puede derivar en `var_num_simple`, `var_num_suscrita` o `var_cadena`. He decidido hacer estas derivaciones (en lugar de insertar directamente todo en `var`) para poder reutilizarlas si fuese necesario en alguna producción posterior.
+
+- ES 2.
+
+Para simplificar su uso más adelante, tanto los literales numéricos como las cadenas (`STRING`) pueden derivar de `literal`. Así, recojo los valores correspondientes a los nodos hoja en la producción `basic_expression`. En las expresiones binarias (suma, exponenciación, multiplicación...) compruebo el tipo del expresión básica para que sólo operen con expresiones de tipo numérico.
+
+Para definir la precedencia en la gramática, he hecho que las operaciones con menor precedencia puedan derivar en las de mayor precedencia con recursividad a la izquierda. Así, tenemos por ejemplo el siguiente ejemplo con las expresiones relacionadas con la suma (y resta):
+
+```
+additive_expression ::= multiplicative_expression:e |
+                        additive_expression:e1 SUM multiplicative_expression:e2 |
+                        additive_expression:e1 SUB multiplicative_expression:e2;
+```
+
+Llegando hasta la de mayor precedencia, que puede derivar en las expresiones básicas:
+
+```
+pow_expression ::= basic_expression:e |
+                   pow_expression:e1 POW basic_expression:e2;
+```
+
+- ES 3.
+
+Para que las funciones puedan tener como parámetro otra función, todas derivan recursivamente en `funcion_suministrada` o pueden producir `additive_expression` para llegar hasta los símbolos terminales.
+
+- ES 4.
+
+Cuando se define una nueva función, sólo guardamos para identificarla en la tabla de símbolos el último caracter de su definición (FN**X** almacenaría sólo **X**). Como no comprobamos la completa validez de la función hasta el final del análisis sintáctico (en la fase de análisis semántico) sólo puede derivar en error si la expresión está mal formada o si el símbolo ya está definido como variable numérica.
+
+- ES 5.
+
+En la asignación (en esta fase) sólo hacemos comprobación de tipos y si existe o no en la tabla de símbolos.
+
+- ES 6.
+
+Con esta producción he tenido algún problema al principio por la comprobación de tipos porque *hereda* de las expresioens binarias, y al tener recursividad, uno de los dos parámetros puede no ser de tipo numérico. Al final lo he resuelto definiendo el nuevo tipo en la clase de java correspondiente.
+
+- ES 7. y ES 8.
+
+Lo más reseñable de esta especificación son las sentencias `FOR` y `GOSUB`. He tenido que tratar las dos de forma especial en el análisis final del programa. Mientras que el resto de sentencias acaban siendo una linea que cuelga del nodo `Programa`, cuando detecto una sentencia `FOR` o una `GOSUB` anido el resto de lineas hasta llegar a `NEXT` o `RETURN` (respectivamente).
+
+Al principio había definido directamente en la gramática del `FOR` algo parecido a:
+
+```
+for_to ::= FOR var:v1 EQU funcion:f1 TO funcion:f2 lineas:ls INTEGER:i NEXT var:v2
+```
+
+Pero finalmente decidí independizar las dos sentencias y comprobar que están introducidas de forma correcta en el análisis final.
+
+- ES 9.
+
+En la sentencia `print` convierto los token `PCOMA` y `COMA` en sus respectivos valores de impresión en el método `toString()` del nodo.
+
+- ES 10., ES 11. y ES 12.
+
+Para la sentencia `INPUT`, a la hora de hacer las últimas comprobaciones hago que el programa pida un valor. Como en la práctica no generamos código, no puedo meter especificaciones semánticas posteriores a esta fase, y no tengo otra forma de comprobar que los valores introducidos sean correctos.
+
+Para las sentencias `READ` y `DATA` hago también una comprobación específica. Tras un `READ` tiene que haber siempre un `DATA`, que tiene que tener el mismo número de valores y todos los valores tienen que tener correspondencia de tipo *dos a dos*. Si encuentro una línea con `DATA` sin que haya antes una `READ` muestro un error (irrecuperable).
+
+- ES 13.
+
+
+
+- ES 14.
+
+
+
+- ES 15.
+
 
 
 ### Requisitons sintácticos
 
+- RS 1.
+
+
+
+- RS 2.
+
+
+
+- RS 3.
+
+
+
+- RS 4.
+
+
 
 ### Gramática
 
+
+
+### Otros
+
+Aunque no lo pusiese en las especificaciones, he decidido que la última línea tiene que terminar en un salto de línea. Suele ser una buena prácita, y simplifica la gramática: el programa termina en `EOF`, pero si cada línea termina con un salto de línea, la última no tiene por qué ser una excepción.
 
 ## Análisis semántico
 
