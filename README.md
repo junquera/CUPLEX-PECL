@@ -9,7 +9,7 @@ Se propone la creación de un sistema capaz de realizar las fases de análisis l
 Para el analizador léxico, como hemos comentado, utilizaremos **JFlex**. Símplemente tendremos que definir las expresiones regulares que generaran los tokens y definir la funcionalidad extra que le queramos dar (gestión de errores, clases específicas para la generación de los simbolos...).
 
 ### Especificaciones léxicas
- 
+
 Al principio iba a indicar las especificaciones léxicas con comentarios en el código del archivo `main.jflex` con el siguiente formato:
 
 ```java
@@ -18,7 +18,7 @@ Al principio iba a indicar las especificaciones léxicas con comentarios en el c
 
 Pero al aumentar la complejidad del código, considero necesario explicar algunas cosas de forma más detallada:
 
-- **EL 4.** 
+- **EL 4.**
 
 Para los identificadores de variable he decidido hacer el análisis a través del léxico, y que devuelva un token `VAR_NUM` para las variables numéricas (sólo una letra) y `VAR_TXT` para las variables de cadena.
 
@@ -53,7 +53,7 @@ Definidos en el apartado [Uso de estados léxicos](#lex_state)
 
 Durante el análisis léxico, voy recogiendo todos los tokens en la estructura `List<BASICSymbol> tokens`. Para hacerlo, defino el nombre que tiene que tener el método que devuelve el siguiente token (`%function nextToken`) y escribo una función `next_token` (que es a la que llamará *CUP*) que hace de interfaz de `nextToken` guardando los tokens en la estructura mencionada antes de devolverlos.
 
-Al terminar todos los análisis, el programa principal imprime todos los token obtenidos. Por ejemplo, para la entrada: 
+Al terminar todos los análisis, el programa principal imprime todos los token obtenidos. Por ejemplo, para la entrada:
 
 
 ```BASIC
@@ -80,16 +80,16 @@ Obtendríamos la siguiente salida:
 /** Análisis léxico     **/
 /**************************/
 
-[INTEGER(0), REM, CRLF, INTEGER(10), PRINT, 
-STRING(Cual es tu nombre?: ), CRLF, INTEGER(20), READ, 
-VAR_TXT(U$), CRLF, INTEGER(30), DATA, STRING(Javier), CRLF, INTEGER(40), 
-PRINT, STRING(Hola ), PCOMA, VAR_TXT(U$), CRLF, INTEGER(50), PRINT, 
-STRING(Cuantas estrellas quieres?: ), CRLF, INTEGER(60), INPUT, VAR_NUM(N), 
-CRLF, INTEGER(70), PRINT, STRING(Cuantas puntas tiene una estrella?: ), 
-CRLF, INTEGER(80), READ, VAR_NUM(P), CRLF, INTEGER(90), DATA, INTEGER(5), 
-CRLF, INTEGER(100), LET, VAR_NUM(R), EQU, VAR_NUM(P), MUL, VAR_NUM(N), CRLF, 
-INTEGER(110), PRINT, STRING(Total:), PCOMA, VAR_NUM(R), PCOMA, STRING( puntas), 
-CRLF, INTEGER(120), PRINT, STRING(Adios !! ), PCOMA, VAR_TXT(U$), CRLF, 
+[INTEGER(0), REM, CRLF, INTEGER(10), PRINT,
+STRING(Cual es tu nombre?: ), CRLF, INTEGER(20), READ,
+VAR_TXT(U$), CRLF, INTEGER(30), DATA, STRING(Javier), CRLF, INTEGER(40),
+PRINT, STRING(Hola ), PCOMA, VAR_TXT(U$), CRLF, INTEGER(50), PRINT,
+STRING(Cuantas estrellas quieres?: ), CRLF, INTEGER(60), INPUT, VAR_NUM(N),
+CRLF, INTEGER(70), PRINT, STRING(Cuantas puntas tiene una estrella?: ),
+CRLF, INTEGER(80), READ, VAR_NUM(P), CRLF, INTEGER(90), DATA, INTEGER(5),
+CRLF, INTEGER(100), LET, VAR_NUM(R), EQU, VAR_NUM(P), MUL, VAR_NUM(N), CRLF,
+INTEGER(110), PRINT, STRING(Total:), PCOMA, VAR_NUM(R), PCOMA, STRING( puntas),
+CRLF, INTEGER(120), PRINT, STRING(Adios !! ), PCOMA, VAR_TXT(U$), CRLF,
 INTEGER(130), END, CRLF, EOF, EOF, ]
 ```
 
@@ -107,59 +107,76 @@ Como la declaración de que es una línea *REM* se produce después de el identi
 
 ### <tag id="aut">Autómatas y expresiones regulares</tag>
 
-### ![](Pictures/1000020100000228000002284FDAA1824BFEE6A1.png){width="14.605cm" height="14.605cm"}CAR CADENA SIMPLE
+### CAR CADENA SIMPLE
 
-\[+-.\] | {Digito} | {Letra} | \[a-z\]
+![](Pictures/1000020100000228000002284FDAA1824BFEE6A1.png)
 
-### ![](Pictures/1000020100000234000000E4973616EAC56FCA45.png){width="14.923cm" height="6.033cm"}LETRA
+`[+-.] | {Digito} | {Letra} | [a-z]`
 
-\[A-Z\]
+### LETRA
+
+![](Pictures/1000020100000234000000E4973616EAC56FCA45.png)
+
+`[A-Z]`
 
 ### DÍGITO
 
-![](Pictures/1000020100000213000000BBE0076D52DA992B8F.png){width="14.049cm"
-height="4.948cm"}
+![](Pictures/1000020100000213000000BBE0076D52DA992B8F.png)
 
-\[0-9\]
+
+`[0-9]`
 
 ### CAR CADENA
 
-![](Pictures/10000201000001DD00000192134BB69E0E1854C5.png){width="12.621cm"
-height="10.636cm"}
+![](Pictures/10000201000001DD00000192134BB69E0E1854C5.png)
 
-### ![](Pictures/100002010000020D000002C360A61B4E35F5D71D.png){width="13.891cm" height="18.706cm"}CAR\_CAD\_DELIMITADO
+`? | {Car_Cad_Delimitado}`
 
-### CAD\_DELIMITADA
+### CAR_CAD_DELIMITADO
 
-![](Pictures/1000020100000303000001EC640998018C1A9D88.png){width="17cm"
-height="10.848cm"}
+
+![](Pictures/100002010000020D000002C360A61B4E35F5D71D.png)
+
+`[!#$%&'()*,/:;<=>?\^_] | {Car_No_Delimitado}`
+
+### CAD_DELIMITADA
+
+![](Pictures/1000020100000303000001EC640998018C1A9D88.png)
+
+`"{Car_Cad_Delimitado}*"`
 
 ### EOF
 
-![](Pictures/10000201000001BA000001AFCDE074EEE75226D6.png){width="11.695cm"
-height="11.404cm"}
+![](Pictures/10000201000001BA000001AFCDE074EEE75226D6.png)
+
+`\x00 | \x03`
 
 ### NUM ENTERO
 
-![](Pictures/100002010000025B00000131210A0E5E1E997E90.png){width="15.954cm"
-height="8.07cm"}
+![](Pictures/100002010000025B00000131210A0E5E1E997E90.png)
+
+`(+-)?{Digito}+`
 
 ### NUM REAL
 
-![](Pictures/100002010000032F000000AB618A4B6610AB1776.png){width="17cm"
-height="3.567cm"}
+![](Pictures/100002010000032F000000AB618A4B6610AB1776.png)
+
+`{Num_Entero}.{Digito}+`
 
 ### NUM ESCALAR
 
-![](Pictures/100002010000034E0000009A70B06D02D570866C.png){width="17cm"
-height="3.094cm"}
+![](Pictures/100002010000034E0000009A70B06D02D570866C.png)
 
-### 
+`{Num_Real}[E]{Num_Entero}`
 
 ### VARIABLE Y VARIABLE DE CADENA
 
-![](Pictures/1000020100000210000000B29BF61C633AEF7D69.png){width="13.97cm"
-height="4.71cm"}
+![](Pictures/1000020100000210000000B29BF61C633AEF7D69.png)
+
+```
+{Letra}   -> VAR_NUM
+{Letra}$  -> VAR_TXT
+```
 
 ### Otros
 
@@ -335,7 +352,7 @@ basic_expression ::= literal |
 pow_expression ::= basic_expression |
                    pow_expression POW basic_expression;
 
-multiplicative_expression ::= 
+multiplicative_expression ::=
                           pow_expression |
                           multiplicative_expression DIV basic_expression |
                           multiplicative_expression MUL basic_expression;
@@ -432,7 +449,7 @@ Esta comprobación la realizo en la clase `SymbolTable`, a la hora de acceder a 
 ```java
 public Node get(String name) throws Exception {
     if (!exists(name)) {
-        throw new Exception("ERROR SEMÁNTICO: LA VARIABLE " + name + 
+        throw new Exception("ERROR SEMÁNTICO: LA VARIABLE " + name +
         " NO HA SIDO DEFINIDA");
     }
     return this.map.get(name);
@@ -478,8 +495,8 @@ En la tabla de símbolos compruebo que la expresión añadida a el nombre de una
 ```java
 if (aux.getType() != l.getType() && aux.getType() >= 0)
         throw new Exception(
-                    "ERROR SEMÁNTICO: El valor añadido " + 
-                    name 
+                    "ERROR SEMÁNTICO: El valor añadido " +
+                    name
                     + " no es del mismo tipo que el previamente declarado."
         );
 ```
@@ -490,9 +507,9 @@ También en la tabla de símbolos, al insertar una variable de tipo `STRING`, li
 
 ```java
 public static class Literal extends Node {
-    
+
     ...
-   
+
     public void limitSize(int size){
         if(this.getType() == STRING){
             String aux = (String) this.value;
@@ -501,9 +518,9 @@ public static class Literal extends Node {
             }
         }
     }
-    
+
     ...
-    
+
 }
 ```
 
@@ -524,7 +541,7 @@ Dentro de la clase `Node.Funcion`:
     if(n1Num < 0)
         throw new Exception("El valor de SQR no puede ser negativo");
     return String.valueOf(Math.sqrt(n1Num));
-} 
+}
 ```
 
 - **ESm 13.**
@@ -548,7 +565,7 @@ public void checkInput(Node.Input ni) throws Exception {
             if(f.floatValue() > f.intValue()){
                 tabla.add(nv, new Node.Literal(f, Literal.NUMERIC));
             } else {
-                tabla.add(nv, new Node.Literal(new Integer(f.intValue()), 
+                tabla.add(nv, new Node.Literal(new Integer(f.intValue()),
                 Literal.NUMERIC));
             }
         }
@@ -594,9 +611,6 @@ public void checkOnGoTo(Node.OnGoTo ogt) throws Exception{
 
 Comentaremos la estructura de la tabla de símbolos en [Tabla de símbolos](#tds)
 
-- **ESm 17.**
-
-
 ## <tag id="tds">Tabla de símbolos</tag>
 
 Para la creación de la tabla de símbolos he escrito la clase `SymbolTable`. Esta clase, además de albergar los símbolos del programa, se encarga de analizarlos a la hora de introducirlos en introducir la mayor reducción posible.
@@ -606,6 +620,8 @@ Si introducimos un `Node` que no sea de tipo `Funcion` y al recorrerlo encontram
 Los nodos de tipo `Funcion` los inserta tal cual, porque su interpretación se realizaría cuando fuesen llamados durante la ejecución, nunca antes.
 
 ## Casos de prueba
+
+Están en la carpeta `ejemplos`.
 
 ### Casos correctos
 
@@ -620,17 +636,17 @@ Valor para N: 1
 /** Análisis léxico     **/
 /**************************/
 
-[INTEGER(0), REM, CRLF, INTEGER(10), PRINT, STRING(Cual es tu nombre?: ), 
-CRLF, INTEGER(20), READ, VAR_TXT(U$), CRLF, INTEGER(30), DATA, 
-STRING(Javier), CRLF, INTEGER(40), PRINT, STRING(Hola ), PCOMA, 
-VAR_TXT(U$), CRLF, INTEGER(50), PRINT, 
-STRING(Cuantas estrellas quieres?: ), CRLF, INTEGER(60), INPUT, 
-VAR_NUM(N), CRLF, INTEGER(70), PRINT, 
-STRING(Cuantas puntas tiene una estrella?: ), CRLF, INTEGER(80), 
-READ, VAR_NUM(P), CRLF, INTEGER(90), DATA, INTEGER(5), CRLF, 
-INTEGER(100), LET, VAR_NUM(R), EQU, VAR_NUM(P), MUL, VAR_NUM(N), 
-CRLF, INTEGER(110), PRINT, STRING(Total:), PCOMA, VAR_NUM(R), PCOMA, 
-STRING( puntas), CRLF, INTEGER(120), PRINT, STRING(Adios !! ), PCOMA, 
+[INTEGER(0), REM, CRLF, INTEGER(10), PRINT, STRING(Cual es tu nombre?: ),
+CRLF, INTEGER(20), READ, VAR_TXT(U$), CRLF, INTEGER(30), DATA,
+STRING(Javier), CRLF, INTEGER(40), PRINT, STRING(Hola ), PCOMA,
+VAR_TXT(U$), CRLF, INTEGER(50), PRINT,
+STRING(Cuantas estrellas quieres?: ), CRLF, INTEGER(60), INPUT,
+VAR_NUM(N), CRLF, INTEGER(70), PRINT,
+STRING(Cuantas puntas tiene una estrella?: ), CRLF, INTEGER(80),
+READ, VAR_NUM(P), CRLF, INTEGER(90), DATA, INTEGER(5), CRLF,
+INTEGER(100), LET, VAR_NUM(R), EQU, VAR_NUM(P), MUL, VAR_NUM(N),
+CRLF, INTEGER(110), PRINT, STRING(Total:), PCOMA, VAR_NUM(R), PCOMA,
+STRING( puntas), CRLF, INTEGER(120), PRINT, STRING(Adios !! ), PCOMA,
 VAR_TXT(U$), CRLF, INTEGER(130), END, CRLF, EOF, EOF, ]
 
 /**************************/
@@ -710,7 +726,7 @@ Genera el siguiente árbol:
 ```
 +----[Literal numérico: 1 SUM Literal numérico: 5 MUL Literal numérico:
         2 SUM Literal numérico: 1]
-|    |    |    +----[Literal numérico: 1 SUM Literal numérico: 5 MUL 
+|    |    |    +----[Literal numérico: 1 SUM Literal numérico: 5 MUL
                         Literal numérico: 2]
 |    |    |    |    +----[Literal numérico: 1]
 |    |    |    |    +----[Literal numérico: 5 MUL Literal numérico: 2]
@@ -808,7 +824,7 @@ ERROR SEMÁNTICO: LA VARIABLE U$ NO HA SIDO DEFINIDA
 Aquí vemos cómo, aun siendo un programa correcto (es una copia de `programa1.bas`), como no cumple con `RS 1.-` y la extensión no es *.bas*, el analizador lanza un error:
 
 ```
-Exception in thread "main" java.lang.Exception: La extensión del archivo 
+Exception in thread "main" java.lang.Exception: La extensión del archivo
 tiene que ser .bas
 ```
 
@@ -841,4 +857,3 @@ El valor de SQR no puede ser negativo
 - Manual de *BASIC*: [http://jorgicor.sdfeu.org/bas55/bas55.html](http://jorgicor.sdfeu.org/bas55/bas55.html)
 
 - Ejemplo de estructura de árbol: [https://stackoverflow.com/questions/6033303/parse-tree-generation-with-java-cup](https://stackoverflow.com/questions/6033303/parse-tree-generation-with-java-cup)
-
