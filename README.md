@@ -283,9 +283,10 @@ basic_expression ::= literal |
 pow_expression ::= basic_expression |
                    pow_expression POW basic_expression;
 
-multiplicative_expression ::= pow_expression |
-                              multiplicative_expression DIV basic_expression |
-                              multiplicative_expression MUL basic_expression;
+multiplicative_expression ::= 
+                          pow_expression |
+                          multiplicative_expression DIV basic_expression |
+                          multiplicative_expression MUL basic_expression;
 
 additive_expression ::= multiplicative_expression |
                         additive_expression SUM multiplicative_expression |
@@ -379,7 +380,8 @@ Esta comprobación la realizo en la clase `SymbolTable`, a la hora de acceder a 
 ```java
 public Node get(String name) throws Exception {
     if (!exists(name)) {
-        throw new Exception("ERROR SEMÁNTICO: LA VARIABLE " + name + " NO HA SIDO DEFINIDA");
+        throw new Exception("ERROR SEMÁNTICO: LA VARIABLE " + name + 
+        " NO HA SIDO DEFINIDA");
     }
     return this.map.get(name);
 }
@@ -473,10 +475,6 @@ Dentro de la clase `Node.Funcion`:
 } 
 ```
 
-- **ESm 11.**
-
-
-
 - **ESm 13.**
 
 Como hemos comentado anteriormente, a la hora de hacer `INPUT`, dentro del método `check()` de la clase `Node.Programa` llamo al método `checkInput()`:
@@ -498,7 +496,8 @@ public void checkInput(Node.Input ni) throws Exception {
             if(f.floatValue() > f.intValue()){
                 tabla.add(nv, new Node.Literal(f, Literal.NUMERIC));
             } else {
-                tabla.add(nv, new Node.Literal(new Integer(f.intValue()), Literal.NUMERIC));
+                tabla.add(nv, new Node.Literal(new Integer(f.intValue()), 
+                Literal.NUMERIC));
             }
         }
     }
@@ -569,7 +568,18 @@ Valor para N: 1
 /** Análisis léxico     **/
 /**************************/
 
-[INTEGER(0), REM, CRLF, INTEGER(10), PRINT, STRING(Cual es tu nombre?: ), CRLF, INTEGER(20), READ, VAR_TXT(U$), CRLF, INTEGER(30), DATA, STRING(Javier), CRLF, INTEGER(40), PRINT, STRING(Hola ), PCOMA, VAR_TXT(U$), CRLF, INTEGER(50), PRINT, STRING(Cuantas estrellas quieres?: ), CRLF, INTEGER(60), INPUT, VAR_NUM(N), CRLF, INTEGER(70), PRINT, STRING(Cuantas puntas tiene una estrella?: ), CRLF, INTEGER(80), READ, VAR_NUM(P), CRLF, INTEGER(90), DATA, INTEGER(5), CRLF, INTEGER(100), LET, VAR_NUM(R), EQU, VAR_NUM(P), MUL, VAR_NUM(N), CRLF, INTEGER(110), PRINT, STRING(Total:), PCOMA, VAR_NUM(R), PCOMA, STRING( puntas), CRLF, INTEGER(120), PRINT, STRING(Adios !! ), PCOMA, VAR_TXT(U$), CRLF, INTEGER(130), END, CRLF, EOF, EOF, ]
+[INTEGER(0), REM, CRLF, INTEGER(10), PRINT, STRING(Cual es tu nombre?: ), 
+CRLF, INTEGER(20), READ, VAR_TXT(U$), CRLF, INTEGER(30), DATA, 
+STRING(Javier), CRLF, INTEGER(40), PRINT, STRING(Hola ), PCOMA, 
+VAR_TXT(U$), CRLF, INTEGER(50), PRINT, 
+STRING(Cuantas estrellas quieres?: ), CRLF, INTEGER(60), INPUT, 
+VAR_NUM(N), CRLF, INTEGER(70), PRINT, 
+STRING(Cuantas puntas tiene una estrella?: ), CRLF, INTEGER(80), 
+READ, VAR_NUM(P), CRLF, INTEGER(90), DATA, INTEGER(5), CRLF, 
+INTEGER(100), LET, VAR_NUM(R), EQU, VAR_NUM(P), MUL, VAR_NUM(N), 
+CRLF, INTEGER(110), PRINT, STRING(Total:), PCOMA, VAR_NUM(R), PCOMA, 
+STRING( puntas), CRLF, INTEGER(120), PRINT, STRING(Adios !! ), PCOMA, 
+VAR_TXT(U$), CRLF, INTEGER(130), END, CRLF, EOF, EOF, ]
 
 /**************************/
 /** Análisis sintáctico **/
@@ -646,8 +656,10 @@ Una versión ligeramente modificada del programa del enunciado. En su resultado,
 Genera el siguiente árbol:
 
 ```
-+----[Literal numérico: 1 SUM Literal numérico: 5 MUL Literal numérico: 2 SUM Literal numérico: 1]
-|    |    |    +----[Literal numérico: 1 SUM Literal numérico: 5 MUL Literal numérico: 2]
++----[Literal numérico: 1 SUM Literal numérico: 5 MUL Literal numérico:
+        2 SUM Literal numérico: 1]
+|    |    |    +----[Literal numérico: 1 SUM Literal numérico: 5 MUL 
+                        Literal numérico: 2]
 |    |    |    |    +----[Literal numérico: 1]
 |    |    |    |    +----[Literal numérico: 5 MUL Literal numérico: 2]
 |    |    |    |    |    +----[Literal numérico: 5]
@@ -744,21 +756,22 @@ ERROR SEMÁNTICO: LA VARIABLE U$ NO HA SIDO DEFINIDA
 Aquí vemos cómo, aun siendo un programa correcto (es una copia de `programa1.bas`), como no cumple con `RS 1.-` y la extensión no es *.bas*, el analizador lanza un error:
 
 ```
-Exception in thread "main" java.lang.Exception: La extensión del archivo tiene que ser .bas
+Exception in thread "main" java.lang.Exception: La extensión del archivo 
+tiene que ser .bas
 ```
 
 - `programa9.bas` y `programa10.bas`
 
 Comprobación de `ESm 9.`: El valor del argumento de la función LOG no será cero o negativo. El valor del argumento de la función SQR no será es negativo.
 
-> # programa9.bas
 ```
+> # programa9.bas
 ERROR IRRECUPERABLE:
 El valor de LOG no puede ser 0 o menor
 ```
 
-> # programa10.bas
 ```
+> # programa10.bas
 ERROR IRRECUPERABLE:
 El valor de SQR no puede ser negativo
 ```
