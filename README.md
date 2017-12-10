@@ -4,6 +4,16 @@
 
 Se propone la creación de un sistema capaz de realizar las fases de análisis léxico, sintáctico y semántico de un compilador de BASIC (dialecto de `ECMA-55 Minimal BASIC`). Para ello utilizaremos las herramientas **JFLex** y **CUP**. Con **JFLex** crearemos un sistema encargado de la generación de los tokens y la eliminación de caracteres innecesarios (análisis léxico). Con **CUP** haremos un analizador LALR que se encargará de la generación de un árbol de derivación de la gramática que definamos (análisis sintáctico), el manejo de errores y de tabla de símbolos; y, finalmente, de verificar que se cumplen las especificaciones semánticas.
 
+## Ejecución de la práctica
+
+Está todo montado para que *IntelliJ IDEA* lo reconozca, pero por si acaso, he generado una archivo *.jar* dentro del directorio *bin* para ejecutarla.
+
+La lanzaríamos:
+
+```
+java -jar bin/PECL.jar [nombre_del_archivos_bas]
+```
+
 ## Analizador léxico
 
 Para el analizador léxico, como hemos comentado, utilizaremos **JFlex**. Símplemente tendremos que definir las expresiones regulares que generaran los tokens y definir la funcionalidad extra que le queramos dar (gestión de errores, clases específicas para la generación de los simbolos...).
@@ -43,7 +53,7 @@ Para cualquier caracter no definido en las especificaciones léxicas devuelvo un
 
 - **RL 2.**
 
-Definidos en el apartado [Autómatas](#aut)
+Definidos en el anexo [Autómatas y expresiones regulares](#aut)
 
 - **RL 3.**
 
@@ -104,79 +114,6 @@ Para no capturar dentro del token las comillas del string, he creado un estado l
 - `%state REM`
 
 Como la declaración de que es una línea *REM* se produce después de el identificador de número de línea, si no introducía en el token (más bien, hago que el token se lo coma, porque no lo guardo) todo lo que hubiese hasta el salto de línea, el analizador sintáctico fallaba. Así que, ante el token `REM`, nos ponemos a pasar por alto cualquier entrada hasta el salto de línea.
-
-### <tag id="aut">Autómatas y expresiones regulares</tag>
-
-### CAR CADENA SIMPLE
-
-![](Pictures/1000020100000228000002284FDAA1824BFEE6A1.png)
-
-`[+-.] | {Digito} | {Letra} | [a-z]`
-
-### LETRA
-
-![](Pictures/1000020100000234000000E4973616EAC56FCA45.png)
-
-`[A-Z]`
-
-### DÍGITO
-
-![](Pictures/1000020100000213000000BBE0076D52DA992B8F.png)
-
-
-`[0-9]`
-
-### CAR CADENA
-
-![](Pictures/10000201000001DD00000192134BB69E0E1854C5.png)
-
-`? | {Car_Cad_Delimitado}`
-
-### CAR_CAD_DELIMITADO
-
-
-![](Pictures/100002010000020D000002C360A61B4E35F5D71D.png)
-
-`[!#$%&'()*,/:;<=>?\^_] | {Car_No_Delimitado}`
-
-### CAD_DELIMITADA
-
-![](Pictures/1000020100000303000001EC640998018C1A9D88.png)
-
-`"{Car_Cad_Delimitado}*"`
-
-### EOF
-
-![](Pictures/10000201000001BA000001AFCDE074EEE75226D6.png)
-
-`\x00 | \x03`
-
-### NUM ENTERO
-
-![](Pictures/100002010000025B00000131210A0E5E1E997E90.png)
-
-`(+-)?{Digito}+`
-
-### NUM REAL
-
-![](Pictures/100002010000032F000000AB618A4B6610AB1776.png)
-
-`{Num_Entero}.{Digito}+`
-
-### NUM ESCALAR
-
-![](Pictures/100002010000034E0000009A70B06D02D570866C.png)
-
-`{Num_Real}[E]{Num_Entero}`
-
-### VARIABLE Y VARIABLE DE CADENA
-
-![](Pictures/1000020100000210000000B29BF61C633AEF7D69.png)
-
-```
-{Letra}   -> VAR_NUM
-{Letra}$  -> VAR_TXT
-```
 
 ### Otros
 
@@ -640,7 +577,7 @@ Valor para N: 1
 CRLF, INTEGER(20), READ, VAR_TXT(U$), CRLF, INTEGER(30), DATA,
 STRING(Javier), CRLF, INTEGER(40), PRINT, STRING(Hola ), PCOMA,
 VAR_TXT(U$), CRLF, INTEGER(50), PRINT,
-STRING(Cuantas estrellas quieres?: ), CRLF, INTEGER(60), INPUT,
+STR ING(Cuantas estrellas quieres?: ), CRLF, INTEGER(60), INPUT,
 VAR_NUM(N), CRLF, INTEGER(70), PRINT,
 STRING(Cuantas puntas tiene una estrella?: ), CRLF, INTEGER(80),
 READ, VAR_NUM(P), CRLF, INTEGER(90), DATA, INTEGER(5), CRLF,
@@ -857,3 +794,27 @@ El valor de SQR no puede ser negativo
 - Manual de *BASIC*: [http://jorgicor.sdfeu.org/bas55/bas55.html](http://jorgicor.sdfeu.org/bas55/bas55.html)
 
 - Ejemplo de estructura de árbol: [https://stackoverflow.com/questions/6033303/parse-tree-generation-with-java-cup](https://stackoverflow.com/questions/6033303/parse-tree-generation-with-java-cup)
+
+### <tag id="aut">Autómatas y expresiones regulares</tag>
+
+![CAR_CADENA SIMPLE: `[+-.] | {Digito} | {Letra} | [a-z]`](Pictures/1000020100000228000002284FDAA1824BFEE6A1.png)
+
+![LETRA: `[A-Z]`](Pictures/1000020100000234000000E4973616EAC56FCA45.png)
+
+![DÍGITO: `[0-9]`](Pictures/1000020100000213000000BBE0076D52DA992B8F.png)
+
+![CAR CADENA: `? | {Car_Cad_Delimitado}`](Pictures/10000201000001DD00000192134BB69E0E1854C5.png)
+
+![CAR_CAD_DELIMITADO: `[!#$%&'()*,/:;<=>?\^_] | {Car_No_Delimitado}`](Pictures/100002010000020D000002C360A61B4E35F5D71D.png)
+
+![CAD_DELIMITADA: `"{Car_Cad_Delimitado}*"`](Pictures/1000020100000303000001EC640998018C1A9D88.png)
+
+![EOF: `\x00 | \x03`](Pictures/10000201000001BA000001AFCDE074EEE75226D6.png)
+
+![NUM ENTERO: `(+-)?{Digito}+`](Pictures/100002010000025B00000131210A0E5E1E997E90.png)
+
+![NUM REAL: `{Num_Entero}.{Digito}+`](Pictures/100002010000032F000000AB618A4B6610AB1776.png)
+
+![NUM ESCALAR: `{Num_Real}[E]{Num_Entero}`](Pictures/100002010000034E0000009A70B06D02D570866C.png)
+
+![VARIABLE Y VARIABLE DE CADENA: ```{Letra}   -> VAR_NUM, {Letra}$  -> VAR_TXT```](Pictures/1000020100000210000000B29BF61C633AEF7D69.png)
