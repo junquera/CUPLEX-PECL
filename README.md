@@ -107,7 +107,59 @@ Como la declaración de que es una línea *REM* se produce después de el identi
 
 ### <tag id="aut">Autómatas y expresiones regulares</tag>
 
+### ![](Pictures/1000020100000228000002284FDAA1824BFEE6A1.png){width="14.605cm" height="14.605cm"}CAR CADENA SIMPLE
 
+\[+-.\] | {Digito} | {Letra} | \[a-z\]
+
+### ![](Pictures/1000020100000234000000E4973616EAC56FCA45.png){width="14.923cm" height="6.033cm"}LETRA
+
+\[A-Z\]
+
+### DÍGITO
+
+![](Pictures/1000020100000213000000BBE0076D52DA992B8F.png){width="14.049cm"
+height="4.948cm"}
+
+\[0-9\]
+
+### CAR CADENA
+
+![](Pictures/10000201000001DD00000192134BB69E0E1854C5.png){width="12.621cm"
+height="10.636cm"}
+
+### ![](Pictures/100002010000020D000002C360A61B4E35F5D71D.png){width="13.891cm" height="18.706cm"}CAR\_CAD\_DELIMITADO
+
+### CAD\_DELIMITADA
+
+![](Pictures/1000020100000303000001EC640998018C1A9D88.png){width="17cm"
+height="10.848cm"}
+
+### EOF
+
+![](Pictures/10000201000001BA000001AFCDE074EEE75226D6.png){width="11.695cm"
+height="11.404cm"}
+
+### NUM ENTERO
+
+![](Pictures/100002010000025B00000131210A0E5E1E997E90.png){width="15.954cm"
+height="8.07cm"}
+
+### NUM REAL
+
+![](Pictures/100002010000032F000000AB618A4B6610AB1776.png){width="17cm"
+height="3.567cm"}
+
+### NUM ESCALAR
+
+![](Pictures/100002010000034E0000009A70B06D02D570866C.png){width="17cm"
+height="3.094cm"}
+
+### 
+
+### VARIABLE Y VARIABLE DE CADENA
+
+![](Pictures/1000020100000210000000B29BF61C633AEF7D69.png){width="13.97cm"
+height="4.71cm"}
 
 ### Otros
 
@@ -789,3 +841,4 @@ El valor de SQR no puede ser negativo
 - Manual de *BASIC*: [http://jorgicor.sdfeu.org/bas55/bas55.html](http://jorgicor.sdfeu.org/bas55/bas55.html)
 
 - Ejemplo de estructura de árbol: [https://stackoverflow.com/questions/6033303/parse-tree-generation-with-java-cup](https://stackoverflow.com/questions/6033303/parse-tree-generation-with-java-cup)
+
