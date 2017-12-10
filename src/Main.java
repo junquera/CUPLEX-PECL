@@ -19,7 +19,7 @@ public class Main {
     }
 
     public static void parse(String[] args) throws Exception {
-        String program = "src/programa10.bas";
+        String program = "src/ejemplos/programa_simple.bas";
         if (args.length > 1)
             program = args[1];
 

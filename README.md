@@ -4,6 +4,16 @@
 
 Se propone la creación de un sistema capaz de realizar las fases de análisis léxico, sintáctico y semántico de un compilador de BASIC (dialecto de `ECMA-55 Minimal BASIC`). Para ello utilizaremos las herramientas **JFLex** y **CUP**. Con **JFLex** crearemos un sistema encargado de la generación de los tokens y la eliminación de caracteres innecesarios (análisis léxico). Con **CUP** haremos un analizador LALR que se encargará de la generación de un árbol de derivación de la gramática que definamos (análisis sintáctico), el manejo de errores y de tabla de símbolos; y, finalmente, de verificar que se cumplen las especificaciones semánticas.
 
+## Ejecución de la práctica
+
+Está todo montado para que *IntelliJ IDEA* lo reconozca, pero por si acaso, he generado una archivo *.jar* dentro del directorio *bin* para ejecutarla.
+
+La lanzaríamos:
+
+```
+java -jar bin/PECL.jar [nombre_del_archivos_bas]
+```
+
 ## Analizador léxico
 
 Para el analizador léxico, como hemos comentado, utilizaremos **JFlex**. Símplemente tendremos que definir las expresiones regulares que generaran los tokens y definir la funcionalidad extra que le queramos dar (gestión de errores, clases específicas para la generación de los simbolos...).
