@@ -323,7 +323,7 @@ public abstract class Node {
         }
 
         public String getPrintableValue(SymbolTable st) throws Exception {
-            if(super.getSons().size() <= 0){
+            if(super.getSons().size() <= 0 || this.created){
                 return this.toString();
             }
             Node n1 = super.getSons().get(0);
@@ -340,7 +340,7 @@ public abstract class Node {
                 return String.valueOf(Math.rint(n1Num));
             } else if( name == "LOG") {
                 if(n1Num <= 0)
-                    throw new Exception("El valor de LOG no puede ser negativo");
+                    throw new Exception("El valor de LOG no puede ser 0 o menor");
                 return String.valueOf(Math.log(n1Num));
             } else if( name == "SIN") {
                 return String.valueOf(Math.sin(n1Num));

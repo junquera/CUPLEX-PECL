@@ -12,5 +12,5 @@
 130 IF A$ = "S" THEN 30
 135 DEF FNA(X) = X + 2
 140 IF N > FNA(2) THEN ASDFAS
-140 PRINT "Adios !! "; U$
+141 LET X$ = 5
 150 END

@@ -482,12 +482,14 @@ next ::= NEXT var:v {:
 print ::= PRINT funcion:f {:
             Node.Print np = new Node.Print();
             np.addSonNode(f);
+            f.getPrintableValue(parser.tabla);
             RESULT = np;
           :} |
           print:p PCOMA funcion:f {:
             Node.Literal nl = new Node.Literal("SPACE", Node.Literal.STRING);
             p.addSonNode(nl);
             p.addSonNode(f);
+            f.getPrintableValue(parser.tabla);
             RESULT = p;
           :} |
           print:p COMA funcion:f {:

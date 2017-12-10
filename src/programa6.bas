@@ -1,0 +1,3 @@
+10 LET U = 5
+20 DEF FNU = 5
+30 END

@@ -539,9 +539,20 @@ public void checkOnGoTo(Node.OnGoTo ogt) throws Exception{
 
 ```
 
-## Tabla de símbolos
+- **ESm 16.**
 
-- Diseño de la Tabla de Símbolos: Descripción de su estructura y organización.
+Comentaremos la estructura de la tabla de símbolos en [Tabla de símbolos](#tds)
+
+- **ESm 17.**
+
+
+## <tag id="tds">Tabla de símbolos</tag>
+
+Para la creación de la tabla de símbolos he escrito la clase `SymbolTable`. Esta clase, además de albergar los símbolos del programa, se encarga de analizarlos a la hora de introducirlos en introducir la mayor reducción posible.
+
+Si introducimos un `Node` que no sea de tipo `Funcion` y al recorrerlo encontramos que tiene un nodo hoja del tipo `Node.Literal`, este será el valor introducido. Así mismo, si vemos que este último nodo es una variable, la buscaremos en la misma tabla para analizar la expresión. La estructura que he elegido para almacenar los símbolos es un `HashMap<String, Node>`, porque nos permitirá búsquedas rápidas en función del nombre de la variable, y versatilidad a la hora de insertar un valor (tanto `Literal`, como `Variable` y `Funcion` heredan de `Node`).
+
+Los nodos de tipo `Funcion` los inserta tal cual, porque su interpretación se realizaría cuando fuesen llamados durante la ejecución, nunca antes.
 
 ## Casos de prueba
 
@@ -626,15 +637,142 @@ Entrada correcta
 
 - `programa1.bas`
 
-Una versión ligeramente modificada del programa del enunciado.
+Una versión ligeramente modificada del programa del enunciado. En su resultado, podemos ver cómo funciona la precedencia. La expresión:
+
+```
+101 LET A = 1 + 5 * 2 + 1
+```
+
+Genera el siguiente árbol:
+
+```
++----[Literal numérico: 1 SUM Literal numérico: 5 MUL Literal numérico: 2 SUM Literal numérico: 1]
+|    |    |    +----[Literal numérico: 1 SUM Literal numérico: 5 MUL Literal numérico: 2]
+|    |    |    |    +----[Literal numérico: 1]
+|    |    |    |    +----[Literal numérico: 5 MUL Literal numérico: 2]
+|    |    |    |    |    +----[Literal numérico: 5]
+|    |    |    |    |    +----[Literal numérico: 2]
+|    |    |    +----[Literal numérico: 1]
+```
 
 ### Casos fallidos
 
-- Diez casos de prueba y su salida. Deberá incluirse en la memoria un anexo con los diez casos listados. Dos de ellos serán correctos y los otros erróneos, de tal manera que permitan observar el comportamiento de la solución dada.
+- `programa2.bas`
 
-- Para uno de los ejemplos correctos, se incluirá el listado de tokens, la salida de las reglas aplicadas por el analizador sintáctico, el árbol de derivación y el volcado de la tabla de símbolos.
+Con la linea:
 
-- Para los ejemplos erróneos se incluirá el mensaje o mensajes de error obtenidos.
+```
+80 LET S$ = S$ + "*"
+```
+
+Comprobamos que se cumple **ESm 4.**, obteniendo en la consola:
+
+```
+ERROR SEMÁNTICO: Las expresiones numéricas solo aceptan valores numéricos
+```
+
+- `programa3.bas`
+
+Con la línea:
+
+```
+140 IF N > FNA(2) THEN ASDFAS
+```
+
+Comprobamos las producciones de error de **IF-THEN**:
+
+```
+Arregle los errores y vuelva a intentarlo.
+Syntax error (at line 14 and column 24)
+SyntaxError en if: IF c THEN (numero de linea) (at line 14)
+```
+
+- `programa4.bas`
+
+Con este programa podemos ver que, hasta el final, el analizador sintáctico no muestra los errores recuperables:
+
+```
+SyntaxError en if: IF c THEN (numero de linea) (at line 14)
+Las variables asignadas tienen que ser del mismo tipo (at line 15)
+Arregle los errores y vuelva a intentarlo.
+```
+
+- `programa5.bas`
+
+Aquí podemos ver cómo, cuando introducimos mal el número de lineas:
+
+```
+10 PRINT "Esta bien esta linea?"
+0 PRINT "No, esta mal numerada"
+5 END
+```
+
+el analizador avisa:
+
+```
+Error en la linea 2: número menor que linea anterior
+```
+
+- `programa6.bas`
+
+Vemos que la tabla de símbolos hace comprobación de tipos:
+
+```
+10 LET U = 5
+20 DEF FNU = 5
+30 END
+```
+
+Obteniendo:
+
+```
+ERROR IRRECUPERABLE:
+ERROR: U is not a function
+```
+
+- `programa7.bas`
+
+Con este ejemplo comprobamos la especificación semántica 1 (Todos los identificadores de variable utilizados en las expresiones deberán haber sido declarados previamente.):
+
+```
+ERROR IRRECUPERABLE:
+ERROR SEMÁNTICO: LA VARIABLE U$ NO HA SIDO DEFINIDA
+```
+
+- `programa8.bss`
+
+Aquí vemos cómo, aun siendo un programa correcto (es una copia de `programa1.bas`), como no cumple con `RS 1.-` y la extensión no es *.bas*, el analizador lanza un error:
+
+```
+Exception in thread "main" java.lang.Exception: La extensión del archivo tiene que ser .bas
+```
+
+- `programa9.bas` y `programa10.bas`
+
+Comprobación de `ESm 9.`: El valor del argumento de la función LOG no será cero o negativo. El valor del argumento de la función SQR no será es negativo.
+
+> # programa9.bas
+```
+ERROR IRRECUPERABLE:
+El valor de LOG no puede ser 0 o menor
+```
+
+> # programa10.bas
+```
+ERROR IRRECUPERABLE:
+El valor de SQR no puede ser negativo
+```
 
 ## Bibliografía
 
+- Documentación de **JFlex**: [http://www.jflex.de/manual.html](http://www.jflex.de/manual.html)
+
+- Documentación de **CUP**: [http://www.jflex.de/manual.html](http://www2.cs.tum.edu/projects/cup/docs.php)
+
+- Ejemplo de conversor de unidades **LEX/CUP**: [http://crysol.org/es/node/819](http://crysol.org/es/node/819)
+
+- Compilador de *BASIC* (con *bison*): [http://buraphakit.sourceforge.net/BASIC.shtml](http://buraphakit.sourceforge.net/BASIC.shtml)
+
+- Manual de *BASIC*: [http://jorgicor.sdfeu.org/bas55/bas55.html](http://jorgicor.sdfeu.org/bas55/bas55.html)
+
+- Ejemplo de estructura de árbol: [https://stackoverflow.com/questions/6033303/parse-tree-generation-with-java-cup](https://stackoverflow.com/questions/6033303/parse-tree-generation-with-java-cup)
